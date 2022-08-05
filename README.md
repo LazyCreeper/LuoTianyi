@@ -1,6 +1,6 @@
 ## 简介
 该主题基于最新版宝塔Linux面板`7.9.3`制作。
-背景图出处：[https://www.pixiv.net/artworks/63936697][https://www.pixiv.net/artworks/63936697]。
+背景图出处：https://www.pixiv.net/artworks/63936697。
 
 ## 特性
 1. 更好看的页面（二次元！）
