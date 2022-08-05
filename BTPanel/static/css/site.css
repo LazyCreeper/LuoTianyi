@@ -8513,7 +8513,7 @@
   }
   
   .dropUpLoadFile li:hover {
-	background-color: #f5f5f5;
+	background-color: rgb(68 144 155 / 50%);
   }
   
   
@@ -8674,7 +8674,7 @@
   }
   
   .dropUpLoadFileHead li.fileTitle span {
-	color: #666;
+	color: #fff;
 	font-size: 13px;
 	display: inline-block;
 	height: 35px;
@@ -8698,7 +8698,7 @@
   }
   
   .dropUpLoadFile .fileItem>span {
-	color: #666;
+	color: #fff;
 	font-size: 12px;
 	vertical-align: top;
 	padding-left: 10px;
@@ -8734,7 +8734,7 @@
   }
   
   .dropUpLoadFile li .filesize {
-	color: #999;
+	color: #ffc557;
 	display: inline-block;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -16804,6 +16804,7 @@
   
   .recommend-soft{
   position: relative;
+  display: none;
   }
   
   .recommend-soft .images{
