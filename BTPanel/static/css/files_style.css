@@ -222,11 +222,6 @@
     transition: all 0.5s;
   }
   
-  .file_list_header .file_checkbox:hover,
-  .file_list_header .file_operation:hover {
-  background: #f1f1f1;
-  }
-  
   
   .file_ps_title .set_file_ps{
     background-color: rgba(137,114,146,0.5);
@@ -2659,13 +2654,14 @@
   .filePage .Pcount-item {
     border-left: none;
     border-right: 1px solid #ececec;
-    color: #333;
+    color: #fff;
   }
   
   .filePage .Pcount-item .showRow {
     margin: 0 3px;
     border: 1px solid #eee;
     border-radius: 2px;
+    background: #0000;
   }
   
   /* 预览图片 */

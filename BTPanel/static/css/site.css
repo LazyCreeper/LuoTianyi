@@ -7870,7 +7870,7 @@
 	margin-right: 20px;
 	font-size: 14px;
 	font-weight: initial;
-	color: #666;
+	color: #fff;
   }
   
   .external_link button {
@@ -16262,7 +16262,7 @@
   /*历史搜索列表 end*/
   
   .replace_content_view .checkbox_config {
-	color: #666;
+	color: #fff;
 	border-top: none;
 	height: 26px;
 	line-height: 26px;
