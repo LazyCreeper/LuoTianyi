@@ -11,7 +11,7 @@
  body {
 	line-height: 1.4;
 	color: #fff;
-	font-family: SourceHanSansSC-regular,"微软雅黑", Arial, Helvetica, sans-serif;
+	font-family: MiSans,SourceHanSansSC-regular,"等线","微软雅黑", Arial, Helvetica, sans-serif!important;
 	font-size: 12px;
 	background: linear-gradient(33deg, #ff86b4, #f5f955);
   }
@@ -2015,6 +2015,10 @@
 	width: 100%
   }
   
+  #bt_site_table thead th:nth-child(11), #bt_site_table tbody tr td:nth-child(11) {
+	width: auto!important;
+  }
+
   .bt-form-submit-btn .btn:first-child {
 	margin-right: 4px
   }
