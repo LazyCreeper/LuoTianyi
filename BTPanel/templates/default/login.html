@@ -1,6 +1,6 @@
 <!--
     @Name: 宝塔面板洛天依（秋）主题
-    @Last Date: 2022.8.5
+    @Last Date: 2022.10.15
     @Create Date: 2021.3.21			
     @Author: Lazy
     @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{g.title}}</title>
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link href="https://font.sec.miui.com/font/css?family=MiSans:400,500,600,700:Chinese_Simplify,Latin,Chinese_Traditional&amp;display=swap" rel="stylesheet">
     <style type="text/css">
         * {
             margin: 0;
@@ -25,7 +26,7 @@
         body {
             line-height: 1.4;
             background-color: #000;
-            font-family: "等线","微软雅黑",Arial,Helvetica,sans-serif;
+            font-family: "MiSans","等线","微软雅黑",Arial,Helvetica,sans-serif;
             font-size: 12px;
             color: #333;
         }
@@ -74,12 +75,15 @@
             padding: 30px 40px 50px;
             background: rgba(0,0,0,0.5);
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition-property: all;
+	        transition-duration: 700ms;
+	        transition-timing-function: ease;
         }
         .login:hover {
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(3px);
-            transition: all 0.7s;
             box-shadow: 0 0 15px rgb(0 0 0 / 60%);
+            padding: 35px 45px 55px;
         }
         .login.code {
             height: 345px;
@@ -175,7 +179,7 @@
             height: 42px;
             padding: 5px 10px;
             border: 1px solid #d1d1d1;
-            box-shadow: 0 3px 5px -4px rgb(0 0 0 / 40%) inset, -1px 0 3px -2px rgb(0 0 0 / 10%) inset;
+            box-shadow: 0 0px 5px 0px #e4e4e4;
             z-index: 1;
             color: #ffcfff;
         }
@@ -201,7 +205,7 @@
         }
         .validform_checktip.validform_wrong {
             background: #e53451;
-            border-radius: 3px;
+            border-radius: 15px;
             color: #fff;
         }
         .validform_checktip.validform_right {
@@ -232,14 +236,16 @@
         .login_btn {
             width: 100%;
             height: 43px;
-            background: linear-gradient(48deg,#24acff,#ff4e86);
+            background: linear-gradient(-48deg,#62c3ff,#76ff9a);
             cursor: pointer;
             text-align: center;
             font-size: 16px;
             color: #fff;
             border: 0;
-            transition: all 0.5s;
-            box-shadow: 0 0 5px #849cbb;
+            box-shadow: 0 0 8px #6ce2cb;
+            transition-property: all;
+	        transition-duration: 300ms;
+	        transition-timing-function: ease;
         }
         .login_btn:hover {
             transform: scale(0.99);
@@ -465,13 +471,13 @@
                     height: 100%;
                     position: fixed;
                     min-height: 475px;
-                    background-image: url('//api.imlazy.ink/img');
+                    background-image: url('https://api.imlazy.ink/img/');
                     background-repeat: no-repeat;
                     background-size: cover;
 				}
 				@media (max-width: 790px) {
                     .bg {
-                        background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.43) 0%, rgba(28, 103, 146, 0.7) 100%),url(//api.imlazy.ink/img-phone/)!important;
+                        background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.43) 0%, rgba(28, 103, 146, 0.7) 100%),url('https://api.imlazy.ink/img-phone/')!important;
                         background-size: cover;
                         background-repeat: no-repeat;
                     }
