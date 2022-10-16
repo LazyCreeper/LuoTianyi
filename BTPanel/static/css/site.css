@@ -981,6 +981,8 @@
 	height: 50px;
 	line-height: 50px;
 	cursor: pointer;
+	font-weight: 100;
+    font-size: 2rem;
   }
   
   .sidebar-scroll .mypcip:hover {
@@ -2989,6 +2991,32 @@
     border: none;
     background: rgba(0,0,0,0);
 }
+
+.tab-nav-border {
+    border-bottom: #cacad9 1px solid;
+    font-size: 0;
+    height: 37px;
+}
+
+.tab-nav-border span {
+    height: 36px;
+    line-height: 36px;
+    padding: 0 18px;
+    color: #fff;
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    bottom: -1px;
+    border: 1px solid transparent;
+    font-size: 12px;
+}
+
+.tab-nav-border .on {
+    border: 1px solid #cacad9;
+    border-bottom: 1px solid #fff;
+    color: rgb(255, 205, 230);
+    position: relative;
+}
   
   .tab-nav {
 	border-bottom: #cacad9 1px solid
@@ -3014,6 +3042,7 @@
 	overflow: auto;
 	padding: 10px;
 	position: relative;
+	width: 100%;
   }
   
   .tab-con .tab-block {
@@ -3023,10 +3052,14 @@
   
   .tab-con .tab-block.on {
 	display: inline-block;
+	width: 100%;
   }
   
   .tab-con ul.cmdlist {
 	list-style-type: decimal
+  }
+  .firewall-tab-view .tab-con {
+	width: 100%;
   }
   ul.cmdlist {
 	list-style-type: decimal;
@@ -4689,7 +4722,6 @@
   }
   
   .btltd-gray {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADsAAAAUCAMAAAAEAbViAAAAA3NCSVQICAjb4U/gAAAAb1BMVEX////8/Pz4+Pj19fXy8vLu7u7r6+vo6Ojk5OTh4eHd3d3a2trT09PNzc3JycnGxsbDw8O/v7+8vLy5ubm1tbWysrKurq6rq6uoqKikpKShoaGenp6ampqXl5eUlJSQkJCNjY2KioqGhoaDg4OAgIDOtWLkAAAAJXRSTlMA////////////////////////////////////////////////qJ0RewAAAAlwSFlzAAAOdAAADnQBaySz1gAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAAWdEVYdENyZWF0aW9uIFRpbWUAMDUvMzEvMTikOWwBAAABrElEQVQ4jZ2U7XLjIAxF1TZeu1m8TVDxEmOsCPT+z1iBP9Lu9Ie7GobxAEdCV8IAAA16t5rHBn5iL6PEceSc2d8mIbQHrbAXSQYa7v8wQMcyHmUVbpIbPfgAEBEcvt3dcRYjdOSp3GB6jzpNy47n/RDXUdZs3UQ3lADQJd+ZKP7pdHp+l6kBxzWwzxQ3NtdRnbANiZmCLywJpSRCRSsSXZ8l6Poto41Uzrt/2T0noGSMwYTt62t75fOvtuXZIusd0YbsN7AMtMklDLdSzMo20aleZKrivkxhmLKGdgVnsjQsrNcUcgg+MIeQa75wThcAXyiY1YPRWE5jVrYEV6ayyS2KhepkLXAvBvqk/XS6P0O71Ff1cpmZ1QfmylZXmSfNl+1AKwtOmhfqAa5a4zzjxm41CpWd3KrV5MKwlKI2JcV66fAGkZeW/Mw+dEaqtDqyGwudoNGumOEqawG+Z4egZNKuSX5nNeULQTed5VbPurxb4Mc3x8HyFDhaTLSzmnL63d9l76TvrSiH9tEb6zuMEme5H35/n1ntDhE+/IK+smBS/vufqOplfvS3UfsAEbFRvvF78J0AAAAASUVORK5CYII=");
 	background-repeat: no-repeat;
 	padding: 2px 0 2px 64px;
 	margin-right: 5px;
@@ -9845,7 +9877,7 @@
 	padding-left: 25px;
 	padding-top: 40px;
 	width: 500px;
-	background: #fff;
+	background: rgb(107 107 107 / 10%);
 	top: 50%;
 	left: 50%;
 	position: absolute;
@@ -17002,6 +17034,7 @@
 	margin-left: 40px;
 	margin-top: 60px;
 	text-align: left;
+	color: #fff!important
   }
   .webedit-con .thumbnail-introduce span{
 	font-size: 17px;
@@ -17098,7 +17131,7 @@
   
   .security-sacn-header .scan-type{
 	font-size: 18px;
-	color: #444;
+	color: #fff;
 	font-weight: 600;
 	margin-bottom: 8px;
 	transition: all 500ms;
@@ -17117,7 +17150,7 @@
   }
   
   .security-sacn-header .scan-details{
-	color: #666;
+	color: #eee;
 	font-size: 13px;
 	transition: all 500ms;
   }
@@ -17567,18 +17600,21 @@
 	top: 9px;
   }
   
+  #siteConfigBody,#config_rewrite {
+	  background: #fff
+  }
+  
   /*消息通道安装模块样式  end*/
   /*当前证书*/
   .ssl_state_info{
 	padding: 15px 30px;
-	background: #f5faf2;
+	background: rgb(245 250 242 / 50%);
 	margin-top: 5px;
 	border-radius: 4px;
 	border: 1px solid #EAF1F2;
 	font-size: 12px;
 	position: relative;
   }
-  
   
   .ssl_state_info .state_item{
 	width: 50%;
