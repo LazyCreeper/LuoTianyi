@@ -75,7 +75,7 @@
   border-radius: 2px;
   cursor: pointer;
   transition: all 200ms;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.3);
   margin: 3px 0;
   }
   .file_list_header .file_check{
@@ -178,6 +178,10 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
+  }
+
+  .file_file_status input {
+    background-color: rgba(255,255,255,0.1);
   }
   
   .file_table_view.icon_view .file_list_content .file_tr:hover {
