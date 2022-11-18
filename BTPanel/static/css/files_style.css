@@ -215,12 +215,6 @@
     max-width: 300px;
   }
   
-  
-  .file_list_header .file_th.active {
-    background: #eee;
-    color: #555;
-  }
-  
   .file_list_header .file_th:hover {
     background: rgba(29,68,100,0.5);
     transition: all 0.5s;
