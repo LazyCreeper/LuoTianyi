@@ -1990,10 +1990,6 @@
     background: #00000000;
   }
   
-  .file_path_input input.focus {
-    background-color: #fff;
-  }
-  
   .file_dir_omit {
     display: inline-block;
     font-size: 0;

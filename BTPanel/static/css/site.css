@@ -11941,7 +11941,7 @@
   }
   
   .file_path_input input.focus {
-	background-color: #fff;
+	background-color: #170e2587;
   }
   
   .file_path_input.active .file_dir_item {
