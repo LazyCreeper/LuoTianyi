@@ -17409,6 +17409,7 @@
   
   .recommend-soft{
 	position: relative;
+	display: none
   }
   
   .recommend-soft .images{
