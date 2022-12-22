@@ -175,7 +175,7 @@
     <div class="sidebar-scroll">
       <div class="sidebar-auto">
         <div id="task" class="task cw" onclick="messagebox()">0</div>
-        <h3 class="mypcip"><span class="f14 cw">{{g.title}}</span></h3>
+        <h3 class="mypcip"><span class="cw">{{g.title}}</span></h3>
         <ul class="menu">
           {% for menu in g['menus'] %}
           {% if menu['href'] == g.uri %}
@@ -212,7 +212,7 @@
       <a class="btlink" style="margin: 0 8px;" href="https://www.kancloud.cn/chudong/bt2017/424204" target="_blank">使用手册</a>|
       <a class="btlink bt_wx_qrcode" style="margin: 0 8px;" href="javascript:;">微信公众号<div class="bt_wx_img"></div></a>|
       <a class="btlink" style="margin: 0 8px;" href="https://www.bt.cn/auth" target="_blank">正版查询</a>|
-      <a class="btlink" style="margin-right: 8px;" href="https://www.lazy.ink" target="_blank">主题作者：Lazy</a>
+      <a class="btlink" style="margin: 0 8px;" href="https://www.lazy.ink" target="_blank">主题作者：Lazy</a>
     </div>
   </div>
   {% if g.cdn_url != '/static' %}
