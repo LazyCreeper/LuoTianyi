@@ -5172,7 +5172,7 @@
   
   .rebt-li a {
 	display: block;
-	background: #eee;
+	background: #7d7d7d2e;
 	border: #ddd 1px solid;
   }
   
@@ -6056,6 +6056,10 @@
 	height: 100%;
 	overflow: hidden;
 	/*background: url('../img/resize_corner.png') no-repeat;*/
+  }
+
+  #siteConfigBody {
+	background: #fff;
   }
   
   .aceEditors .layui-layer-content {
@@ -18430,7 +18434,7 @@
   
   .ssl_state_info .state_item span:nth-child(1){
 	font-weight: bold;
-	color: #666;
+	color: #173c42;
   }
   
   
