@@ -169,6 +169,10 @@ z-index: 1;
   font-style: inherit;
 }
 
+.file_title.file_dir_status input {
+  background: #aaa0;
+}
+
 .file_table_view.icon_view .file_title.file_dir_status,
 .file_table_view.icon_view .file_title.file_file_status {
   width: 70px;
@@ -212,8 +216,8 @@ margin-left: -5px;
 }
 
 .file_list_header .file_th.active {
-  background: #eee;
-  color: #555;
+  background: #475b8263;
+  color: #ffe0e0;
 }
 
 .file_list_header .file_th:hover {
@@ -421,7 +425,6 @@ display: block;
 
 .file_table_view.list_view .file_list_content .file_tr.editr_tr .clear_file_btn {
   color: #555;
-  background-color: #fff;
   border-color: #ccc;
 }
 
@@ -2712,7 +2715,7 @@ height: 22px;
 .filePage .Pcount-item {
   border-left: none;
   border-right: 1px solid #ececec;
-  color: #333;
+  color: #fff;
 }
 
 .filePage .Pcount-item .showRow {
