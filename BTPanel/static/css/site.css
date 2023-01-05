@@ -1,12 +1,26 @@
 /*!
  
  @Name: 宝塔面板框架主题样式
- @Last Date: 2022.12.29
+ @Last Date: 2023.1.5
  @Create Date: 2021.3.21					
  @Author: Lazy
  @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
  
  */
+
+  ::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+  }
+  /* 滚动条 */
+  ::-webkit-scrollbar-track {
+	background-color: #ffffff21;
+  }
+  
+  /* 滚动条里面的条 */
+  ::-webkit-scrollbar-thumb {
+	background: rgb(255 209 163 / 45%);
+  }
 
  body {
 	line-height: 1.4;
@@ -4388,7 +4402,7 @@
   }
   
   .re-con-menu {
-	background-color: #f0f0f1;
+	background-color: #f0f0f108;
 	float: left;
 	height: 100%;
 	width: 120px
@@ -4402,7 +4416,7 @@
   }
   
   .re-con-menu p.on {
-	background-color: #fff
+	background-color: #ffffff20
   }
   
   .recycle_bin_view .re-con {
@@ -5839,7 +5853,7 @@
 	height: 36px;
 	padding-left: 10px;
 	line-height: 36px;
-	background-color: #F5F5F5;
+	background-color: #32323242;
 	border-bottom: #eee solid 1px;
   }
   
@@ -16663,6 +16677,7 @@
   }
   
   .promptDelete input {
+	background: #aaa0;
 	width: 300px;
 	height: 30px;
 	padding-left: 5px;
@@ -18782,7 +18797,7 @@
 	margin-left: 10px;
   }
   .hint_confirm .confirm-info-box {
-	background-color: #f0f0f0;
+	/* background-color: #f0f0f0; */
 	clear: both;
 	font-size: 14px;
 	height: 105px;
