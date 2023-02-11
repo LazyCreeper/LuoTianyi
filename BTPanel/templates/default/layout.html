@@ -160,13 +160,13 @@
 
 <body>
   <div style="z-index: -3;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    min-height: 475px;
-    background-image: url('{{g.cdn_url}}/images/006MpbfMgy1grosiqpn7pj33o322au17.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;"></div>
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  min-height: 475px;
+  background-image: url('{{g.cdn_url}}/images/006MpbfMgy1grosiqpn7pj33o322au17.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;"></div>
 <div class="bt-warp bge6">
   <a style="display:none;" id="panel_debug" data="{{g['debug']}}" data-pyversion="{{g['pyversion']}}"></a>
   <a style="display:none;" id="request_token_head" token="{{session[g.get_csrf_html_token_key]}}"></a>
@@ -191,7 +191,7 @@
     <button style="display: none;" id="bt_copys" class="bt_copy" data-clipboard-text=""></button>
     <a style="display: none;" id="defaultPath">{{session['config']['sites_path']}}</a>
     {% block content %}{% endblock %}
-    <div id="wechat-customer" class="wechat-customer hide" >
+    <!-- <div id="wechat-customer" class="wechat-customer hide" >
       <div class="describe-title">在线客服</div>
       <div class="qrcode-wechat">
         <div id="wechatCustomerQrcode"><img src="/static/images/customer-qrcode.png" /></div>
@@ -201,6 +201,20 @@
         <span class="scan-title">微信扫码</span>
       </div>
       <span class="layui-layer-setwin wechat-close"><a href="javascript:;" class="layui-layer-ico layui-layer-close layui-layer-close2"></a></span>
+    </div> -->
+    <div id="wechat-customer" class="wechat-customer hide">
+      <div class="describe-title">在线客服</div>
+      <div class="qrcode-wechat">
+        <div id="wechatCustomerQrcode">
+          <img src="/static/images/customer-qrcode.png"  style="width: 80px;height: 80px;" alt="" />
+        </div>
+      </div>
+      <div class="wechat-title">
+      <img class="icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAATlJREFUSEvtVrFOw0AMfed8AxJsZWGAgQHBXP4DCQa+Ioou7g18BRIg9T/KDGJggIGFbiDxDXGQowSBuGvrFISEmtF+7/nis312RVEMiWgIoMT375aIjpj5KeJrTMy8JSJjAPsRzEhErl1Zlhd1XZ8kRKZEdMjM0xlBBiIyATCIYZxzl857X6uTiHaY+TElZrUz87aIPCjvI0gIwVmF5uG7H1gFmZepxv85XTdqCCEcLMQ0gLz3jbbTOm/rPdkLBt0v0E77xysq2it9T2nhuTzPN4ho10KyYEXkXvvkBcC6hWjEvmqQMwCnANZa8p1RJAbfa41vAM7/0cUzczOiZ43zvunrtPVOntuO3+wrluJ12qspvFBm/+bR+u03nhPrkKZk2ZVINUZO964sy44Ta9FSK5GuQ1VVXb0DLf+sHQ9tLL0AAAAASUVORK5CYII=">
+      <span class="scan-title">微信扫码</span></div>
+      <hr style="width: 88px;height: 1px;background: #E6E6E6;margin: 10px auto;">
+      <div><a href="https://www.bt.cn/new/wechat_customer" target="_blank" class="btlink">点击咨询客服<div class="icon-r"></div></a></div>
+      <span class="layui-layer-setwin wechat-close"><a href="javascript:;" class="layui-layer-ico layui-layer-close layui-layer-close2"></a></span>
     </div>
     <div class="toolbar-right hide">
       <a href="javascript:;" class="service" title="在线客服"></a>
@@ -208,11 +222,12 @@
     </div>
     <div class="footer bgw">
       <span style="margin-right: 8px;">{{session['brand']}}{{session['product']}} &copy;2014-{{g['yaer']}} 广东堡塔安全技术有限公司 (bt.cn)</span>
-      <a class="btlink" style="margin-right: 8px;" href="http://www.bt.cn/bbs" target="_blank">论坛求助</a>|
+      <a class="btlink" style="margin: 0 8px" href="http://www.bt.cn/bbs" target="_blank">论坛求助</a>|
       <a class="btlink" style="margin: 0 8px;" href="https://www.kancloud.cn/chudong/bt2017/424204" target="_blank">使用手册</a>|
       <a class="btlink bt_wx_qrcode" style="margin: 0 8px;" href="javascript:;">微信公众号<div class="bt_wx_img"></div></a>|
       <a class="btlink" style="margin: 0 8px;" href="https://www.bt.cn/auth" target="_blank">正版查询</a>|
-      <a class="btlink" style="margin: 0 8px;" href="https://www.lazy.ink" target="_blank">主题作者：Lazy</a>
+      <a class="btlink" style="margin: 0 8px;" href="https://www.lazy.ink" target="_blank">主题作者：Lazy</a>|
+      <span class="bt_qq_qun">|<a class="btlink" style="margin: 0 8px;" href="https://jq.qq.com/?_wv=1027&k=12Y6BkLq" target="_blank">售后QQ群：907340327</a></span>
     </div>
   </div>
   {% if g.cdn_url != '/static' %}
@@ -462,7 +477,16 @@
         }
       })
     }
-    getPaymentStatus();
+    if(bt.get_cookie('bt_user_info') == null || bt.get_cookie('bt_user_info') == ''){
+      bt.pub.get_user_info(function(userInfo){
+        if (userInfo.status) {
+          bt.set_cookie('bt_user_info', JSON.stringify(userInfo));
+          getPaymentStatus();
+        }
+      })
+    }else{
+      getPaymentStatus();
+    }
 
   </script>
   {% endblock %}
