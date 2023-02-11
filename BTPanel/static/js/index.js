@@ -1,9 +1,9 @@
 try {
-  if (bind_user == 'True') {
+  if (bind_user == 'True'){
     var bindAccount = new BindAccount();
     bindAccount.installBindUser();
   }
-} catch (error) { }
+} catch (error) {}
 
 $("select[name='network-io'],select[name='disk-io']").change(function () {
   var key = $(this).val(), type = $(this).attr('name')
@@ -362,8 +362,8 @@ var index = {
         index.consultancy_services(rdata.msg.adviser);
 
         if (rdata.status !== false) {
-          var res = rdata.msg, beta = res.beta, is_beta = res.is_beta, ignore = res.ignore;
-          if (ignore.indexOf(is_beta ? beta.version : res.version) == -1) index.check_update(true) // 判断自动升级
+          var res = rdata.msg, beta = res.beta,is_beta = res.is_beta,ignore = res.ignore;
+          if(ignore.indexOf(is_beta?beta.version:res.version) == -1) index.check_update(true) // 判断自动升级
           $('#toUpdate a').html('更新<i style="display: inline-block; color: red; font-size: 40px;position: absolute;top: -35px; font-style: normal; right: -8px;">.</i>');
           $('#toUpdate a').css("position", "relative");
 
@@ -712,25 +712,25 @@ var index = {
       // 推荐安装软件
       try {
         var recomConfig = product_recommend.get_recommend_type(1)
-        if (recomConfig) {
+        if(recomConfig){
           var pay_status = product_recommend.get_pay_status();
           for (var i = 0; i < recomConfig['list'].length; i++) {
             const item = recomConfig['list'][i];
-            if (setup_length > softboxsum) break;
-            if (pay_status.is_pay && item['install']) continue;
+            if(setup_length > softboxsum) break;
+            if(pay_status.is_pay && item['install']) continue;
             softboxcon += '<div class="col-sm-3 col-md-3 col-lg-3">\
               <div class="recommend-soft recom-iconfont">\
                 <div class="product-close hide">关闭推荐</div>\
-                <div class="images"><img src="/static/img/soft_ico/ico-'+ item['name'] + '.png"></div>\
-                <div class="product-name">'+ item['title'] + '</div>\
+                <div class="images"><img src="/static/img/soft_ico/ico-'+ item['name'] +'.png"></div>\
+                <div class="product-name">'+ item['title'] +'</div>\
                 <div class="product-pay-btn">\
-                '+ ((item['isBuy'] && !item['install']) ?
-                '<button class="btn btn-sm btn-success home_recommend_btn" style="margin-left:0;" onclick="bt.soft.install(\'' + item['name'] + '\')">立即安装</button>' :
-                '<a class="btn btn-sm btn-default mr5 ' + (!item.preview ? 'hide' : '') + '" href="' + item.preview + '" target="_blank">预览</a><button type="submit" class="btn btn-sm btn-success home_recommend_btn" onclick=\"product_recommend.pay_product_sign(\'ltd\',' + item.pay + ',\'' + item.pluginType + '\')\">购买</button>') + '\
+                '+ ((item['isBuy'] && !item['install'])?
+                '<button class="btn btn-sm btn-success home_recommend_btn" style="margin-left:0;" onclick="bt.soft.install(\''+ item['name'] +'\')">立即安装</button>':
+                '<a class="btn btn-sm btn-default mr5 '+ (!item.preview?'hide':'') +'" href="'+ item.preview +'" target="_blank">预览</a><button type="submit" class="btn btn-sm btn-success home_recommend_btn" onclick=\"product_recommend.pay_product_sign(\'ltd\','+ item.pay +',\''+item.pluginType+'\')\">购买</button>') +'\
                 </div>\
               </div>\
             </div>'
-            setup_length++;
+            setup_length ++;
           }
         }
       } catch (error) {
@@ -745,7 +745,7 @@ var index = {
       $("#indexsoft").append(softboxcon);
       $("#indexsoft").dragsort({ dragSelector: ".spanmove", dragBetween: true, dragEnd: saveOrder, placeHolderTemplate: "<div class='col-sm-3 col-md-3 col-lg-3 dashed-border'></div>" });
 
-      function saveOrder() {
+      function saveOrder () {
         var data = $("#indexsoft > div").map(function () { return $(this).attr("data-id"); }).get();
         data = data.join('|');
         bt.soft.set_sort_index(data)
@@ -758,20 +758,20 @@ var index = {
     bt.system.check_update(function (rdata) {
       loadT.close();
       if (rdata.status === false && typeof rdata.msg === 'string') {
-        try {
-          messagebox()
-        } catch (err) { }
-        layer.msg(rdata.msg, { icon: 2 });
-        return
-      }
+				try {
+					messagebox()
+				} catch (err) {}
+				layer.msg(rdata.msg, { icon: 2 });
+				return
+			}
       var data = rdata.msg
-      var is_beta = data.is_beta
-      var beta = data.beta
-      var versionData = is_beta ? beta : data
-      var versionType = is_beta ? '测试版' : '正式版'
-      bt.open({
+			var is_beta = data.is_beta
+			var beta = data.beta
+			var versionData = is_beta ? beta : data
+			var versionType = is_beta ? '测试版' : '正式版'
+			bt.open({
         type: 1,
-        title: ' 版本更新-' + bt.os + '面板' + versionType,
+        title: ' 版本更新-'+ bt.os + '面板' + versionType,
         area: '480px',
         shadeClose: false,
         skin: 'layui-layer-dialog',
@@ -779,24 +779,24 @@ var index = {
         content: '\
 				<div class="setchmod bt-form">\
 					<div class="update_title">\
-						<i class="layui-layer-ico layui-layer-ico'+ (rdata.status ? 0 : 1) + '"></i>\
-						<span>'+ (!rdata.status ? '恭喜您，当前已经是最新版本' : '发现新的面板版本，是否立即更新？') + '</span>\
+						<i class="layui-layer-ico layui-layer-ico'+ (rdata.status?0:1) +'"></i>\
+						<span>'+ (!rdata.status?'恭喜您，当前已经是最新版本':'发现新的面板版本，是否立即更新？') +'</span>\
 					</div>\
 					'+ (function () {
-            if (!rdata.status) {
-              return '<div class="update_version">当前版本：<a href="https://www.bt.cn/bbs/forum-36-1.html" target="_blank" class="btlink" title="查看当前版本日志">宝塔' + bt.os + versionType + versionData.version + '</a>&nbsp;&nbsp;发布时间：' + versionData.uptime + '</div>'
-            } else {
-              return '<div class="update_conter"><div class="update_version"><span style="width:60%;">最新版本：<a href="https://www.bt.cn/bbs/forum-36-1.html" target="_blank" class="btlink" title="查看版本更新日志">宝塔' + bt.os + versionType + ' ' + versionData.version + '</a></span><span style="text-align: right;width:40%;">更新日期：' + versionData.uptime + '</span></div><div class="update_logs">' + versionData.updateMsg + '</div></div>'
-            }
-          })() + '\
+						if (!rdata.status) {
+							return '<div class="update_version">当前版本：<a href="https://www.bt.cn/bbs/forum-36-1.html" target="_blank" class="btlink" title="查看当前版本日志">宝塔'+ bt.os + versionType + versionData.version + '</a>&nbsp;&nbsp;发布时间：' + versionData.uptime + '</div>'
+						}else{
+							return '<div class="update_conter"><div class="update_version"><span style="width:60%;">最新版本：<a href="https://www.bt.cn/bbs/forum-36-1.html" target="_blank" class="btlink" title="查看版本更新日志">宝塔'+ bt.os + versionType +' '+ versionData.version + '</a></span><span style="text-align: right;width:40%;">更新日期：' + versionData.uptime + '</span></div><div class="update_logs">'+ versionData.updateMsg + '</div></div>'
+						}
+					})() + '\
               <div class="update_conter">\
-                  <div class="update_tips">'+ (is_beta ? '正式版' : '测试版') + '最新版本为：&nbsp;' + (is_beta ? data.version : beta.version) + '&nbsp;&nbsp;&nbsp;更新时间:&nbsp;&nbsp;' + (is_beta ? data.uptime : beta.uptime) + '&nbsp;&nbsp;&nbsp;\
+                  <div class="update_tips">'+ (is_beta?'正式版':'测试版') + '最新版本为：&nbsp;' + (is_beta?data.version:beta.version) + '&nbsp;&nbsp;&nbsp;更新时间:&nbsp;&nbsp;' + (is_beta?data.uptime:beta.uptime) + '&nbsp;&nbsp;&nbsp;\
                   '+ (!is_beta ? '<span>如需更新测试版请点击<a href="javascript:;" onclick="index.beta_msg()" class="btlink btn_update_testPanel">查看详情</a></span>' : '<span>如需切换回正式版请点击<a href="javascript:;" onclick="index.to_not_beta()" class="btlink btn_update_testPanel">切换到正式版</a></span>') + '\
                   '+ (is_beta ? data.btb : '') + '\
                   <span>有更新时提醒我: <span class="bt_switch" style="display:inline-block"><input class="btswitch btswitch-ios" id="updateTips" type="checkbox"><label class="btswitch-btn" for="updateTips"></label></span><a class="btlink setupdateconfig" style="margin-left: 15px;" href="javascript:;">提醒方式</a></span></span>\
                   </div>\
               </div>\
-              <div class="bt-form-btn '+ (!rdata.status ? 'hide' : '') + '">\
+              <div class="bt-form-btn '+ (!rdata.status?'hide':'') +'">\
                 <button type="button" class="btn ignore-renew">忽略本次更新</button>\
                 <button type="button" class="btn btn-success btn_update_panel" onclick="index.to_update()" >'+ lan.index.update_go + '</button>\
               </div>\
@@ -817,18 +817,18 @@ var index = {
             .bt-form-btn .btn:nth-child(2) {margin-right: 0;}\
             .setchmod.bt-form .btswitch-btn {margin-bottom: 0;height: 1.9rem;width: 3.2rem;position: relative;top: 4.5px;}\
         </style>',
-        success: function (layers, indexs) {
-          $('.ignore-renew').on('click', function () {
+        success:function (layers,indexs) {
+          $('.ignore-renew').on('click',function () {
             bt.send('ignore_version', 'ajax/ignore_version', { version: versionData.version }, function (rdata) {
               bt.msg(rdata);
-              if (rdata.status) layer.close(indexs);
+              if(rdata.status) layer.close(indexs);
             })
           })
-          var updateModule = '', _updateStatus = false
+          var updateModule = '',_updateStatus = false
           // 更新提醒开关状态
           cacheModule(function (rdata1) {
             updateModule = rdata1.module   //已选择的告警方式
-            $('#updateTips').attr('checked', rdata1.status)
+            $('#updateTips').attr('checked',rdata1.status)
           })
           // 设置告警通知
           $('#updateTips').on('click', function () {
@@ -855,14 +855,14 @@ var index = {
             }
           });
           // 告警方式
-          $('.setupdateconfig').on('click', function () {
+          $('.setupdateconfig').on('click',function (){
             alarmMode()
           });
           /**
            * 更新提醒
            * @param $check 更新提醒开关
            */
-          function alarmMode($check) {
+          function alarmMode ($check) {
             cacheModule(function (rdata1) {
               var time = new Date().getTime();
               var isExpiration = rdata1.status;
@@ -895,33 +895,33 @@ var index = {
                 success: function ($layer) {
                   renderConfigHTML()
                   // 手动刷新
-                  $('.handRefresh').click(function () {
+                  $('.handRefresh').click(function(){
                     renderConfigHTML()
                   })
 
                   // 获取配置
-                  function renderConfigHTML() {
+                  function renderConfigHTML(){
                     bt.site.get_msg_configs(function (rdata) {
                       var html = '', unInstall = ''
                       for (var key in rdata) {
-                        var item = rdata[key], _html = '', accountConfigStatus = false;
-                        if (key == 'sms') continue;
-                        if (key === 'wx_account') {
-                          if (!$.isEmptyObject(item.data) && item.data.res.is_subscribe && item.data.res.is_bound) {
+                        var item = rdata[key],_html = '',accountConfigStatus = false;
+                        if(key == 'sms') continue;
+                        if(key === 'wx_account'){
+                          if(!$.isEmptyObject(item.data) && item.data.res.is_subscribe && item.data.res.is_bound){
                             accountConfigStatus = true   //安装微信公众号模块且绑定
                           }
                         }
 
-                        _html = '<div class="inlineBlock module-check ' + ((!item.setup || $.isEmptyObject(item.data)) ? 'check_disabled' : ((key == 'wx_account' && !accountConfigStatus) ? 'check_disabled' : '')) + '">' +
-                          '<div class="cursor-pointer form-checkbox-label mr10">' +
-                          '<i class="form-checkbox cust—checkbox cursor-pointer mr5 ' + (rdata1.module.indexOf(item.name) > -1 ? ((!item.setup || $.isEmptyObject(item.data)) ? '' : ((key == 'wx_account' && !accountConfigStatus) ? '' : 'active')) : '') + '" data-type="' + item.name + '"></i>' +
-                          '<input type="checkbox" class="form—checkbox-input hide mr10" name="' + item.name + '" ' + ((item.setup || !$.isEmptyObject(item.data)) ? ((key == 'wx_account' && !accountConfigStatus) ? '' : 'checked') : '') + '/>' +
-                          '<span class="vertical_middle" title="' + item.ps + '">' + item.title + ((!item.setup || $.isEmptyObject(item.data)) ? '[<a target="_blank" class="bterror installNotice" data-type="' + item.name + '">点击安装</a>]' : ((key == 'wx_account' && !accountConfigStatus) ? '[<a target="_blank" class="bterror installNotice" data-type="' + item.name + '">未配置</a>]' : '')) + '</span>' +
-                          '</div>' +
-                          '</div>';
-                        if (!item.setup) {
+                        _html = '<div class="inlineBlock module-check ' + ((!item.setup || $.isEmptyObject(item.data)) ? 'check_disabled' : ((key == 'wx_account' && !accountConfigStatus)?'check_disabled':'')) + '">' +
+                            '<div class="cursor-pointer form-checkbox-label mr10">' +
+                            '<i class="form-checkbox cust—checkbox cursor-pointer mr5 '+ (rdata1.module.indexOf(item.name) > -1?((!item.setup || $.isEmptyObject(item.data)) ?'':((key == 'wx_account' && !accountConfigStatus)?'':'active')):'') +'" data-type="'+ item.name +'"></i>' +
+                            '<input type="checkbox" class="form—checkbox-input hide mr10" name="' + item.name + '" '+ ((item.setup || !$.isEmptyObject(item.data))?((key == 'wx_account' && !accountConfigStatus)?'':'checked'):'') +'/>' +
+                            '<span class="vertical_middle" title="' + item.ps + '">' + item.title + ((!item.setup || $.isEmptyObject(item.data)) ? '[<a target="_blank" class="bterror installNotice" data-type="'+ item.name +'">点击安装</a>]' : ((key == 'wx_account' && !accountConfigStatus)?'[<a target="_blank" class="bterror installNotice" data-type="'+ item.name +'">未配置</a>]':'')) + '</span>' +
+                            '</div>' +
+                            '</div>';
+                        if(!item.setup){
                           unInstall += _html;
-                        } else {
+                        }else{
                           html += _html;
                         }
                       }
@@ -931,7 +931,7 @@ var index = {
                   // 安装消息通道
                   $('.installPush').on('click', '.form-checkbox-label', function () {
                     var that = $(this).find('i')
-                    if (!that.parent().parent().hasClass('check_disabled')) {
+                    if (!that.parent().parent().hasClass('check_disabled')){
                       if (that.hasClass('active')) {
                         that.removeClass('active')
                         that.next().prop('checked', false)
@@ -942,7 +942,7 @@ var index = {
                     }
                   });
 
-                  $('.installPush').on('click', '.installNotice', function () {
+                  $('.installPush').on('click','.installNotice',function(){
                     var type = $(this).data('type')
                     openAlertModuleInstallView(type)
                   })
@@ -950,11 +950,11 @@ var index = {
                 yes: function (index) {
                   var status = $('input[name="due_alarm"]').is(':checked');
                   var arry = [];
-                  $('.installPush .active').each(function (item) {
+                  $('.installPush .active').each(function(item){
                     var item = $(this).attr('data-type')
                     arry.push(item)
                   })
-                  if (!arry.length) return layer.msg('请选择至少一种告警通知方式', { icon: 2 })
+                  if(!arry.length) return layer.msg('请选择至少一种告警通知方式',{icon:2})
 
                   // 参数
                   var data = {
@@ -971,31 +971,31 @@ var index = {
                     data: JSON.stringify(data),
                   }, function (rdata) {
                     bt.msg(rdata)
-                    if (rdata.status) {
-                      $('#updateTips').prop('checked', data.status)
+                    if(rdata.status){
+                      $('#updateTips').prop('checked',data.status)
                       layer.close(index)
                     }
                   })
                 },
-                cancel: function () {
+                cancel: function() {
                   $check && $check.prop('checked', !isExpiration)
                 },
-                btn2: function () {
+                btn2: function(){
                   $check && $check.prop('checked', !isExpiration)
                 }
               });
             })
           }
-          function cacheModule(callback) {
-            $.post('/push?action=get_push_config', { id: 'panel_update', name: 'site_push' }, function (rdata1) {
-              if (typeof rdata1.code == 'undefined' && typeof rdata1.msg != 'undefined') return layer.msg(rdata1.msg, { icon: 2 })
-              if (typeof rdata1.code != 'undefined' && rdata1.code == 100) rdata1 = { module: '', status: false }
-              if (callback) callback(rdata1);
+          function cacheModule(callback){
+            $.post('/push?action=get_push_config', { id:'panel_update',name:'site_push' }, function (rdata1) {
+              if(typeof rdata1.code == 'undefined' && typeof rdata1.msg != 'undefined')return layer.msg(rdata1.msg,{icon:2})
+              if(typeof rdata1.code != 'undefined' && rdata1.code == 100) rdata1 = {module:'',status:false}
+              if(callback) callback(rdata1);
             });
           }
         },
-        cancel: function () {
-          if (rdata.status) bt.send('ignore_version', 'ajax/ignore_version', { version: versionData.version })
+        cancel:function (){
+          if(rdata.status) bt.send('ignore_version', 'ajax/ignore_version', { version: versionData.version })
         }
       })
     })
@@ -1073,7 +1073,7 @@ var index = {
                         </div>'
       });
       var countdown = 5;
-      function settime(val) {
+      function settime (val) {
         if (countdown == 0) {
           val.removeAttr("disabled");
           $('#update_time').text('');
@@ -1095,9 +1095,9 @@ var index = {
         }
       });
       $('.btn_update_panel_beta').click(function () {
-        if ($(this).hasClass('disabled')) {
-          layer.tips('请查看并勾选“申请内测须知”', $(this), { tips: [1, '#f00'] });
-        } else {
+        if($(this).hasClass('disabled')){
+          layer.tips('请查看并勾选“申请内测须知”', $(this), {tips: [1, '#f00']});
+        }else{
           bt.show_confirm('升级Linux内测版', '请仔细阅读内测升级须知，是否升级Linux内测版？', function () {
             bt.send('apple_beta', 'ajax/apple_beta', {}, function (rdata) {
               if (rdata.status === false) {
@@ -1284,65 +1284,65 @@ var index = {
    */
   reader_warning_view: function () {
     var that = this;
-    if (!that.warning_num && that.warning_num !== 0) {
-      layer.msg("正在获取安全风险项，请稍后 ...", { icon: 0 });
+    if(!that.warning_num && that.warning_num !== 0) {
+      layer.msg("正在获取安全风险项，请稍后 ...",{icon:0});
       return false;
     }
-    function reader_warning_list(data) {
+    function reader_warning_list (data) {
       var html = '', scan_time = '', arry = [['risk', '风险项'], ['security', '无风险项'], ['ignore', '已忽略项']], level = [['低危', '#e8d544'], ['中危', '#E6A23C'], ['高危', 'red']]
       bt.each(arry, function (index, item) {
         var data_item = data[item[0]], data_title = item[1];
         html += '<li class="module_item ' + item[0] + '">' +
-          '<div class="module_head">' +
-          '<span class="module_title">' + data_title + '</span>' +
-          '<span class="module_num">' + data_item.length + '</span>' +
-          '<span class="module_cut_show">' + (item[index] == 'risk' && that.warning_num > 0 ? '<i>点击折叠</i><span class="glyphicon glyphicon-menu-up" aria-hidden="false"></span>' : '<i>查看详情</i><span class="glyphicon glyphicon-menu-down" aria-hidden="false"></span>') + '</span>' +
-          '</div>' +
-          (function (index, item) {
-            var htmls = '<ul class="module_details_list ' + (item[0] == 'risk' && that.warning_num > 0 ? 'active' : '') + '">';
-            bt.each(data_item, function (indexs, items) {
-              scan_time = items.check_time;
-              htmls += '<li class="module_details_item">' +
-                '<div class="module_details_head">' +
-                '<span class="module_details_title"><span title="' + items.ps + '">' + items.ps + '</span><i>（&nbsp;检测时间：' + (that.get_simplify_time(items.check_time) || '刚刚') + '，耗时：' + (items.taking > 1 ? (items.taking + '秒') : ((items.taking * 1000).toFixed(2) + '毫秒')) + '&nbsp;，等级：' + (function (level) {
-                  var level_html = '';
-                  switch (level) {
-                    case 3:
-                      level_html += '<span style="color:red">高危</span>';
-                      break;
-                    case 2:
-                      level_html += '<span style="color:#E6A23C">中危</span>';
-                      break;
-                    case 1:
-                      level_html += '<span style="color:#e8d544">低危</span>';
-                      break;
-                  }
-                  return level_html;
-                }(items.level)) + '）</i></span>' +
-                '<span class="operate_tools">' + (item[0] != 'security' ? ('<a href="javascript:;" class="btlink cut_details">详情</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" data-model="' + items.m_name + '" data-title="' + items.title + '" ' + (item[0] == 'ignore' ? 'class=\"btlink\"' : '') + ' data-type="' + item[0] + '">' + (item[0] != 'ignore' ? '忽略' : '移除忽略') + '</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" class="btlink" data-model="' + items.m_name + '" data-title="' + items.title + '">检测</a>') : '<a href="javascript:;" class="btlink cut_details">详情</a>') + '</span>' +
-                '</div>' +
-                '<div class="module_details_body">' +
-                '<div class="module_details_line">' +
-                '<div class="module_details_block"><span class="line_title">检测类型：</span><span class="line_content">' + items.title + '</span></div>' +
-                '<div class="module_details_block"><span class="line_title">风险等级：</span><span class="line_content" style="color:' + level[items.level - 1][1] + '">' + level[items.level - 1][0] + '</span></div>' +
-                '</div>' +
-                '<div class="module_details_line"><span class="line_title">风险描述：</span><span class="line_content">' + items.msg + '</span></div>' +
-                '<div class="module_details_line"><span class="line_title">' + (item[0] != 'security' ? '解决方案：' : '配置建议') + '</span><span class="line_content">' +
-                (function () {
-                  var htmlss = '';
-                  bt.each(items.tips, function (indexss, itemss) {
-                    htmlss += '<i>' + (indexss + 1) + '、' + itemss + '</i></br>';
-                  });
-                  return htmlss;
-                }()) + '</span></div>' +
-                (items.help != '' ? ('<div class="module_details_line"><span class="line_title">帮助文档：</span><span class="line_content"><a href="' + items.help + '" target="_blank" class="btlink">' + items.help + '</span></div>') : '') +
-                '</div>' +
-                '</li>';
-            });
-            htmls += '</ul>';
-            return htmls;
-          }(index, item))
-          + '</li>'
+            '<div class="module_head">' +
+            '<span class="module_title">' + data_title + '</span>' +
+            '<span class="module_num">' + data_item.length + '</span>' +
+            '<span class="module_cut_show">' + (item[index] == 'risk' && that.warning_num > 0 ? '<i>点击折叠</i><span class="glyphicon glyphicon-menu-up" aria-hidden="false"></span>' : '<i>查看详情</i><span class="glyphicon glyphicon-menu-down" aria-hidden="false"></span>') + '</span>' +
+            '</div>' +
+            (function (index, item) {
+              var htmls = '<ul class="module_details_list ' + (item[0] == 'risk' && that.warning_num > 0 ? 'active' : '') + '">';
+              bt.each(data_item, function (indexs, items) {
+                scan_time = items.check_time;
+                htmls += '<li class="module_details_item">' +
+                    '<div class="module_details_head">' +
+                    '<span class="module_details_title"><span title="' + items.ps + '">' + items.ps + '</span><i>（&nbsp;检测时间：' + (that.get_simplify_time(items.check_time) || '刚刚') + '，耗时：' + (items.taking > 1 ? (items.taking + '秒') : ((items.taking * 1000).toFixed(2) + '毫秒')) + '&nbsp;，等级：' + (function (level) {
+                      var level_html = '';
+                      switch (level) {
+                        case 3:
+                          level_html += '<span style="color:red">高危</span>';
+                          break;
+                        case 2:
+                          level_html += '<span style="color:#E6A23C">中危</span>';
+                          break;
+                        case 1:
+                          level_html += '<span style="color:#e8d544">低危</span>';
+                          break;
+                      }
+                      return level_html;
+                    }(items.level)) + '）</i></span>' +
+                    '<span class="operate_tools">' + (item[0] != 'security' ? ('<a href="javascript:;" class="btlink cut_details">详情</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" data-model="' + items.m_name + '" data-title="' + items.title + '" ' + (item[0] == 'ignore' ? 'class=\"btlink\"' : '') + ' data-type="' + item[0] + '">' + (item[0] != 'ignore' ? '忽略' : '移除忽略') + '</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" class="btlink" data-model="' + items.m_name + '" data-title="' + items.title + '">检测</a>') : '<a href="javascript:;" class="btlink cut_details">详情</a>') + '</span>' +
+                    '</div>' +
+                    '<div class="module_details_body">' +
+                    '<div class="module_details_line">' +
+                    '<div class="module_details_block"><span class="line_title">检测类型：</span><span class="line_content">' + items.title + '</span></div>' +
+                    '<div class="module_details_block"><span class="line_title">风险等级：</span><span class="line_content" style="color:' + level[items.level - 1][1] + '">' + level[items.level - 1][0] + '</span></div>' +
+                    '</div>' +
+                    '<div class="module_details_line"><span class="line_title">风险描述：</span><span class="line_content">' + items.msg + '</span></div>' +
+                    '<div class="module_details_line"><span class="line_title">' + (item[0] != 'security' ? '解决方案：' : '配置建议') + '</span><span class="line_content">' +
+                    (function () {
+                      var htmlss = '';
+                      bt.each(items.tips, function (indexss, itemss) {
+                        htmlss += '<i>' + (indexss + 1) + '、' + itemss + '</i></br>';
+                      });
+                      return htmlss;
+                    }()) + '</span></div>' +
+                    (items.help != '' ? ('<div class="module_details_line"><span class="line_title">帮助文档：</span><span class="line_content"><a href="' + items.help + '" target="_blank" class="btlink">' + items.help + '</span></div>') : '') +
+                    '</div>' +
+                    '</li>';
+              });
+              htmls += '</ul>';
+              return htmls;
+            }(index, item))
+            + '</li>'
       });
       $('.warning_scan_body').html(html);
       scan_time = Date.now() / 1000;
@@ -1354,14 +1354,14 @@ var index = {
       area: ['750px', '700px'],
       skin: 'warning_scan_view',
       content: '<div class="warning_scan_view" style="height: 100%;">' +
-        '<div class="warning_scan_head">' +
-        '<span class="warning_scan_ps">' + (that.warning_num > 0 ? ('本次扫描共检测到风险项<i>' + that.warning_num + '</i>个,请及时修复！') : '本次扫描检测无风险项，请继续保持！') + '</span>' +
-        '<span class="warning_scan_time"></span>' +
-        '<button class="warning_repair_scan">人工修复</button>' +
-        '<button class="warning_again_scan" style="right:160px;">重新检测</button>' +
-        '</div>' +
-        '<ol class="warning_scan_body" style="min-height: 528px;"></ol>' +
-        '</div>',
+          '<div class="warning_scan_head">' +
+          '<span class="warning_scan_ps">' + (that.warning_num > 0 ? ('本次扫描共检测到风险项<i>' + that.warning_num + '</i>个,请及时修复！') : '本次扫描检测无风险项，请继续保持！') + '</span>' +
+          '<span class="warning_scan_time"></span>' +
+          '<button class="warning_repair_scan">人工修复</button>' +
+          '<button class="warning_again_scan" style="right:160px;">重新检测</button>' +
+          '</div>' +
+          '<ol class="warning_scan_body" style="min-height: 528px;"></ol>' +
+          '</div>',
       success: function () {
         $('.warning_again_scan').click(function () {
           var loadT = layer.msg('正在重新检测安全风险，请稍候...', { icon: 16 });
@@ -1484,20 +1484,20 @@ var index = {
       $('.btpro-gray').replaceWith($(res[0]));
       bt.set_cookie('pro_end', res[1]);
       bt.set_cookie('ltd_end', res[2]);
-      if (res[1] === 0) {
-        $(".btpro span").click(function (e) {
+      if(res[1] === 0){
+        $(".btpro span").click(function(e){
           layer.confirm('切换回免费版可通过解绑账号实现', { icon: 3, btn: ['解绑账号'], closeBtn: 2, title: '是否取消授权' }, function () {
             $.post('/ssl?action=DelToken', {}, function (rdata) {
               layer.msg(rdata.msg);
               setTimeout(function () {
                 window.location.reload();
-              }, 2000);
+              },2000);
             });
           });
           e.stopPropagation();
         });
       }
-      if (callback) callback();
+      if(callback) callback();
     })
   },
   /**
@@ -1508,25 +1508,25 @@ var index = {
       var recomConfig = product_recommend.get_recommend_type(0)
       var pay_status = product_recommend.get_pay_status()
       var is_pay = pay_status.is_pay;
-      var advanced = pay_status.advanced;
+      var advanced =  pay_status.advanced;
       var end_time = pay_status.end_time;
-      var html = '', list_html = '';
-      if (!is_pay) advanced = ''; //未购买的时候，使用推荐内容
-      if (recomConfig) {
+      var html = '',list_html = '';
+      if(!is_pay) advanced = ''; //未购买的时候，使用推荐内容
+      if(recomConfig){
         var item = recomConfig;
         for (let j = 0; j < item['ps'].length; j++) {
           const element = item['ps'][j];
-          list_html += '<div class="item">' + element + '</div>';
+          list_html += '<div class="item">'+ element +'</div>';
         }
         var pay_html = '';
-        if (is_pay) {
-          pay_html = '<div class="product-buy ' + (advanced || item.name) + '-type">到期时间：<span>' + (end_time === 0 ? '永久授权' : (end_time === -2 ? '已过期' : bt.format_data(end_time, 'yyyy-MM-dd')) + '&nbsp;&nbsp;<a class="btlink" href="javascript:;" onclick="product_recommend.pay_product_sign(\'' + advanced + '\',' + item.pay + ',\'' + advanced + '\')">续费</a>') + '</span></div>'
-        } else {
-          pay_html = '<div class="product-buy"><button type="button" class="btn btn-xs btn-success" onclick="product_recommend.pay_product_sign(\'' + (advanced || item.name) + '\',' + item.pay + ',\'ltd\')">立即升级</button></div>'
+        if(is_pay){
+          pay_html = '<div class="product-buy '+ (advanced || item.name) +'-type">到期时间：<span>'+ (end_time === 0?'永久授权':(end_time === -2?'已过期':bt.format_data(end_time,'yyyy-MM-dd')) + '&nbsp;&nbsp;<a class="btlink" href="javascript:;" onclick="product_recommend.pay_product_sign(\''+ advanced +'\','+ item.pay +',\''+ advanced +'\')">续费</a>') +'</span></div>'
+        }else{
+          pay_html = '<div class="product-buy"><button type="button" class="btn btn-xs btn-success" onclick="product_recommend.pay_product_sign(\''+ (advanced || item.name) +'\','+ item.pay +',\'ltd\')">立即升级</button></div>'
         }
         html = '<div class="conter-box bgw">\
-          <div class="recommend-top radius4 pd15 '+ (is_pay ? (advanced + '-bg') : '') + '">' + (!is_pay ? pay_html : '') + '<div class="product-ico ' + (advanced || item.name) + '' + (!is_pay ? '-pay' : '') + '-ico"></div>' + (is_pay ? pay_html : '') + '\
-            <div class="product-label">'+ list_html + '</div>\
+          <div class="recommend-top radius4 pd15 '+ (is_pay?( advanced +'-bg'):'') +'">'+ (!is_pay?pay_html:'') +'<div class="product-ico '+ (advanced || item.name) +''+ (!is_pay?'-pay':'') +'-ico"></div>' + (is_pay?pay_html:'') +'\
+            <div class="product-label">'+ list_html +'</div>\
           </div>\
         </div>'
         $('#home-recommend').html(html)
@@ -1546,8 +1546,8 @@ index.get_init();
 index.consultancy_services()
 //setTimeout(function () { index.get_cloud_list() }, 800);
 
-product_recommend.init(function () {
-  index.get_product_status(function () {
+product_recommend.init(function(){
+  index.get_product_status(function(){
     index.recommend_paid_version()
   });
   index.get_index_list();
