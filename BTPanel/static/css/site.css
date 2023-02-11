@@ -17696,7 +17696,7 @@
   .bt-form .dep_msg{
 	padding: 15px;
 	margin: 0 10px 10px 10px;
-	background: rgb(232, 246, 235);
+	background: rgb(166 255 185 / 33%);
   }
   .bt-form .deployment_line,#render_deployment .dep_content{
 	max-height: 170px;
@@ -17784,7 +17784,7 @@
   .dep_content .cont div:first-child{
 	display: flex;
 	align-items: center;
-	color: #333;
+	color: #fff;
   }
   .dep_content .cont div{
 	width: 225px;
@@ -17793,7 +17793,7 @@
 	white-space: nowrap;
 	display: inline-block;
 	line-height: 20px;
-	color: #888;
+	color: #ffe7f0;
   }
   .dep_content .cont div:nth-child(2) span{
 	max-width: 167px;
@@ -17858,7 +17858,7 @@
   .bt-form .dep_config{
 	padding: 15px 15px;
 	width: 530px;
-	background: #F8F8F8;
+	background: #8d8d8d8a;
   }
   .bt-form .dep_config .database_info{
 	display: flex;
@@ -18371,9 +18371,9 @@
   .alarm-view .plugin_user_info {
 	padding: 15px 30px;
 	line-height: 26px;
-	background: rgb(86 106 118 / 52%);
-	border-radius: 5px;
-	border: 1px solid #efefef;
+	background: #f5f6fa26;
+    border-radius: 5px;
+    border: 1px solid #efefef99;
   }
   
   .alarm-view .plugin_user_info p {
@@ -18954,4 +18954,31 @@
 	word-wrap: break-word;
 	max-width: 104px;
 	overflow: hidden;
+  }
+
+  /* NGINX 免费防火墙 */
+  .waf_left_menu {
+    background: #101d194f!important;
+  }
+  .waf_left_menu li.active {
+    background: #2e827a96!important;
+  }
+  .waf_left_menu span,.waf_tips_list,.waf_left_menu .icon i {
+    color: #ececec!important;
+  }
+  .waf_conter,.waf_nav_group span {
+    color: #fff!important;
+  }
+  .waf_table>thead>tr {
+    background: #ff62e62e!important;
+  }
+  .waf_table>tbody>tr>td {
+    color: #fff!important;
+  }
+  .waf-input {
+	background: transparent!important;
+  }
+  .waf_nav_group span.active {
+    color: #fff!important;
+    background: #25191970!important;
   }
