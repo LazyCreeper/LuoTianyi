@@ -1,0 +1,95 @@
+/*
+ 
+ @Name: 宝塔面板框架额外主题样式
+ @Last Date: 2023.5.16
+ @Create Date: 2023.5.16				
+ @Author: Lazy
+ @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
+ 
+*/
+
+/* Logs */
+.tabContent .Tab {
+  /* border: 1px solid #bababa; */
+  border: 0 !important;
+}
+
+.tabContent .Tab .Item {
+  border: 1px solid #bababa !important;
+}
+
+.tabContent .Tab .Item.active {
+  background-color: #ea9dff42 !important;
+  color: #ffcaf5 !important;
+}
+
+.tabContent .Tab .Item:hover {
+  background-color: rgb(243 170 255 / 30%) !important;
+}
+
+/* 插件安装弹窗 */
+.install-header-title .install-tips,
+.plugin-title,
+.plugin-user-info .plugin-info-content,
+.index_date,
+.index_conter {
+  color: #fff !important;
+}
+
+.plugin-user-info {
+  background: #ffffff38 !important;
+  border: 1px solid #efefef73 !important;
+}
+
+.plugin-user-info .plugin-info-title {
+  color: #d3fff5 !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+}
+
+/* NGINX 免费防火墙 */
+.waf_left_menu {
+  background: #101d194f !important;
+}
+.waf_left_menu li.active {
+  background: #2e827a96 !important;
+}
+.waf_left_menu span,
+.waf_tips_list,
+.waf_left_menu .icon i {
+  color: #ececec !important;
+}
+.waf_conter,
+.waf_nav_group span {
+  color: #fff !important;
+}
+.waf_table > thead > tr {
+  background: #ff62e62e !important;
+}
+.waf_table > tbody > tr > td {
+  color: #fff !important;
+}
+.waf-input {
+  background: transparent !important;
+}
+.waf_nav_group span.active {
+  color: #fff !important;
+  background: #25191970 !important;
+}
+
+/* IP配置工具 */
+.network_card {
+  background-color: transparent !important;
+}
+
+.network_card .name {
+  color: #fff !important;
+}
+
+.info_box_item .item_label {
+  color: #a5ffcc !important;
+}
+
+.info_box_item .item_value {
+  color: #deffff !important;
+}
