@@ -21737,6 +21737,7 @@
 	background-size: contain;
   }
   .file_table_view .file_name .icon-file-unlock{
+	display: none;
 	background: url('/static/img/file_icon/icon-file-unlock.svg') no-repeat;
 	background-size: contain;
   }
