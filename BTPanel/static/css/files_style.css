@@ -1,7 +1,7 @@
 /*!
  
  @Name: 宝塔面板文件管理主题样式
- @Last Date: 2022.12.29
+ @Last Date: 2023.5.16
  @Create Date: 2022.8.5			
  @Author: Lazy
  @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
@@ -408,7 +408,7 @@ display: block;
 
 .file_table_view.list_view .file_list_content .file_tr.editr_tr .rename_file_input:focus {
   outline: none;
-  border: 1px solid #20a53a;
+  border: 1px solid #ff8b98;
 }
 
 .file_table_view.list_view .file_list_content .file_tr.editr_tr .clear_file_btn,
@@ -417,10 +417,10 @@ display: block;
   line-height: 30px;
   padding: 0 18px;
   margin-right: 10px;
-  background-color: #20a53a;
+  background-color: #ff8b98;
   border-radius: 2px;
   color: #fff;
-  border: 1px solid #20a53a;
+  border: 1px solid #ff8b98;
 }
 
 .file_table_view.list_view .file_list_content .file_tr.editr_tr .clear_file_btn {
@@ -457,7 +457,7 @@ display: block;
   display: inline-block;
   width: 7px;
   height: 7px;
-  color: #20a53a;
+  color: #ff8b98;
   border-left: 1px solid;
   border-bottom: 1px solid;
   transform: rotate(-45deg);
@@ -474,8 +474,8 @@ display: block;
 
 .file_table_view.list_view .file_tr:hover .foo_menu .foo_menu_title,
 .file_table_view.list_view .file_tr.active .foo_menu .foo_menu_title {
-  border: 1px solid #20a53a;
-  color: #20a53a !important;
+  border: 1px solid #ff8b98;
+  color: #ff8b98 !important;
   background: #fff;
   border-radius: 2px;
   padding: 4px 18px 4px 8px;
@@ -486,17 +486,17 @@ display: block;
 
 .file_table_view.list_view .file_tr .foo_menu .foo_menu_title:hover,
 .file_table_view.list_view .file_tr.active .foo_menu .foo_menu_title:hover {
-  border: 1px solid #20a53a;
+  border: 1px solid #ff8b98;
   color: #fff !important;
-  background: #20a53a;
+  background: #ff8b98;
 }
 
 .file_table_view.list_view .file_tr:hover .foo_menu .foo_menu_title:hover,
 .file_table_view.list_view .file_tr.active .foo_menu .foo_menu_title:hover,
 .file_table_view.list_view .file_tr .foo_menu.foo_menu_click .foo_menu_title {
-  border: 1px solid #20a53a;
+  border: 1px solid #ff8b98;
   color: #fff !important;
-  background: #20a53a;
+  background: #ff8b98;
 }
 
 .file_table_view.list_view .file_tr:hover .foo_menu .foo_menu_title:hover::after,
@@ -514,7 +514,7 @@ display: block;
 
 /* 手机端菜单栏 */
 .app_menu_group ul {
-  color: #20a53a;
+  color: #ff8b98;
   height: 50px;
   line-height: 50px;
   display: inline-block;
@@ -1189,7 +1189,7 @@ height: 22px;
   line-height: 30px;
   padding: 0 10px;
   position: absolute;
-  border-left: 4px solid #20a53a;
+  border-left: 4px solid #ff8b98;
   bottom: 38px;
   font-size: 14px;
 }
@@ -1619,7 +1619,7 @@ height: 22px;
 
 .nav_group.mount_disk_list.thezoom .disk_title_group_btn .disk_title_group {
   font-size: 12px;
-  color: #666;
+  color: #fff;
   position: absolute;
   top: 0px;
 }
@@ -1642,8 +1642,8 @@ height: 22px;
 
 .nav_group.multi.thezoom .batch_multi_title:hover,
 .nav_group.mount_disk_list.thezoom .disk_title_group_btn:hover {
-  background-color: #20a53a;
-  border-color: #20a53a;
+  background-color: rgba(173,99,255,0.5);
+  border-color: #aa83df;
 }
 
 .nav_group.multi.thezoom .batch_multi_title:hover>span,
@@ -1855,6 +1855,10 @@ height: 22px;
   color: #555;
 }
 
+.nav_down_list li:hover {
+  background: #f0f0f03d;
+}
+
 .nav_down_list li:last-child {
   border: none;
 }
@@ -1947,10 +1951,10 @@ height: 22px;
   padding: 0 12px;
 }
 .file_path_views .file_path_upper:hover{
-  background-color: #20a53a;
+  background-color: #ff8b98;
   color: #fff;
   cursor: pointer;
-  border:1px solid #20a53a;
+  border:1px solid #ff8b98;
   border-right: none;
 }
 .file_path_views .file_path_upper:hover i{
@@ -1991,8 +1995,8 @@ height: 22px;
 }
 
 .file_path_views .forward_path span:hover {
-  background: #20a53a;
-  border: 1px solid #20a53a;
+  background: #ff8b98;
+  border: 1px solid #ff8b98;
 }
 .file_path_views .forward_path span:hover:first-child i{
   background-position: -90px 6px;
@@ -2295,7 +2299,7 @@ height: 22px;
 }
 
 .file_path_collect:hover {
-  background: #20a53a;
+  background: #ff8b98;
   border-color: #38983b;
   color: #fff
 }
@@ -2339,7 +2343,7 @@ height: 22px;
 }
 
 .search_path_views .is_search_children:hover {
-  color: #20a53a;
+  color: #ff8b98;
   cursor: pointer;
 }
 
@@ -2411,9 +2415,9 @@ height: 22px;
 }
 
 .search_path_views .file_search_config .file_search_checked.active {
-  background: #20a53a;
+  background: #ff8b98;
   color: #fff;
-  border-color:#20a53a ;
+  border-color:#ff8b98 ;
 }
 
 .search_path_views .file_search_config .file_search_checked.active:after {
@@ -2688,16 +2692,14 @@ height: 22px;
   border: none;
   line-height: 30px;
   /* height: 30px; */
-  color: #20a53a;
+  color: #ff8b98;
   display: inline;
   font-size: 13px;
   padding: 0 5px;
 }
 
 .filePage>.page_num a:hover {
-  background: #fff;
-  color: #20a53a;
-  text-shadow: 0 1px 0 #fff;
+  color: #ff7988;
   cursor: pointer;
 }
 
@@ -2999,7 +3001,7 @@ width: 350px;
 border-radius: 2px;
 }
 .bt-property-setting .property-box .attr-content input:focus{
-border-color: #20a53a;
+border-color: #ff8b98;
 }
 
 .bt-property-setting .property-box .file_icon{
