@@ -30,7 +30,7 @@ $('.tabs-nav span').click(function () {
 })
 
 
-
+var table_confirm_show = false;
 var interval_stop = false;
 var index = {
   // 顾问服务弹窗
@@ -103,6 +103,15 @@ var index = {
     val: 30,
     color: '#ff87c8'
   }],
+  cache_system_push: {},// 缓存告警信息
+  all_status: {// 单个信息
+    load: {},
+    cpu: {},
+    mem: {},
+    disk: {}
+  },
+  alarm_type_list: [{title: '【负载状态】告警',value: 'load'},{title: '【CPU使用率】告警',value: 'cpu'},{title: '【内存使用率】告警',value:'mem'}],// 告警任务类型
+  msg_config: {},// 告警通知配置
   release: false,
   interval: {
     limit: 10,
@@ -229,186 +238,758 @@ var index = {
       _disk.data.aData.push(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds());
     }
   },
+  /**
+   * 表格生成器
+   * @param {*} el 表格挂载节点
+   * @param {*} data 表格挂载数据
+   * @param config 表格配置
+   */
+  table_generation: function (el, data, config) {
+    _this = this
+    // 清理表格
+    $(el).empty();
+
+    bt_tools.table({
+      data: data,
+      el: el,
+      height: '350px',
+      minWidth: '290px',
+      column: [
+        {
+          fid: 'proc_name',
+          title: '进程名',
+          width: '100px',
+          template: function (row, index) {
+            return '<div title="备注：' + row.explain + '\n启动路径：' + row.exe_path + '\n运行目录：' + row.cwd_path + '\n线程数量：' + row.num_threads + '" style="overflow: hidden;text-overflow: ellipsis;">' + row.proc_name + '</div>';
+          },
+        },
+        {
+          fid: config.fid[0],
+          width: '80px',
+          title: config.title[0],
+        },
+        // {
+        //   fid: config.fid[1],
+        //   width: '100px',
+        //   title: config.title[1],
+        // },
+        {
+          title: '操作',
+          width: '40px',
+          type: 'group',
+          align: 'right',
+          group: [
+            {
+              title: config.fid[0] == 'cpu_percent' ? '结束' : '释放',
+              event: function (row, index, ev, key, that) {
+                table_confirm_show = true;
+                var load;
+                if (row.important !== 1) {
+                  bt.compute_confirm({title:'结束【' + row.proc_name + '】进程',msg:'结束【' + row.proc_name + '】进程会导致'+row.explain.split('的进程')[0]+'无法正常运行，是否结束?'}, function () {
+                    load = bt.load();
+                    bt_tools.send(
+                      {
+                        url: '/monitor/process_management/kill_process_all',
+                        data: {
+                          pid: row.pid.toString(),
+                        },
+                      },
+                      function (res) {
+                        load.close();
+                        if (res.status) {
+                          layer.msg(res.msg, {icon: 1});
+                          table_confirm_show = false;
+                        } else {
+                          layer.msg(res.msg, {icon: 2});
+                          table_confirm_show = false;
+                        }
+                      }
+                    );
+                    load.close();
+                  })
+                  table_confirm_show = false;
+                } else {
+                  var s = config.fid[0] == 'cpu_percent' ? '结束' : '释放'
+                  layer.msg('该进程为系统进程，禁止' + s, {icon: 2});
+                  table_confirm_show = false;
+                }
+              },
+            },
+          ],
+        },
+      ],
+    });
+    $('.divtable').css('border', '0px');
+    $('td').css({'word-break':'break-all','text-overflow': 'ellipsis'});
+    $('table').css({'table-layout': 'fixed','white-space': 'nowrap'})
+  },
   get_init: function () {
     var _this = this;
-    _this.reander_system_info(function (rdata) {
-      // 负载悬浮事件
-      $('#loadChart').hover(function () {
-        var arry = [
-          ['最近1分钟平均负载', rdata.load.one],
-          ['最近5分钟平均负载', rdata.load.five],
-          ['最近15分钟平均负载', rdata.load.fifteen]
-        ], tips = '';
-        $.each(arry || [], function (index, item) {
-          tips += item[0] + '：' + item[1] + '</br>';
-        })
-        $.each(rdata.cpu_times || {}, function (key, item) {
-          tips += key + '：' + item + '</br>';
-        })
-        // '最近1分钟平均负载：' + rdata.load.one + '</br>最近5分钟平均负载：' + rdata.load.five + '</br>最近15分钟平均负载：' + rdata.load.fifteen + ''
-        layer.tips(tips, this, { time: 0, tips: [1, '#999'] });
-      }, function () {
-        layer.closeAll('tips');
-      })
-
-      // cpu悬浮事件
-      $('#cpuChart').hover(function () {
-        var cpuText = '';
-        for (var i = 1; i < rdata.cpu[2].length + 1; i++) {
-          var cpuUse = parseFloat(rdata.cpu[2][i - 1] == 0 ? 0 : rdata.cpu[2][i - 1]).toFixed(1)
-          if (i % 2 != 0) {
-            cpuText += 'CPU-' + i + '：' + cpuUse + '%&nbsp;|&nbsp;'
-          } else {
-            cpuText += 'CPU-' + i + '：' + cpuUse + '%'
-            cpuText += '</br>'
+    var layer_id = 0;
+    var layer_table_time = 0;
+    var postion_time = 0;
+    var time = 0
+    var mouseY, mouseX;
+    /**
+     * 创建表格
+     * @param el 表格挂载节点
+     * @param type 渲染表格类型
+     * @param config 表格配置
+     */
+    var create_data_table = function (el, type, config) {
+      bt_tools.send({url: '/monitor/process_management/specific_resource_load_type'}, function (res) {
+        if (res.hasOwnProperty('status') && res['status'] === false) {
+					var item_CPU = {
+						"proc_name": "BT-****",
+						"pid": '284**',
+						"cpu_percent": "2.**%",
+						"memory_usage": "*.**%",
+						"proc_survive": "2*\u5206\u949f"
+					}
+					var item_CPU_x = {
+						"proc_name": "**-****",
+						"pid": '*****',
+						"cpu_percent": "*.**%",
+						"memory_usage": "*.**%",
+						"proc_survive": "**\u5206\u949f"
+					}
+          res.CPU_high_occupancy_software_list = [item_CPU, item_CPU_x, item_CPU_x, item_CPU_x, item_CPU_x]
+          res.memory_high_occupancy_software_list = [item_CPU, item_CPU_x, item_CPU_x, item_CPU_x, item_CPU_x]
+					//显示开通企业版
+          $('.un-profession').css('display', 'flex')
+        } else {
+          // if(!$('#other .disk-item-list').hasClass('active')){
+          //   $('#other .disk-item-list').addClass('active');
+          //   $('#other .disk-item-list').find('span').text('收起');
+          //   $('#other .disk-item-list').find('img').css('transform', 'rotate(180deg)');
+          // }
+          $('.load_tips .disk-item-footer').css('display', 'flex')
+				}
+				_this.table_generation(el, res[type] || {}, config);
+        if (res.info && res.info.load_avg) {
+          $('#load_one').text(res.info.load_avg['1'] + '  /  ' + res.info.load_avg['5'] + '  /  ' + res.info.load_avg['15'])
+				}
+        if (res.info) {
+					$('#load_cpu_times_num').text(res.info.active_processes+ '  /  ' + res.info.total_processes)
+				}
+        _this.isCorporat = res.status === false;
+      }, {verify: false});
+    }
+    /**
+     * 弹窗
+     * @param config 格式
+     * {
+     * table:{
+     *  type:'',
+     *  table_title:[],
+     *  table_fid:[],
+     * },
+     * html:{
+     *   base_html:'',
+     *   disk_title:'',
+     *   table_id:'',
+     *   position:'',
+     *   newClass:'',
+     * }
+     * }
+     */
+    var float_box = function (config) {
+      if (postion_time) {
+        clearInterval(postion_time);
+      }
+      $('body').find('.layui-layer').remove()
+      var is_other_active = bt.get_storage('LoadTips' + config.html.newClass + '_other_info'),
+        is_top_active = bt.get_storage('LoadTips' + config.html.newClass + '_top5_info')
+      var other_table_html = '', num = 0,
+          title = {
+            user: '用户级别的 CPU 时间百分比',
+            system: '系统级别的 CPU 时间百分比',
+            idle: '空闲状态的 CPU 时间百分比',
+            iowait: '等待 I/O 操作完成的 CPU 时间百分比',
+            irq: '处理硬件中断的 CPU 时间百分比',
+            softirq: '处理软件中断的 CPU 时间百分比',
+            guest: '运行虚拟机时使用的 CPU 时间百分比',
+            steal: '当前 CPU 被其他虚拟机偷取的CPU时间百分比',
+            guest_nice: '运行带有 “nice” 优先级的虚拟机时使用的CPU时间百分比',
+            nice: '运行带有 “nice” 优先级的进程时使用的 CPU 时间百分比'
+          }
+      var is_other = config.html.hasOwnProperty('cpu_times') && config.html.cpu_times.length
+      if (is_other) {//cpu使用率 其他信息
+        for (var i = 0; i < config.html.cpu_times.length; i++) {
+          var is_next = config.html.cpu_times.hasOwnProperty(i + 1)
+          other_table_html += '<div class="disk-body-list">\
+            <span>核心 ' + (i + 1) + (is_next ? ' / ' + (i + 2) : '') + ' 占用：</span>\
+            <span id="cpu_' + (i + 1) + '_num">' + config.html.cpu_times[i] + '%' + (is_next ? ' / ' + config.html.cpu_times[i + 1] + '%' : '') + '</span>\
+          </div>'
+          i++
+        }
+      } else {//负载状态 其他信息
+        for (var key in config.html.cpu_times) {
+          var val = config.html.cpu_times[key];
+          if (key !== '总进程数' && key !== '活动进程数') {
+            if (num % 2 === 0) {
+              other_table_html += '<tr>'
+            }
+            other_table_html += '<td title="' + title[key] + '"><span>' + key + '</span></td><td title="' + title[key] + '">' + val + '</td>'
+            if (num % 2 === 1) {
+              other_table_html += '</tr>'
+            }
+            num++
           }
         }
+      }
+      layer_id = layer.open({
+        type: 1,
+        shade: 0,
+        area: '360px',
+        title: false,
+        skin: 'load_tips ' + config.html.newClass,
+        fixed: false,
+        closeBtn: false,
+        id: 'LoadTips' + config.html.newClass,
+        offset: [($(config.html.position).offset().top + 140 - $(window).scrollTop()) + 'px', $(config.html.position).offset().left + 'px'],
+        content:
+          '<div class=" load_tips disk_cont">\
+            <div id="slot"></div>\
+            <div class="disk-item-list active base_html" id="base_info">\
+              <div class="disk-item-header">\
+                  <div class="disk-header-title">基础信息</div>\
+              </div>\
+              <div class="disk-item-body" id="base_info_html">' + config.html.base_html + '</div>\
+              </div>' +
+          (config.html.cpu_times ? '<div class="disk-item-list other_html ' + (is_other_active ? 'active' : '') + '" id="other_info">\
+              <div class="disk-item-header">\
+                <div class="disk-header-title">'+ config.html.title +'</div>\
+                <div class="disk-header-fold flex"><span class="mr8">'+ (is_other_active ? '折叠' : '展开') +'</span><img src="/static/img/arrow-down.svg" '+ (is_other_active ? 'style="transform: rotate(180deg);"' : '') +' class="icon-index-arrow"></div>\
+              </div>\
+              <div class="disk-item-body ' + (is_other ? 'cpu-core-body' : '') + '" id="other_info_html" ' + (is_other ? '' : 'style="padding: 16px 16px 0;') + '">' + (is_other ? other_table_html : '<table class="table" style="border:#ddd 1px solid;"><tbody>' + other_table_html + '</tbody></table>') + '</div></div>' : '') +
+              '<div id = "other">\
+                <div class="disk-item-list ' + (is_top_active ? 'active' : '') + '" id="top5_info">\
+                    <div class="disk-item-header" mark="cpu">\
+                      <div class="disk-header-title">' + config.html.disk_title + '</div>\
+                  <div class="disk-header-fold flex"><span class="mr8">' + (is_top_active ? '折叠' : '展开') + '</span><img src="/static/img/arrow-down.svg" ' + (is_top_active ? 'style="transform: rotate(180deg);"' : '') + ' class="icon-index-arrow"></div>\
+                </div>\
+                <div class="disk-item-body disk-item-body-nottom" style="position:relative">\
+                  <div class="disk-body-list no-bg">\
+									<div class="load-list index_status_table" id="' + config.html.table_id + '"></div>\
+                  \
+									<div class="un-profession" style="display:none;bottom: 24px;">\
+									</div>\
+                  </div>\
+                  <div class="disk-item-footer '+ (config.html.isShow ? 'hide' : '') +'" style="text-align: center;">\
+                    <a id="task_manager_btn" style="margin:auto" title="立即购买" class="btlink"">立即购买</a>\
+                  </div>\
+                </div>\
+							</div>'+
+              '</div>\
+            </div>',
+        success: function (layero, index) {
+          // <div class="corporat-tip">\
+					// 						<span  class="un-corporat-tip"></span>\
+					// 						<span>此功能为企业版专享 </span>\
+					// 						<button type="button" onclick="bt.soft.product_pay_view({ totalNum: 141, limit: \'ltd\', closePro: true })"></span>立即升级</button>\
+          // 	    </div>\
 
-        layer.tips(rdata.cpu[3] + "</br>" + rdata.cpu[5] + "个物理CPU，" + (rdata.cpu[4]) + "个物理核心，" + rdata.cpu[1] + "个逻辑核心</br>" + cpuText, this, { time: 0, tips: [1, '#999'] });
-      }, function () {
-        layer.closeAll('tips');
-      })
-
-      $('#memChart').hover(function () {
-        $(this).append('<div class="mem_mask shine_green" title="点击清理内存"><div class="men_inside_mask"></div><div class="mem-re-con" style="display:block"></div></div>');
-        $(this).find('.mem_mask .mem-re-con').animate({ top: '5px' }, 400);
-        $(this).next().hide();
-      }, function () {
-        $(this).find('.mem_mask').remove()
-        $(this).next().show();
-      }).click(function () {
-        var that = $(this);
-        var data = _this.chart_result.mem;
-        bt.show_confirm('真的要释放内存吗？', '<font style="color:red;">若您的站点处于有大量访问的状态，释放内存可能带来无法预测的后果，您确定现在就释放内存吗？</font>', function () {
-          _this.release = true
-          var option = JSON.parse(JSON.stringify(_this.series_option));
-          // 释放中...
-          var count = ''
-          var setInter = setInterval(function () {
-            if (count == '...') {
-              count = '.'
-            } else {
-              count += '.'
-            }
-            option.series[0].detail.formatter = "释放中" + count
-            option.series[0].detail.fontSize = 15
-            option.series[0].data[0].value = 0
-            _this.chart_view.mem.setOption(option, true)
-            that.next().hide()
-          }, 400)
-          // 释放接口请求
-          bt.system.re_memory(function (res) {
-            that.next().show()
-            clearInterval(setInter)
-            var memory = data.memRealUsed - res.memRealUsed
-            option.series[0].detail = $.extend(option.series[0].detail, {
-              formatter: "已释放\n" + bt.format_size(memory > 0 ? memory : 0) + "",
-              lineHeight: 18,
-              padding: [5, 0]
+          $(layero).find('.bt_switch input').each(function (index, item) {
+            $(this).change(function () {
+              var status = $(this).prop('checked'),
+                name = $(this).parent().parent().find('.set_alarm_status').data('type'), id = '';
+              var alarm_data = _this.get_alarm_data(name)
+              id = alarm_data['id'] ? alarm_data['id'] : ''
+              //id 不存在则添加告警 id 存在则开启/关闭告警
+              if (!status) { //存在告警关闭告警
+                bt.simple_confirm({
+                  title: '关闭告警',
+                  msg: '关闭告警后，将不再接收到该项的告警信息，是否继续操作？'
+                }, function () {
+                  _this.set_push_status(id, 0)
+                }, function () {
+                  $('#' + name + 'Tips').prop('checked', !$('#' + name + 'Tips').is(':checked'))
+                })
+              } else { //不存在告警添加告警 或者 存在则开启告警
+                if (id) {
+                  bt.simple_confirm({
+                    title: '开启告警',
+                    msg: '开启告警后，达到触发条件会收到该项的告警信息，是否继续操作？'
+                  }, function () {
+                    _this.set_push_status(id, 1)
+                  }, function () {
+                    $('#' + name + 'Tips').prop('checked', !$('#' + name + 'Tips').is(':checked'))
+                  })
+                } else {
+                  var data = {
+                    type: name,
+                  }
+                  _this.open_alarm(data, true)
+                }
+              }
             })
-            _this.chart_view.mem.setOption(option, true)
-            setTimeout(function () {
-              _this.release = false;
-              _this.chart_result.mem = res;
-              _this.chart_active('mem');
-            }, 2000);
+            $(this).parent().parent().find('.set_alarm_status').click(function () {
+              var name = $(this).data('type'), id = '';
+              var alarm_data = _this.get_alarm_data(name)
+              id = alarm_data['id'] ? alarm_data['id'] : ''
+              if (id) {
+                _this.open_alarm(alarm_data)
+              } else {
+                var data = {
+                  type: name,
+                }
+                _this.open_alarm(data)
+              }
+            })
           })
-        })
-      })
+
+          //预渲染一个空表格占位
+          _this.table_generation('#' + config.html.table_id, '', {
+            fid: config.table.table_fid,
+            title: config.table.table_title
+          });
+          //立即获取数据渲染真表格
+          create_data_table('#' + config.html.table_id, config.table.type, {
+            fid: config.table.table_fid,
+            title: config.table.table_title,
+          });
+          //定时获取数据渲染真表格刷新新基础信息
+          if (time) {
+            clearInterval(time);
+          }
+
+          function layer_table_time_fun() {
+            time = setTimeout(function () {
+              create_data_table('#' + config.html.table_id, config.table.type, {
+                fid: config.table.table_fid,
+                title: config.table.table_title,
+              });
+              layer_table_time_fun()
+            }, 6000);
+          }
+
+          layer_table_time_fun()
+          $(window).resize(function () {
+            var class_name = '.' + config.html.newClass
+            if ($(class_name).length) {
+              $(class_name).css({
+                top: $(config.html.position).offset().top + 140 - $(window).scrollTop() + 'px',
+                left: $(config.html.position).offset().left,
+              });
+            }
+          });
+          //判断是否有插入内容，将插入内容替换掉基础信息
+          if (!config.html.base_html) {
+            $('.base_html').remove();
+            config.html.slot ? $('#slot').html(config.html.slot) : '';
+          } else {
+            if (config.html.slot) {
+              $('#slot').html(config.html.slot)
+            }
+          }
+          //获取鼠标isCisCoporary坐标
+          $(document).mousemove(function (e) {
+            mouseY = e.pageY;
+            mouseX = e.pageX;
+          });
+          //内存释放
+          $('#mem_scanning_btn').on('click', function () {
+            var that = $(this);
+            var data = _this.chart_result.mem;
+            bt.show_confirm('真的要释放内存吗？', '<font style="color:red;">若您的站点处于有大量访问的状态，释放内存可能带来无法预测的后果，您确定现在就释放内存吗？</font>', function () {
+              _this.release = true;
+              var option = JSON.parse(JSON.stringify(_this.series_option));
+              // 释放中...
+              var count = '';
+              var setInter = setInterval(function () {
+                if (count == '...') {
+                  count = '.';
+                } else {
+                  count += '.';
+                }
+                option.series[0].detail.formatter = '释放中' + count;
+                option.series[0].detail.fontSize = 15;
+                option.series[0].data[0].value = 0;
+                _this.chart_view.mem.setOption(option, true);
+                that.next().hide();
+              }, 400);
+              // 释放接口请求
+              bt.system.re_memory(function (res) {
+                that.next().show();
+                clearInterval(setInter);
+                var memory = data.memRealUsed - res.memRealUsed;
+                option.series[0].detail = $.extend(option.series[0].detail, {
+                  formatter: '已释放\n' + bt.format_size(memory > 0 ? memory : 0) + '',
+                  lineHeight: 18,
+                  padding: [5, 0],
+                });
+                _this.chart_view.mem.setOption(option, true);
+                setTimeout(function () {
+                  _this.release = false;
+                  _this.chart_result.mem = res;
+                  _this.chart_active('mem');
+                }, 2000);
+              });
+            });
+          });
+					// 查看进程，下载任务管理器
+					$('#task_manager_btn').on('click', function () {
+            var ltd_end = bt.get_cookie('ltd_end') > 0;
+
+            bt.soft.get_soft_find('task_manager', function (dataRes) {
+							// 打开其他弹窗前把当前弹窗关闭，防止弹窗重叠
+              $('.' + config.html.newClass).remove();
+              if (ltd_end) {
+                if (dataRes.setup && dataRes.endtime > 0) {
+                  bt.soft.set_lib_config(dataRes.name, dataRes.title, dataRes.version)
+                } else {
+                  bt.soft.install('task_manager')
+                }
+              } else {
+                product_recommend.pay_product_sign('ltd', 141, 'ltd')
+              }
+							// if(dataRes.setup && dataRes.endtime > 0) {
+							// 	bt.soft.set_lib_config(dataRes.name,dataRes.title,dataRes.version)
+							// }else{
+							// 	var is_buy = dataRes.endtime < 0 && dataRes.pid > 0
+              //   if(is_buy) {
+              //     bt.soft.product_pay_view({
+              //       name:dataRes.title,
+              //       pid:dataRes.pid,
+              //       type:dataRes.type,
+              //       plugin:true,
+              //       renew:-1,
+              //       ps:dataRes.ps,
+              //       ex1:dataRes.ex1,
+              //       totalNum:141
+              //     })
+              //   }else{
+              //     bt.soft.install('task_manager')
+              //   }
+							// }
+            });
+          })
+          //展示收起
+          $(layero)
+            .find('.disk-item-header')
+            .on('click', function () {
+              if ($(this).parent().hasClass('base_html')) return;
+              if ($(this).parent().hasClass('active')) {
+									$(this).parent().removeClass('active');
+									$(this).find('span').text('展开');
+									$(this).find('img').removeAttr('style');
+              } else {
+                $(this).parent().addClass('active');
+								$(this).find('span').text('折叠');
+                $(this).find('img').css('transform', 'rotate(180deg)');
+              }
+              var name = $(this).parents('.layui-layer-content').prop('id') + '_' + $(this).parents('.disk-item-list').prop('id')
+              bt.set_storage(name, $(this).parent().hasClass('active') ? 1 : '')
+            });
+        },
+			});
+    }
+    /**
+     * 关于浮窗如何取消的一系列动作
+     * @param dom_point
+     * @param father_point
+     * @param open
+     */
+    var cancel_float_box = function (dom_point, father_point) {
+      if (postion_time) {
+        clearInterval(postion_time);
+      }
+      //监听鼠标是否在浮窗内
+      postion_time = setInterval(function () {
+        if ($(dom_point).length != 0) {
+          var diskX = $(dom_point).offset().left,
+            diskY = $(dom_point).offset().top,
+            diskW = $(dom_point).width(),
+            diskH = $(dom_point).height();
+          var diskChartY = $(father_point).offset().top,
+            diskChartX = $(father_point).offset().left,
+            diskChartW = $(father_point).width(),
+            diskChartH = $(father_point).height();
+          var is_move_disk = mouseX >= diskChartX && mouseX <= diskChartX + diskChartW && mouseY >= diskChartY && mouseY <= diskChartY + diskChartH;
+          var is_move = mouseX >= diskX && mouseX <= diskX + diskW && mouseY >= diskY && mouseY <= diskY + diskH;
+          if (!is_move && !is_move_disk && !table_confirm_show) {
+            $(dom_point).remove();
+            clearTimeout(time)
+            clearInterval(layer_table_time)
+          }
+        } else {
+          clearInterval(postion_time);
+        }
+      }, 200);
+    }
+    bt.site.get_msg_configs(function (msg_config) {
+      _this.msg_config = msg_config;
+      bt_tools.send({url: '/push?action=get_push_list'}, function (res) {
+    _this.reander_system_info(function (rdata) {
+          _this.cache_system_push = res.system_push;
+          _this.all_data()
+          var isLoad = !$.isEmptyObject(_this.all_status.load),
+              isCpu = !$.isEmptyObject(_this.all_status.cpu),
+              isMem = !$.isEmptyObject(_this.all_status.mem),
+              isDisk = false;
+      // 负载悬浮事件
+      $('#loadChart').hover(
+        function () {
+          var loadCount = Math.round((rdata.load.one / rdata.load.max) * 100) > 100 ? 100 : Math.round((rdata.load.one / rdata.load.max) * 100);
+              loadCount = loadCount < 0 ? 0 : loadCount;
+              _this.all_data()
+              isLoad = !$.isEmptyObject(_this.all_status.load)
+          float_box({
+            table: {
+              type: 'CPU_high_occupancy_software_list',
+              table_title: ['CPU占用率', '运行时间'],
+              table_fid: ['cpu_percent', 'proc_survive'],
+            },
+            html: {
+              // slot: '<div class="mem-title">\
+              //                 <span>检测到当前负载【<span class="load_text ' +
+              //   (loadCount >= 80 ? (loadCount >= 90 ? 'color-red' : 'color-org') : 'color-green') +
+              //   '">' +
+              //   (loadCount >= 80 ? '运行不稳定' : '运行流畅') +
+              //   '</span>】</span>\
+              //             <button type="button" title="立即优化" class="btn btn-success " id="task_manager_btn">立即优化</button></div>',
+                  slot: '<div class="mem-title">\
+                                  <span>检测到当前负载<span class="load_text ' +
+                    (loadCount >= 80 ? (loadCount >= 90 ? 'color-red-box' : 'color-org-box') : 'color-green-box') +
+                    '">运行达到' + loadCount+'%' +
+                    '</span></span></div>',
+              base_html:
+                '\
+                <div class="disk-body-list">\
+                    <span>最近1/5/15分钟平均负载：</span>\
+                        <span id="load_one">' + rdata.load.one + '  /  ' + rdata.load.five + '  /  ' + rdata.load.fifteen + '</span>\
+                </div>\
+                <div class="disk-body-list">\
+                      <span>活动进程数 / 总进程数：</span>\
+                      <span id="load_cpu_times_num">' + rdata.cpu_times['活动进程数'] + '  /  ' + rdata.cpu_times['总进程数'] + '</span>\
+                    </div>\
+                    <hr style="width: calc(100% - 16px);margin: 14px auto;">\
+                    <div class="disk-body-alarm">\
+                      <div class="flex align-center">告警\
+                          <span class="bt_switch ml8" style="display:inline-block;"><input class="btswitch btswitch-ios" id="loadTips" type="checkbox" ' + (_this.all_status.load['status'] ? 'checked' : '') + '>\
+                          <label class="btswitch-btn" for="loadTips" style="margin: 0;"></label>\
+                        </span>\
+                        <div class="vertical-line"></div>\
+                        <a class="btlink set_alarm_status" data-type="load" href="javascript:;">设置</a>\
+                          <span class=" c9 ml8 load_alarm_tips">5分钟内平均负载超过' + (isLoad ? _this.all_status.load.count : '80') + '%触发</span>\
+                      </div>\
+                </div>',
+              title: '更多负载信息',
+              // disk_title: '<i class="new-file-icon new-ltd-icon mr4" style="vertical-align: text-top;"></i>CPU占用TOP5的进程信息',
+              disk_title: 'CPU占用TOP5的进程信息',
+							cpu_times: rdata.cpu_times,
+              isShow: bt.get_cookie('ltd_end') > 0,
+              typeName: 'CPU',
+              table_id: 'loadCPUTable',
+              position: '#loadChart',
+              newClass: 'load_tips_point'
+            }
+          })
+        },
+        function () {
+          cancel_float_box('.load_tips_point', '#loadChart');
+        }
+      )
+
+      // cpu悬浮事件
+      $('#cpuChart').hover(
+        function () {
+          var cpuCount = rdata.cpu[0];
+              _this.all_data()
+              isCpu = !$.isEmptyObject(_this.all_status.cpu)
+          float_box({
+            table: {
+              type: 'CPU_high_occupancy_software_list',
+              table_title: ['CPU占用率', '运行时间'],
+              table_fid: ['cpu_percent', 'proc_survive'],
+            },
+            html: {
+              // slot: '<div class="mem-title">\
+              //                 <span>检测到当前CPU【<span class="cpu_text ' +
+              //   (cpuCount >= 80 ? (cpuCount >= 90 ? 'color-red' : 'color-org') : 'color-green') +
+              //   '">' +
+              //   (cpuCount >= 80 ? '占用过高' : cpuCount+'%') +
+              //   '</span>】</span>\
+              //             <button type="button" title="立即优化" class="btn btn-success " id="task_manager_btn">立即优化</button></div>',
+                  slot: '<div class="mem-title">\
+                                  <span>检测到当前CPU<span class="cpu_text ' +
+                    (cpuCount >= 80 ? (cpuCount >= 90 ? 'color-red-box' : 'color-org-box') : 'color-green-box') +
+                    '">占用' + cpuCount+'%' +
+                    '</span></span></div>',
+              base_html:
+                '\
+                <div class="disk-body-list">\
+                  <span>' + rdata.cpu[3] + '</span>\
+                </div>\
+                <div class="disk-body-list">\
+                  <span>' + rdata.cpu[5] + '个物理CPU，' + rdata.cpu[4] + '个物理核心，' + rdata.cpu[1] + '个逻辑核心</br>' + '</span>\
+                    </div>\
+                    <hr style="width: calc(100% - 16px);margin: 14px auto;">\
+                    <div class="disk-body-alarm">\
+                      <div class="flex align-center">告警\
+                        <span class="bt_switch ml8" style="display:inline-block"><input class="btswitch btswitch-ios" id="cpuTips" type="checkbox" '+ (_this.all_status.cpu['status'] ? 'checked' : '') +'>\
+                          <label class="btswitch-btn" for="cpuTips" style="margin: 0;"></label>\
+                        </span>\
+                        <div class="vertical-line"></div>\
+                        <a class="btlink set_alarm_status" data-type="cpu" href="javascript:;">设置</a>\
+                        <span class="c9 ml8 cpu_alarm_tips">5分钟内平均CPU超过'+ (isCpu ? _this.all_status.cpu.count : '80') +'%触发</span>\
+                      </div>\
+                </div>',
+              title: '核心使用率',
+              // disk_title: '<i class="new-file-icon new-ltd-icon mr4" style="vertical-align: text-top;"></i>CPU占用TOP5的进程信息',
+              disk_title: 'CPU占用TOP5的进程信息',
+              cpu_times: rdata.cpu[2],
+              isShow: bt.get_cookie('ltd_end') > 0,
+							typeName: 'CPU',
+              table_id: 'loadCPUTable',
+              position: '#cpuChart',
+              newClass: 'load_CPU_tips_point'
+            }
+          })
+        },
+        function () {
+          cancel_float_box('.load_CPU_tips_point', '#cpuChart')
+        }
+      )
+
+      $('#memChart').hover(
+        function () {
+              _this.all_data()
+              isMem = !$.isEmptyObject(_this.all_status.mem)
+          float_box({
+            table: {
+              type: 'memory_high_occupancy_software_list',
+              table_title: ['内存占用率', '运行时间'],
+              table_fid: ['memory_usage', 'proc_survive'],
+            },
+            html: {
+              base_html: '<div class="disk-body-list">\
+                    <span>可用内存：</span>\
+                    <span id="mem_Free">' + rdata.mem.memFree + 'MB</span>\
+                </div>\
+                <div class="disk-body-list" title="由内核自动分配buffer/cache缓存大小，以提高文件系统性能和整体系统的响应速度">\
+                      <span>Buffer和Cache共占用内存：</span>\
+                      <span id="mem_buffer_cache">' + (rdata.mem.memBuffers + rdata.mem.memCached) + 'MB</span>\
+                    </div>\
+                    <hr style="width: calc(100% - 16px);margin: 14px auto;">\
+                    <div class="disk-body-alarm">\
+                      <div class="flex align-center">告警\
+                        <span class="bt_switch ml8" style="display:inline-block"><input class="btswitch btswitch-ios" id="memTips" type="checkbox" '+ (_this.all_status.mem['status'] ? 'checked' : '') +'>\
+                          <label class="btswitch-btn" for="memTips" style="margin: 0;"></label>\
+                        </span>\
+                        <div class="vertical-line"></div>\
+                        <a class="btlink set_alarm_status" data-type="mem" href="javascript:;">设置</a>\
+                        <span class="c9 ml8 mem_alarm_tips">5分钟内内存使用率超过'+ (isMem ? _this.all_status.mem.count : '80') +'%触发</span>\
+                      </div>\
+                </div>',
+              slot: '<div class="mem-title">\
+                    <span>检测到当前内存<span class="mem_text ' +
+                    (((rdata.mem.memRealUsed / rdata.mem.memTotal) * 100).toFixed(2) >= 80 ? (((rdata.mem.memRealUsed / rdata.mem.memTotal) * 100).toFixed(2) >= 90 ? 'color-red-box' : 'color-org-box') : 'color-green-box') +
+                    '">占用' +
+                    ((rdata.mem.memRealUsed / rdata.mem.memTotal) * 100).toFixed(2) +
+                    '%</span></span>\
+                          <button type="button" title="立即清理" class="btn btn-success " id="mem_scanning_btn">立即清理</button></div>',
+              // disk_title: '<i class="new-file-icon new-ltd-icon mr4" style="vertical-align: text-top;"></i>内存占用TOP5的进程信息',
+              disk_title: '内存占用TOP5的进程信息',
+              isShow: bt.get_cookie('ltd_end') > 0,
+              typeName: '内存',
+              table_id: 'loadMEMTable',
+              position: '#memChart',
+              newClass: 'load_MEM_tips_point'
+            }
+          })
+        },
+        function () {
+          cancel_float_box('.load_MEM_tips_point', '#memChart')
+        }
+      )
 
       // 磁盘悬浮事件
-      // for (var i = 0; i < rdata.disk.length; i++) {
-      //   var disk = rdata.disk[i], texts = "基础信息</br>"
-      //   texts += "文件系统：" + disk.filesystem + "</br>"
-      //   texts += "类型：" + disk.type + "</br>"
-      //   texts += "挂载点：" + disk.path + "</br>"
-      //   texts += "<strong>Inode信息:</strong></br>"
-      //   texts += "总数：" + disk.inodes[0] + "</br>"
-      //   texts += "已用：" + disk.inodes[1] + "</br>"
-      //   texts += "可用：" + disk.inodes[2] + "</br>"
-      //   texts += "Inode使用率：" + disk.inodes[3] + "</br>"
-      //   texts += "<strong>容量信息</strong></br>"
-      //   texts += "容量：" + disk.size[0] + "</br>"
-      //   texts += "已用：" + disk.size[1] + "</br>"
-      //   texts += "可用：" + disk.size[2] + "</br>"
-      //   texts += "使用率：" + disk.size[3] + "</br>"
-      //   $("#diskChart" + i).data('title', texts).hover(function () {
-      //     layer.tips($(this).data('title'), this, { time: 0, tips: [1, '#999'] });
-      //   }, function () {
-      //     layer.closeAll('tips');
-      //   })
-      // }
-      var is_remove_disk = [],idx = 0,taskStatus = []//扫描状态
+          var is_remove_disk = [], idx = 0, taskStatus = []//扫描状态
       for (var i = 0; i < rdata.disk.length; i++) {
+        if(_this.alarm_type_list.length == 3+i) _this.alarm_type_list.push({title: '磁盘【' + rdata.disk[i].path + '】告警', value: rdata.disk[i].path})
         is_remove_disk.push(true)
         taskStatus.push(false)
         var mouseX = 0, mouseY = 0;
         $(document).mousemove(function (e) {
           mouseY = e.pageY
-          mouseX = e.pageX 
+          mouseX = e.pageX
         })
         var diskInterval = null
-        $('#diskChart' + i).data('disk',rdata.disk[i]).hover(function () {
+            _this.all_status.disk = {}
+            $('#diskChart' + i).data('disk', rdata.disk[i]).hover(function () {
           var disk = $(this).data('disk')
+              _this.all_data(disk.path)
+              isDisk = !$.isEmptyObject(_this.all_status.disk[disk.path])
+
           clearInterval(diskInterval)
           var top = $(this).offset().top,
           left = $(this).offset().left,
           used_size = parseFloat(disk.size[3].substring(0, disk.size[3].lastIndexOf("%")));
           idx = $(this).prop('id').replace('diskChart', '')
-          for(var i = 0;i < is_remove_disk.length;i++){
-            if(i !== parseInt(idx) && is_remove_disk[i]) {
-              $('.disk_scanning_tips'+ i).remove()
+              for (var i = 0; i < is_remove_disk.length; i++) {
+                if (i !== parseInt(idx) && is_remove_disk[i]) {
+                  $('.disk_scanning_tips' + i).remove()
             }
           }
-          if(!$('.disk_scanning_tips'+ idx).length) {
+              if (!$('.disk_scanning_tips' + idx).length) {
+                var is_active = bt.get_storage('disk_scanning_tips_' + idx)
+                //<div class="disk-body-list"><div class="progressBar"><span style="left: '+ (used_size < 12 ? (used_size + 2) : (used_size-11)) +'%;'+ (used_size < 12 ? 'color:#666;':'') +'">'+ disk.size[3] +'</span><div style="width: '+ disk.size[3] +'; '+ (used_size === 100 ? 'border-radius: 2px;' : '') +'" class="progress '+ (used_size >= 80 ? used_size >= 90 ? 'bg-red' : 'bg-org' : 'bg-green') +'"></div></div></div>\
             layer.open({
               type: 1,
               closeBtn: 1,
               shade: 0,
-              area: '320px',
+              area: '340px',
               title: false,
-              skin: 'disk_scanning_tips disk_scanning_tips'+ idx,
-              content: '<div class="pd20 disk_scanning" data-index="'+ idx +'">\
+                  skin: 'disk_scanning_tips disk_scanning_tips' + idx,
+                  content: '<div class="pd20 disk_scanning" data-index="'+ idx +'">\
                           <div class="disk_cont">\
                             <div class="disk-title">\
-                              检测到当前磁盘<div class="'+ ( used_size >= 80 ? used_size >= 90 ? 'bg-red' : 'bg-org' : 'bg-green' ) +'">'+ ( used_size >= 80 ? '空间不足' : '空间充足' )  +'</div>\
-                              <button type="button" data-path="'+ disk.path +'" title="立即清理" class="btn btn-success disk_scanning_btn">立即清理</button></div>\
+                                  <span>检测到当前磁盘<span class="'+ ( used_size >= 80 ? used_size >= 90 ? 'color-red-box' : 'color-org-box' : 'color-green-box' ) +'">空间占用'+ used_size +'%</span></span>\
+                                <button type="button" data-path="' + disk.path + '" title="立即清理" class="btn btn-success disk_scanning_btn">立即清理</button></div>\
                             <div class="disk-item-list active">\
                               <div class="disk-item-header">\
                                 <div class="disk-header-title">基础信息</div>\
-                                <div class="disk-header-fold">\
-                                  <span>收起</span>\
-                                  <img src="/static/img/arrow-down.svg" style="transform: rotate(180deg);">\
-                                </div>\
                               </div>\
                               <div class="disk-item-body">\
-                                <div class="disk-body-list">类型：'+disk.type+'</div>\
-                                <div class="disk-body-list more_wrap"><div>挂载点：</div><div>'+disk.path+'</div></div>\
-                                <div class="disk-body-list"><div class="progressBar"><span style="left: '+ (used_size < 12 ? (used_size + 2) : (used_size-11)) +'%;'+ (used_size < 12 ? 'color:#666;':'') +'">'+ disk.size[3] +'</span><div style="width: '+ disk.size[3] +'; '+ (used_size === 100 ? 'border-radius: 2px;' : '') +'" class="progress '+ (used_size >= 80 ? used_size >= 90 ? 'bg-red' : 'bg-org' : 'bg-green') +'"></div></div></div>\
-                                    <div class="disk-body-list use_disk" style="margin-top: 6px;white-space: pre-line;">可用：'+ parseFloat(disk.size[2])+' ' + disk.size[2].replace(parseFloat(disk.size[2]),'') +'，共：'+ parseFloat(disk.size[0]) + ' ' + disk.size[0].replace(parseFloat(disk.size[0]),'')+'\n已用：'+ parseFloat(disk.size[1]) + ' ' +disk.size[1].replace(parseFloat(disk.size[1]),'') +'，系统占用：'+disk.size[4]  +'</div>\
-                              </div>\
+                                  <div class="disk-body-list">类型：' + disk.type + '</div>\
+                                  <div class="disk-body-list more_wrap"><div>挂载点：</div><div>' + disk.path + '</div></div>\
+                                  <div class="disk-body-list use_disk" style="margin-top: 6px;white-space: pre-line;">可用：' + parseFloat(disk.size[2]) + ' ' + disk.size[2].replace(parseFloat(disk.size[2]), '') + '，共：' + parseFloat(disk.size[0]) + ' ' + disk.size[0].replace(parseFloat(disk.size[0]), '') + '\n已用：' + parseFloat(disk.size[1]) + ' ' + disk.size[1].replace(parseFloat(disk.size[1]), '') + '，系统占用：' + disk.size[4] + '</div>\
+                                    <hr style="width: calc(100% - 16px);margin: 14px auto;">\
+                                    <div class="disk-body-alarm">\
+                                      <div class="flex align-center">告警\
+                                        <span class="bt_switch ml8" style="display:inline-block">\
+                                          <input class="btswitch btswitch-ios" id="diskTips" type="checkbox" '+ (_this.all_status.disk[disk.path] && _this.all_status.disk[disk.path]['status'] ? 'checked' : '') +'>\
+                                          <label class="btswitch-btn" for="diskTips" style="margin: 0;"></label>\
+                                        </span>\
+                                        <div class="vertical-line"></div>\
+                                        <a class="btlink set_alarm_status" data-spacesize="'+ parseFloat(disk.size[0]) +'" data-type="disk" data-project="'+ disk.path +'" href="javascript:;">设置</a>\
+                                        <span class="c9 ml8 disk_alarm_tips">该磁盘'+ (isDisk ? _this.all_status.disk[disk.path].cycle == 1 ? '余量不足' + _this.all_status.disk[disk.path].count + 'GB' : '用量超过'+ _this.all_status.disk[disk.path].count +'%' : '空间占用超过80%' ) + '触发</span>\
+                                      </div>\
+                                    </div>\
+																</div>\
                             </div>\
-                            <hr />\
-                            <div class="disk-item-list">\
+                              <div class="disk-item-list ' + (is_active ? 'active' : '') + '">\
                               <div class="disk-item-header">\
-                                <div class="disk-header-title">其他信息</div>\
-                                <div class="disk-header-fold">\
-                                  <span>展示</span>\
-                                  <img src="/static/img/arrow-down.svg">\
+                                <div class="disk-header-title">更多磁盘信息</div>\
+                                    <div class="disk-header-fold flex">\
+                                      <span class="mr8">'+ (is_active ? '折叠' : '展开') +'</span>\
+                                      <img src="/static/img/arrow-down.svg" '+ (is_active ? 'style="transform: rotate(180deg);"' : '') +' class="icon-index-arrow">\
                                 </div>\
-                              </div>\
+															</div>\
                               <div class="disk-item-body">\
-                                <div class="disk-body-list more_wrap"><div>文件系统：</div><div>'+ disk.filesystem + '</div></div>\
-                                <div class="disk-body-list inodes0">Inode总数：'+ disk.inodes[0] +'</div>\
-                                <div class="disk-body-list inodes1">Inode已用：'+ disk.inodes[1] +'</div>\
-                                <div class="disk-body-list inodes2">Inode可用：'+ disk.inodes[2] +'</div>\
-                                <div class="disk-body-list inodes3">Inode使用率：'+ disk.inodes[3] +'</div>\
+                                  <div class="disk-body-list more_wrap"><div>文件系统：</div><div>' + disk.filesystem + '</div></div>\
+                                  <div class="disk-body-list inodes0">Inode总数：' + disk.inodes[0] + '</div>\
+                                  <div class="disk-body-list inodes1">Inode已用：' + disk.inodes[1] + '</div>\
+                                  <div class="disk-body-list inodes2">Inode可用：' + disk.inodes[2] + '</div>\
+                                  <div class="disk-body-list inodes3">Inode使用率：' + disk.inodes[3] + '</div>\
                               </div>\
                             </div>\
                           </div>\
                           <div class="disk_scan_cont hide">\
                             <div class="disk-scan-header">\
-                              <button type="button" title="后退" class="btn btn-default disk_back_btn" data-index="'+ idx +'" ><span class="disk_back_icon"></span><span>后退</span></button>\
+                                <button type="button" title="后退" class="btn btn-default disk_back_btn" data-index="' + idx + '" ><span class="disk_back_icon"></span><span>后退</span></button>\
                               <div>磁盘扫描</div>\
                             </div>\
                             <div class="disk-scan-view hide">\
@@ -434,18 +1015,83 @@ var index = {
                           </div>\
                         </div>',
               success: function (layero, index) {
+                $(layero).find('#diskTips').prop('checked', false)
+                $(layero).find('.disk_alarm_tips').text('该磁盘空间占用超过80%触发')
+                for (var key in _this.cache_system_push) {
+                  var item = _this.cache_system_push[key]
+                  if (item.type === 'disk' && item.project === disk.path) {
+                    $(layero).find('#diskTips').prop('checked', item.status)
+                    $(layero).find('.disk_alarm_tips').text('该磁盘' + (item.cycle == 1 ? '余量不足' + item.count + 'GB' : '用量超过' + item.count + '%') + '触发')
+                  }
+                }
+                    $(layero).find('.bt_switch input').each(function (index, item) {
+                      $(this).change(function () {
+                        var status = $(this).prop('checked'),
+                            name = $(this).parent().parent().find('.set_alarm_status').data('type'),
+                            project = $(this).parent().parent().find('.set_alarm_status').data('project'),
+                            space_size = $(this).parent().parent().find('.set_alarm_status').data('spacesize'),
+                            alarm_id = '';
+                        var alarm_data = _this.get_alarm_data(name, project)
+                        alarm_id = alarm_data['id'] ? alarm_data['id'] : ''
+                        //id 不存在则添加告警 id 存在则开启/关闭告警
+                        if(!status) { //存在告警关闭告警
+                          bt.simple_confirm({title: '关闭告警',msg:'关闭告警后，将不再接收到该项的告警信息，是否继续操作？'}, function () {
+                            _this.set_push_status(alarm_id, 0)
+                          },function() {
+                            $('#'+ name +'Tips').prop('checked', !$('#'+ name +'Tips').is(':checked'))
+                          })
+                        }else{ //不存在告警添加告警 或者 存在则开启告警
+                          if(alarm_id){
+                            bt.simple_confirm({title: '开启告警',msg:'开启告警后，达到触发条件会收到该项的告警信息，是否继续操作？'}, function () {
+                              _this.set_push_status(alarm_id, 1)
+                            },function() {
+                              $('#'+ name +'Tips').prop('checked', !$('#'+ name +'Tips').is(':checked'))
+                            })
+                          }else{
+                            var data = {
+                              type: name,
+                              cycle: 2,
+                              project: project,
+                              space_size: space_size
+                            }
+                            _this.open_alarm(data, true)
+                          }
+                        }
+                      })
+                      $(this).parent().parent().find('.set_alarm_status').click(function () {
+                        var name = $(this).data('type'),
+                            project = $(this).data('project'),
+                            space_size = $(this).data('spacesize'),
+                            alarm_id = '';
+                        var alarm_data = _this.get_alarm_data(name,project)
+                        alarm_id = alarm_data['id'] ? alarm_data['id'] : ''
+                        if(alarm_id) {
+                          alarm_data['space_size'] = space_size
+                          _this.open_alarm(alarm_data)
+                        } else {
+                          var data = {
+                            type: name,
+                            cycle: 2,
+                            project: project,
+                            space_size: space_size
+                          }
+                          _this.open_alarm(data)
+                        }
+                      })
+                    })
+
                 is_remove_disk[idx] = true
                 // $(layero).find('.layui-layer-close2').addClass('layui-layer-close1').removeClass('layui-layer-close2');
                 $(layero).find('.layui-layer-close2').remove()
                 $(layero).css({
-                  'top': (top+140 - $(window).scrollTop()) +'px',
+                      'top': (top + 140 - $(window).scrollTop()) + 'px',
                   'left': left - 160,
                 })
                 $(window).resize(function () {
-                  for(var i = 0;i < is_remove_disk.length;i++){
-                    if($('.disk_scanning_tips'+ i).length){
-                        $('.disk_scanning_tips'+ i).css({
-                        'top': ($("#diskChart" + i).offset().top+140 - $(window).scrollTop()) +'px',
+                      for (var i = 0; i < is_remove_disk.length; i++) {
+                        if ($('.disk_scanning_tips' + i).length) {
+                          $('.disk_scanning_tips' + i).css({
+                            'top': ($("#diskChart" + i).offset().top + 140 - $(window).scrollTop()) + 'px',
                         'left': $("#diskChart" + i).offset().left - 160,
                       })
                     }
@@ -453,7 +1099,7 @@ var index = {
                 })
                 $(window).scroll(function () {
                   $(layero).css({
-                    'top': ($("#diskChart" + idx).offset().top+140 - $(window).scrollTop()) +'px',
+                        'top': ($("#diskChart" + idx).offset().top + 140 - $(window).scrollTop()) + 'px',
                     'left': $("#diskChart" + idx).offset().left - 160,
                   })
                 })
@@ -464,30 +1110,32 @@ var index = {
                 $(layero).find('.disk-item-header').on('click', function () {
                   if ($(this).parent().hasClass('active')) {
                     $(this).parent().removeClass('active');
-                    $(this).find('span').text('展示');
+                    $(this).find('span').text('展开');
                     $(this).find('img').removeAttr('style');
                   } else {
                     $(this).parent().addClass('active');
-                    $(this).find('span').text('收起');
+                    $(this).find('span').text('折叠');
                     $(this).find('img').css('transform', 'rotate(180deg)');
                   }
+                  var name = 'disk_scanning_tips_' + idx
+                  bt.set_storage(name, $(this).parent().hasClass('active') ? 1 : '')
                 })
 
                 // 后退
                 $(layero).find('.disk_back_btn').on('click', function () {
                   var path = $(this).data('path'),
                       index = $(this).data('index')
-                  if(path !== undefined && path !== 'undefined'){
-                    if(path === '') {
+                      if (path !== undefined && path !== 'undefined') {
+                        if (path === '') {
                       $(layero).find('.filescan-nav-item.present').click()
                       $(this).data('path', 'undefined');
-                    }else{
-                      var rdata = taskList[path.replace('//','/')];
+                        } else {
+                          var rdata = taskList[path.replace('//', '/')];
                       renderFilesTable(rdata, path); // 渲染文件表格
                       renderFilesPath(path); // 渲染文件路径
                     }
-                  }else{
-                    if(taskStatus[index]) {
+                      } else {
+                        if (taskStatus[index]) {
                       layer.confirm(
                         '取消扫描，将会中断当前扫描目录进程，是否继续？',
                         {
@@ -504,11 +1152,12 @@ var index = {
                           });
                         }
                       );
-                    }else{
+                        } else {
                       renderInitView();
                     }
                   }
                 })
+
                 /**
                  * @description 渲染扫描初始化页面
                  */
@@ -520,86 +1169,92 @@ var index = {
                   $(layero).find('.disk_cont').removeClass('hide').siblings('.disk_scan_cont').addClass('hide');
                   $(layero).find('.layui-layer-close1').show()
                   $(layero).find('.disk-file-view,.disk-scan-view').addClass('hide');
-                  $(layero).find('.disk-file-load').css('display','none')
+                      $(layero).find('.disk-file-load').css('display', 'none')
                 }
-                
+
                 // 扫描
                 $(layero).find('.disk_scanning_btn').unbind('click').on('click', function () {
                   // if(taskStatus.some(function (item){ return item === true })) {
-                  // if(bt.get_cookie('taskStatus') === 'true') {
-                  //   return layer.tips('有任务在执行，请稍后再操作！', $(this), {tips: [3, '#f00']});
-                  // }
-                  is_remove_disk[idx] = false;
-                  var $path = $(this).data('path');
-                  //判断是否安装插件
-                  bt.soft.get_soft_find('disk_analysis',function(dataRes){
-                    if(dataRes.setup && dataRes.endtime > 0) {
-                      layer.closeAll()
-                      bt.set_cookie('diskPath', $path)
-                      bt.set_cookie('taskStatus', true)
-                      bt.soft.set_lib_config(dataRes.name,dataRes.title,dataRes.version)
-                    }else{
-                      var item = {
-                        name: 'diskScan',
-                        pluginName: '堡塔硬盘分析工具',
-                        ps: '急速分析磁盘/硬盘占用情况',
-                        preview: false,
-                        limit: 'ltd'
-                      }
-                      product_recommend.recommend_product_view(item, {
-                        imgArea: ['783px', '718px']
-                      })
+                    // if(bt.get_cookie('taskStatus') === 'true') {
+                    //   return layer.tips('有任务在执行，请稍后再操作！', $(this), {tips: [3, '#f00']});
+                    // }
+                    is_remove_disk[idx] = false;
+                    var $path = $(this).data('path');
+                    //判断是否安装插件
+                      bt.soft.get_soft_find('disk_analysis', function (dataRes) {
+                        if (dataRes.setup && dataRes.endtime > 0) {
+                        layer.closeAll()
+                        bt.set_cookie('diskPath', $path)
+                        bt.set_cookie('taskStatus', true)
+                          bt.soft.set_lib_config(dataRes.name, dataRes.title, dataRes.version)
+                        } else {
+                      // var item = {
+                      //   name: 'disk_analysis',
+                      //   pluginName: '堡塔硬盘分析工具',
+                      //   ps: '急速分析磁盘/硬盘占用情况',
+                      //   preview: false,
+                      //   limit: 'ltd',
+                      //   description:['检测硬盘空间','占用百分比显示'],
+                      //   imgSrc:'https://www.bt.cn/Public/new/plugin/disk_analysis/1.png'
+                      // }
+                      // product_recommend.recommend_product_view(item, {
+                      //   imgArea: ['783px', '718px']
+                      // },'ltd',120,item.name)
                       var is_buy = dataRes.endtime < 0 && dataRes.pid > 0
-                      $('.buyNow').text(is_buy ? '立即购买' : '立即安装').unbind('click').click(function () {
-                        if(is_buy) {
+                      // $('.buyNow').text(is_buy ? '立即购买' : '立即安装').unbind('click').click(function () {
+                          if (is_buy) {
                           bt.soft.product_pay_view({
-                            name:dataRes.title,
-                            pid:dataRes.pid,
-                            type:dataRes.type,
-                            plugin:true,
-                            renew:-1,
-                            ps:dataRes.ps,
-                            ex1:dataRes.ex1,
-                            totalNum:31
+                              name: dataRes.title,
+                              pid: dataRes.pid,
+                              type: dataRes.type,
+                              plugin: true,
+                              renew: -1,
+                              ps: dataRes.ps,
+                              ex1: dataRes.ex1,
+                              totalNum: 120
                           })
-                        }else{ 
+                          } else {
                           bt.soft.install('disk_analysis')
                         }
-                      })
+                      // })
                     }
                   })
                   return
                   var ltd = bt.get_cookie('ltd_end')
-                  if(ltd < 0) {
-                    var item = {
-                      name: 'diskScan',
-                      pluginName: '堡塔硬盘分析工具',
-                      ps: '急速分析磁盘/硬盘占用情况',
-                      preview: false,
-                      limit: 'ltd'
-                    }
-                    product_recommend.recommend_product_view(item, {
-                      imgArea: ['783px', '718px']
-                    })
-                  }else{
+                 	if (ltd < 0) {
+                   var item = {
+                        name: 'disk_analysis',
+                        pluginName: '堡塔硬盘分析工具',
+                        ps: '急速分析磁盘/硬盘占用情况',
+                        preview: false,
+                        limit: 'ltd',
+                          description: ['检测硬盘空间', '占用百分比显示'],
+                          imgSrc: 'https://www.bt.cn/Public/new/plugin/disk_analysis/1.png'
+                      }
+                    bt.soft.product_pay_view({ totalNum: 120, limit: 'ltd', closePro: true,pluginName:'堡塔硬盘分析工具',fun:function () {
+                        product_recommend.recommend_product_view(item, {
+                          imgArea: ['783px', '718px']
+                        }, 'ltd', 120, item.name,true)
+                      }})
+                      } else {
                     $.post('/files/size/scan_disk_info', {path: $path}, function (rdata) {
-                      if(!rdata.status) {
-                        if(rdata['code'] && rdata['code'] === 404){
+                          if (!rdata.status) {
+                            if (rdata['code'] && rdata['code'] === 404) {
                           bt.soft.install('disk_analysis')
                         }
-                      }else{
+                          } else {
                         var $scanView = $(layero).find('.disk-scan-view');
                         var shellView = $(layero).find('.disk-scan-view pre');
                         $scanView.removeClass('hide');
                         $(layero).find('.disk-file-view').addClass('hide')
                         $(layero).find('.disk_cont').addClass('hide').siblings('.disk_scan_cont').removeClass('hide');
                         taskStatus[$(layero).find('.disk_scanning').data('index')] = true;
-                        renderScanTitle(shellView,'开始扫描磁盘目录\n',true)
-                        renderScanTitle(shellView,'<span style="display:flex;" class="omit">目录正在扫描中<span>\n')
+                            renderScanTitle(shellView, '开始扫描磁盘目录\n', true)
+                            renderScanTitle(shellView, '<span style="display:flex;" class="omit">目录正在扫描中<span>\n')
                         renderTaskSpeed(function (rdata) {
                           id = rdata.id;
-                          $(layero).find('.disk_scanning').data('id',id)
-                        },function() {
+                              $(layero).find('.disk_scanning').data('id', id)
+                            }, function () {
                           renderScanTitle(shellView, '扫描完成，等待扫描结果返回\n');
                           renderFilesView({
                             path: $path,
@@ -610,19 +1265,19 @@ var index = {
                     })
                   }
                 })
-               
+
                 /**
                  * @description 渲染文件列表
                  * @param {Object} data 数据
                  */
-                function renderFilesView (data,flag) {
+                function renderFilesView(data, flag) {
                   var param = {
                     root_path: data.path
                   }
-                  if(data['subdir']) param.path = data.subdir;
-                  if(flag) $(layero).find('.disk-file-load').css('display','flex')
+                  if (data['subdir']) param.path = data.subdir;
+                  if (flag) $(layero).find('.disk-file-load').css('display', 'flex')
                   bt_tools.send({url: '/files/size/get_scan_log', data: param}, function (rdata) {
-                    if(flag) $(layero).find('.disk-file-load').css('display','none')
+                    if (flag) $(layero).find('.disk-file-load').css('display', 'none')
                     var $fileView = $(layero).find('.disk-file-view');
                     $fileView.removeClass('hide').prev().addClass('hide');
                     var path = rdata.fullpath
@@ -633,8 +1288,9 @@ var index = {
                     renderFilesPath(path);
                   });
                 }
+
                 // 渲染文件表格
-                function renderFilesTable (rdata, path) {
+                function renderFilesTable(rdata, path) {
                   var $fileTableBody = $(layero).find('.filescan-list-body');
                   var list = rdata.list;
                   var html = '';
@@ -643,11 +1299,11 @@ var index = {
                     var isDir = item.type == 1
                     html +=
                       '<div class="filescan-list-item" data-type="' +
-                      (isDir ? 'folder' : 'files')+ '" data-subdir="'+ rdata.fullpath+ '/' + item.name +'" data-path="' +
+                      (isDir ? 'folder' : 'files') + '" data-subdir="' + rdata.fullpath + '/' + item.name + '" data-path="' +
                       (path + '/' + item.name) +
                       '">' +
                       '<div class="filescan-list-col text-left nowrap" title="' +
-                      (path + '/' + item.name).replace('//','/') +
+                      (path + '/' + item.name).replace('//', '/') +
                       '">' +
                       '<span class="file-type-icon file_' +
                       (isDir ? 'folder' : 'icon') +
@@ -664,7 +1320,7 @@ var index = {
                       bt.format_size(isDir ? item.total_asize : item.asize) +
                       '</div>' +
                       '<div class="filescan-list-col text-right">' +
-                      '<a href="javascript:;" data-filename="'+ item.name +'" data-fullpath="'+ rdata.fullpath +'" data-path="' +
+                      '<a href="javascript:;" data-filename="' + item.name + '" data-fullpath="' + rdata.fullpath + '" data-path="' +
                       (path + '/' + item.name) +
                       '" data-type="' +
                       (isDir ? '文件夹' : '文件') +
@@ -672,7 +1328,7 @@ var index = {
                       '</div>' +
                       '</div>';
                   }
-                  $fileTableBody.html(html); 
+                  $fileTableBody.html(html);
                   // 删除文件
                   $(layero).find('.remove-files').click(function (e) {
                     var path = $(this).data('path'),
@@ -687,7 +1343,9 @@ var index = {
                       },
                       function (rdata) {
                         bt_tools.msg(rdata);
-                        var list = taskList[fullpath].list.filter(function (item) { return item.name !== filename.toString() })
+                            var list = taskList[fullpath].list.filter(function (item) {
+                              return item.name !== filename.toString()
+                            })
                         taskList[fullpath].list = list;
                         renderFilesTable(taskList[fullpath], fullpath);
                       }
@@ -700,20 +1358,21 @@ var index = {
                     var path = $(this).data('subdir'),
                       type = $(this).data('type');
                     if (type !== 'folder' && typeof type !== 'undefined') return false;
-                    if (!taskList.hasOwnProperty(path.replace('//','/'))) {
+                    if (!taskList.hasOwnProperty(path.replace('//', '/'))) {
                       renderFilesView({
                         path: root_path,
                         subdir: path,
-                      },true);
+                      }, true);
                     } else {
-                      var rdata = taskList[path.replace('//','/')];
+                      var rdata = taskList[path.replace('//', '/')];
                       renderFilesTable(rdata, path); // 渲染文件表格
                       renderFilesPath(path); // 渲染文件路径
                     }
                   });
                 }
+
                 // 渲染文件路径
-                function renderFilesPath (path) {
+                function renderFilesPath(path) {
                   var html = '';
                   var newPath = '';
                   var pathArr = [];
@@ -738,7 +1397,7 @@ var index = {
                     var divider = !isLast ? '<span class="divider">></span>' : '';
                     var menuPath = isFirst ? '当前目录(' + taskPath + ')' : element;
                     currentPath = currentPath.replace(/\/\//g, '/');
-                    if(i > 1 && i< pathArr.length - 1 && pathArr.length > 3){
+										if (i > 1 && i < pathArr.length - 1 && pathArr.length > 3) {
                       if (isInit) {
                         html += '<span class="omission">\
                         <a class="btlink" title="部分目录已经省略">...</a>\
@@ -753,17 +1412,17 @@ var index = {
                     }
                   }
                   $(layero).find('#fileScanPath').html(html);
-                  if(omission_li.length > 0){
+									if (omission_li.length > 0) {
                     var omission = $(layero).find('.omission')
                     var ul = omission.find('ul')
-                    for (let i = 0; i < omission_li.length; i++) {
-                      const element = omission_li[i];
+                    for (var i = 0; i < omission_li.length; i++) {
+                      var element = omission_li[i];
                       ul.append('<li><a class="filescan-nav-item cut-path" data-path="' + element.currentPath + '" title="' + element.currentPath + '"><i class="file_folder_icon"></i><span>' + element.menuPath + '</span></a></li>')
                     }
                     $(layero).find('.omission').click(function (e) {
-                      if($(this).hasClass('active')){
+											if ($(this).hasClass('active')) {
                         $(this).removeClass('active')
-                      }else{
+											} else {
                         $(this).addClass('active')
                       }
                       $(document).click(function (ev) {
@@ -780,19 +1439,20 @@ var index = {
                     var root_path = $(layero).find('.disk_scanning_btn').data('path')
                     var path = $(this).data('path'),
                       type = $(this).data('type');
-                    if (type !== 'folder' && typeof type != 'undefined') return layer.msg('文件暂不支持打开', { icon: 0 });
-                    if (!taskList.hasOwnProperty(path.replace('//','/'))) {
+										if (type !== 'folder' && typeof type != 'undefined') return layer.msg('文件暂不支持打开', {icon: 0});
+										if (!taskList.hasOwnProperty(path.replace('//', '/'))) {
                       renderFilesView({
                         path: root_path,
                         subdir: path,
                       });
                     } else {
-                      var rdata = taskList[path.replace('//','/')];
+											var rdata = taskList[path.replace('//', '/')];
                       renderFilesTable(rdata, path); // 渲染文件表格
                       renderFilesPath(path); // 渲染文件路径
                     }
                   })
                 }
+
                 	/**
                  * @description 获取目录地址
                  * @param {string} path 路径
@@ -806,6 +1466,7 @@ var index = {
                   if (typeof param === 'boolean') pathArr.pop();
                   return pathArr.join('/').replace(/(\/)$/, '');
                 }
+
                 /**
                  * @description 渲染文件追加功能
                  * @param {Element} el 控制器
@@ -820,6 +1481,7 @@ var index = {
                     $el.append(html);
                   }
                 }
+
                 /**
                  * @description 渲染扫描进度
                  * @param {Function} callack 回调函数
@@ -845,6 +1507,7 @@ var index = {
                     }, 1000);
                   });
                 }
+
                 /**
                  * @description 获取扫描任务
                  * @param {boolean} load 是否显示加载中
@@ -871,11 +1534,11 @@ var index = {
                  * @description 删除文件或目录
                  * @param {Object} data
                  */
-                function delFileDir (data, callback) {
-                  if (bt.get_cookie('file_recycle_status')==='true') {
+									function delFileDir(data, callback) {
+										if (bt.get_cookie('file_recycle_status') === 'true') {
                     bt.simple_confirm({
                         title: '删除' + data.type + '【' + data.filename + '】',
-                        msg: '删除'+ data.type +'后，'+ data.type +'将迁移至文件回收站，<span class="color-org">请确认删除的文件是不需要的文件，误删文件可能会导致系统崩溃，</span>是否继续操作？</span>'
+                        msg: '删除' + data.type + '后，' + data.type + '将迁移至文件回收站，<span class="color-org">请确认删除的文件是不需要的文件，误删文件可能会导致系统崩溃，</span>是否继续操作？</span>'
                       }, function () {
                         delFileRequest(data, function (res) {
                           if (callback) callback(res);
@@ -886,8 +1549,9 @@ var index = {
                       }
                     );
                   } else {
-                    bt.compute_confirm({title: '删除' + data.type + '【' + data.filename + '】', 
-                      msg: '风险操作，当前未开启文件回收站，删除'+ data.type +'将彻底删除，无法恢复，<span class="color-org">请确认删除的文件是不需要的文件，误删文件可能会导致系统崩溃，</span>是否继续操作？'
+										bt.compute_confirm({
+												title: '删除' + data.type + '【' + data.filename + '】',
+												msg: '风险操作，当前未开启文件回收站，删除' + data.type + '将彻底删除，无法恢复，<span class="color-org">请确认删除的文件是不需要的文件，误删文件可能会导致系统崩溃，</span>是否继续操作？'
                     }, function () {
                         delFileRequest(data, function (res) {
                           if (callback) callback(res);
@@ -899,6 +1563,7 @@ var index = {
                     );
                   }
                 }
+
                 /**
                  * @description 删除文件（文件和文件夹）
                  * @param {Object} data 文件目录参数
@@ -921,8 +1586,8 @@ var index = {
                   );
                 }
               },
-              cancel: function(index,layero){
-                  if(taskStatus[$(layero).find('.disk_scanning').data('index')]){
+							cancel: function (index, layero) {
+								if (taskStatus[$(layero).find('.disk_scanning').data('index')]) {
                     layer.confirm(
                       '取消扫描，将会中断当前扫描目录进程，是否继续？',
                       {
@@ -944,6 +1609,7 @@ var index = {
               }
             })
           }
+
           /**
            * @description 删除扫描任务
            * @param {string} id 任务id
@@ -963,57 +1629,48 @@ var index = {
               }
             );
           }
-        },function () {
+        }, function () {
           diskInterval = setInterval(function () {
-            if($('.disk_scanning_tips'+idx).length) {
-              var diskX = $('.disk_scanning_tips'+idx).offset().left,diskY = $('.disk_scanning_tips'+idx).offset().top,
-                  diskW = $('.disk_scanning_tips'+idx).width(),diskH = $('.disk_scanning_tips'+idx).height()
-              var diskChartY = $('#diskChart' + idx).offset().top,diskChartX = $('#diskChart' + idx).offset().left,
-                  diskChartW = $('#diskChart' + idx).width(),diskChartH = $('#diskChart' + idx).height()
+            if ($('.disk_scanning_tips' + idx).length) {
+							var diskX = $('.disk_scanning_tips' + idx).offset().left,
+								diskY = $('.disk_scanning_tips' + idx).offset().top,
+								diskW = $('.disk_scanning_tips' + idx).width(), diskH = $('.disk_scanning_tips' + idx).height()
+							var diskChartY = $('#diskChart' + idx).offset().top, diskChartX = $('#diskChart' + idx).offset().left,
+								diskChartW = $('#diskChart' + idx).width(), diskChartH = $('#diskChart' + idx).height()
               var is_move_disk = mouseX >= diskChartX && mouseX <= diskChartX + diskChartW && mouseY >= diskChartY && mouseY <= diskChartY + diskChartH
               var is_move = mouseX >= diskX && mouseX <= diskX + diskW && mouseY >= diskY && mouseY <= diskY + diskH
-              if(is_remove_disk[idx] && !is_move && !is_move_disk) {
-                $('.disk_scanning_tips'+ idx).remove()
+                  if (!is_move && !is_move_disk) {
+                    $('.disk_scanning_tips' + idx).remove()
               }
-            }else{
+						} else {
               clearInterval(diskInterval)
             }
           }, 500)
         })
-        if($('.disk_scanning_tips'+i).length){
-          var disk =  $('#diskChart' + i).data('disk')
+        if ($('.disk_scanning_tips' + i).length) {
+					var disk = $('#diskChart' + i).data('disk')
           var size3 = parseFloat(disk.size[3].substring(0, disk.size[3].lastIndexOf("%")))
-          $('.disk_scanning_tips' + i +' .disk-body-list .progressBar span').text(disk.size[3]).css({
-            left: (size3 < 12 ? (size3 + 2) : (size3 - 11)) +'%;',
+					$('.disk_scanning_tips' + i + ' .disk-body-list .progressBar span').text(disk.size[3]).css({
+						left: (size3 < 12 ? (size3 + 2) : (size3 - 11)) + '%;',
             color: size3 < 12 ? '#666;' : '#fff'
           })
           var progressCss = {
             width: disk.size[3],
           }
-          if(size3 === 100) progressCss.borderRadius = '2px'
-          $('.disk_scanning_tips' + i +' .disk-body-list .progressBar .progress').css(progressCss)
-          $('.disk_scanning_tips' + i +' .disk-body-list .progressBar .progress').removeClass('bg-red bg-org bg-green').addClass(size3 >= 80 ? size3 >= 90 ? 'bg-red' : 'bg-org' : 'bg-green')
-          $('.disk_scanning_tips' + i +' .disk-body-list.use_disk').html(parseFloat(disk.size[2])+' ' + disk.size[2].replace(parseFloat(disk.size[2]),'') +'可用，'+ parseFloat(disk.size[1]) + ' ' +disk.size[1].replace(parseFloat(disk.size[1]),'') +'已用，共'+ parseFloat(disk.size[0]) + ' ' + disk.size[0].replace(parseFloat(disk.size[0]),''))
-          $('.disk_scanning_tips' + i +' .disk-body-list.inodes0').html('Inode总数：'+ disk.inodes[0])
-          $('.disk_scanning_tips' + i +' .disk-body-list.inodes1').html('Inode已用：'+ disk.inodes[1])
-          $('.disk_scanning_tips' + i +' .disk-body-list.inodes2').html('Inode可用：'+ disk.inodes[2])
-          $('.disk_scanning_tips' + i +' .disk-body-list.inodes3').html('Inode使用率：'+ disk.inodes[3])
+					if (size3 === 100) progressCss.borderRadius = '2px'
+					$('.disk_scanning_tips' + i + ' .disk-body-list .progressBar .progress').css(progressCss)
+					$('.disk_scanning_tips' + i + ' .disk-body-list .progressBar .progress').removeClass('bg-red bg-org bg-green').addClass(size3 >= 80 ? size3 >= 90 ? 'bg-red' : 'bg-org' : 'bg-green')
+					$('.disk_scanning_tips' + i + ' .disk-body-list.use_disk').html(parseFloat(disk.size[2]) + ' ' + disk.size[2].replace(parseFloat(disk.size[2]), '') + '可用，' + parseFloat(disk.size[1]) + ' ' + disk.size[1].replace(parseFloat(disk.size[1]), '') + '已用，共' + parseFloat(disk.size[0]) + ' ' + disk.size[0].replace(parseFloat(disk.size[0]), ''))
+					$('.disk_scanning_tips' + i + ' .disk-body-list.inodes0').html('Inode总数：' + disk.inodes[0])
+					$('.disk_scanning_tips' + i + ' .disk-body-list.inodes1').html('Inode已用：' + disk.inodes[1])
+					$('.disk_scanning_tips' + i + ' .disk-body-list.inodes2').html('Inode可用：' + disk.inodes[2])
+					$('.disk_scanning_tips' + i + ' .disk-body-list.inodes3').html('Inode使用率：' + disk.inodes[3])
         }
       }
       _this.get_server_info(rdata);
       if (rdata.installed === false) bt.index.rec_install();
-      if (rdata.user_info.status) {
-        var rdata_data = rdata.user_info.data;
-        bt.set_cookie('bt_user_info', JSON.stringify(rdata.user_info));
-        $(".bind-user").html(rdata_data.username);
-      }
-      else {
-        $(".bind-weixin a").attr("href", "javascript:;");
-        $(".bind-weixin a").click(function () {
-
-          bt.msg({ msg: '请先绑定宝塔账号!', icon: 2 });
-        })
-      }
+    })
+    })
     })
     // setTimeout(function () { _this.get_index_list() }, 400)
     setTimeout(function () { _this.net.init() }, 500);
@@ -1035,9 +1692,311 @@ var index = {
           $('#btversion').prepend('<span style="margin-right:5px;">Beta</span>');
           $('#btversion').append('<a class="btlink" href="https://www.bt.cn/bbs/forum-39-1.html" target="_blank">  [找Bug奖宝塔币]</a>');
         }
-
       }, false)
     }, 700)
+  },
+  //单个告警信息配置
+  all_data: function (project) {
+    var _this = this;
+    if(!$.isEmptyObject(_this.cache_system_push)){
+      for (var key in _this.cache_system_push) {
+        var alarmData = _this.cache_system_push[key];
+        if(alarmData.type === 'cpu' || alarmData.type === 'mem' || alarmData.type === 'disk' || alarmData.type === 'load'){
+          if(project || alarmData.type === 'disk') {
+            _this.all_status[alarmData.type][project] = alarmData
+          }else{
+            _this.all_status[alarmData.type] = alarmData
+          }
+        }
+      }
+    }
+  },
+  //打开弹窗
+  open_alarm: function (obj, $check){
+    var _this = this;
+    var isExpiration = !$.isEmptyObject(obj) ? obj.status : false;
+    if ($check) isExpiration = $check
+    var title = obj.type == 'load' ? '负载' : obj.type == 'cpu' ? 'CPU' : obj.type == 'mem' ? '内存' : obj.project,
+        isDisk = obj.type == 'disk',
+        numTitle = obj.type == 'load' ? '负载状态' : obj.type == 'cpu' || obj.type == 'mem' ? '使用率' : isDisk && obj.cycle == 1 ? '剩余容量' : '占用率';
+    bt.open({
+      type: 1,
+      area: '550px',
+      title: '告警设置',//【'+ title +'】
+      closeBtn: 2,
+      btn: ['保存配置', '取消'],
+      content: '<div class="bt-form pd16 index_alarm_set">\
+                  <div class="line hide">\
+                    <span class="tname">告警开关</span>\
+                    <div class="info-r line-switch">\
+                      <input type="checkbox" id="statusAlarm" class="btswitch btswitch-ios" name="status_alarm" '+ (isExpiration ? 'checked' : '') + ' />\
+                      <label class="btswitch-btn" for="statusAlarm"></label>\
+                    </div>\
+                  </div>\
+                  <div class="line">\
+                    <span class="tname">任务类型</span>\
+                    <div class="info-r">\
+                      <div class="inlineBlock  ">\
+                        <input type="text" name="type" disabled="disabled" class="bt-input-text mr10 " style="width:310px;" value="'+ _this.alarm_type_list.filter(function (item) {
+                          return item.value === (obj.type !== 'disk' ? obj.type : obj.project)
+                        })[0].title +'">\
+                      </div>\
+                    </div>\
+                  </div>\
+                  <div class="line '+ (isDisk ? '' : 'hide') +'">\
+                    <span class="tname">检测类型</span>\
+                    <div class="info-r">\
+                      <div class="inlineBlock form-radio mr10">\
+                        <input type="radio" id="cycle2" name="cycle" value="2" '+ (obj.cycle == 2 ? 'checked' : '') +'>\
+                        <label for="cycle2" class="mb0">占用百分比</label>\
+                      </div>\
+                      <div class="inlineBlock form-radio">\
+                        <input type="radio" id="cycle1" name="cycle" value="1" '+ (obj.cycle == 1 ? 'checked' : '') +'>\
+                        <label for="cycle1" class="mb0">剩余容量</label>\
+                      </div>\
+                    </div>\
+                  </div>\
+                  <div class="line">\
+                    <span class="tname numTitle">'+ numTitle +'</span>\
+                    <div class="info-r">\
+                      <div class="inlineBlock group" style="display: inline-flex;">\
+                        <input type="number" name="count" min="0" class="bt-input-text mr10 group" style="width:70px;" value="'+ (obj.hasOwnProperty('count') ? obj.count : 80) +'">\
+                        <span class="unit">'+ (isDisk && obj.cycle == 1 ? 'GB' : '%') +'</span>\
+                      </div>\
+                      <span class="type_tips ml8 c9">每'+ (isDisk ? '隔10' : '5') +'分钟'+ (isDisk ? obj.cycle == 1 ? '磁盘剩余容量低于' : '磁盘占用超过' : '平均' +title + '超过') +'该数值就告警</span>\
+                    </div>\
+                  </div>\
+                  <div class="line">\
+                    <span class="tname">发送次数</span>\
+                    <div class="info-r">\
+                      <div class="inlineBlock group" style="display: inline-flex;">\
+                        <input type="number" name="push_count" min="0" class="bt-input-text mr10 group" style="width:70px;" value="'+ (obj.hasOwnProperty('push_count') ? obj.push_count : 3) +'">\
+                        <span class="unit">次</span>\
+                      </div>\
+                      <span class="ml8 c9">后将不再发送告警信息，如需发送多次请填写2次以上</span>\
+                    </div>\
+                  </div>\
+                  <div class="line">\
+                    <span class="tname">告警方式</span>\
+                    <div class="info-r installPush"></div>\
+                  </div>\
+                  <ul class="help-info-text c7">\
+                    <li>点击配置告警方式后状态未更新，尝试点击【<a class="btlink handRefresh">手动刷新</a>】</li>\
+                    <li>【发送次数】设置0时，每天触发告警次数没有上限</li>\
+                  </ul>\
+                </div>',
+      success: function (layero) {
+        // bt_tools.form({
+        //   el: '.type_alarm_cont',
+        //   form: [{
+        //     label: '任务类型',
+        //     group: {
+        //       type: 'select',
+        //       name: 'type',
+        //       width: '310px',
+        //       list: _this.alarm_type_list,
+        //       value: obj.type !== 'disk' ? obj.type : obj.project,
+        //     }
+        //   }]
+        // })
+        // bt_tools.form({
+        //   el: '.type_alarm_cont',
+        //   form: [{
+        //     label: '任务类型',
+        //     group: {
+        //       type: 'text',
+        //       name: 'type',
+        //       disabled: true,
+        //       width: '310px',
+        //       // list: _this.alarm_type_list,
+        //       value: _this.alarm_type_list.filter(function (item) {
+        //         return item.value === (obj.type !== 'disk' ? obj.type : obj.project)
+        //       })[0].title,
+        //     }
+        //   }]
+        // })
+        renderConfigHTML()
+        // 手动刷新
+        $('.handRefresh').click(function(){
+          renderConfigHTML(true)
+        })
+        $('.index_alarm_set input[type="radio"]').change(function(){
+          var val = $(this).val()
+          if(val == 2){
+            $('.index_alarm_set input[name="count"]').next().text('%')
+            $('.index_alarm_set input[name="count"]').val(80)
+          }else{
+            $('.index_alarm_set input[name="count"]').next().text('GB')
+            $('.index_alarm_set input[name="count"]').val(parseInt(obj.space_size*0.2))
+          }
+          if(isDisk) $('.numTitle').text(val == 2 ? '占用率' : '剩余容量')
+          $('.type_tips').text('每'+ (isDisk ? '隔10' : '5') +'分钟'+ (isDisk ? val == 1 ? '磁盘剩余容量低于' : '磁盘占用超过' : '平均' +title + '超过') +'该数值就告警')
+        })
+        $('.index_alarm_set input[type="number"]').on('input',function(){
+          var val = $(this).val()
+          if($(this).prop('name') == 'push_count') {
+            if(val === '' || val < 0 ) layer.tips('数值不能为负值', $(this), {tips: [1, '#ff0000'],time: 3000});
+          }else{
+            var cycle = $('input[name="cycle"]:checked').val()
+            if(val === '' || val <= 0  || (isDisk && cycle == 2 && val > 100) || (val > 100 && obj.type !== 'disk') ) layer.tips(isDisk && cycle == 1 ? '数值不能小于0' : '数值范围(0,100]', $(this), {tips: [1, '#ff0000'],time: 3000});
+          }
+        })
+        // 获取配置
+        function renderConfigHTML(refresh){
+          if(refresh || $.isEmptyObject(_this.msg_config)){//手动刷新 或者 全局配置_this.msg_config为空
+            bt.site.get_msg_configs(function (rdata) {
+              _this.msg_config = rdata
+              pubConfig(rdata)
+            })
+          }else{  //全局配置_this.msg_config不为空
+            pubConfig(_this.msg_config)
+          }
+          function pubConfig(rdata) {
+            var html = '', unInstall = ''
+            for (var key in rdata) {
+              var item = rdata[key],_html = '',accountConfigStatus = false;
+              if(key == 'sms') continue;
+              if(key === 'wx_account'){
+                if(!$.isEmptyObject(item.data) && item.data.res.is_subscribe && item.data.res.is_bound){
+                  accountConfigStatus = true   //安装微信公众号模块且绑定
+                }
+              }
+              _html = '<div class="inlineBlock module-check ' + ((!item.setup || $.isEmptyObject(item.data)) ? 'check_disabled' : ((key == 'wx_account' && !accountConfigStatus)?'check_disabled':'')) + '">' +
+                  '<div class="cursor-pointer form-checkbox-label mr10">' +
+                  '<i class="form-checkbox cust—checkbox cursor-pointer mr5 '+ (!$.isEmptyObject(obj) && obj.module && obj.module.indexOf(item.name) > -1?((!item.setup || $.isEmptyObject(item.data)) ?'':((key == 'wx_account' && !accountConfigStatus)?'':'active')):'') +'" data-type="'+ item.name +'"></i>' +
+                  '<input type="checkbox" class="form—checkbox-input hide mr10" name="' + item.name + '" '+ ((item.setup || !$.isEmptyObject(item.data))?((key == 'wx_account' && !accountConfigStatus)?'':'checked'):'') +'/>' +
+                  '<span class="vertical_middle" title="' + item.ps + '">' + item.title + ((!item.setup || $.isEmptyObject(item.data)) ? '[<a target="_blank" class="bterror installNotice" data-type="'+ item.name +'">未配置</a>]' : ((key == 'wx_account' && !accountConfigStatus)?'[<a target="_blank" class="bterror installNotice" data-type="'+ item.name +'">未配置</a>]':'')) + '</span>' +
+                  '</div>' +
+                  '</div>';
+            if ((!item.setup || $.isEmptyObject(item.data))) {
+                unInstall += _html;
+              }else{
+                html += _html;
+              }
+            }
+            $('.installPush').html(html + unInstall)
+            if(!$('.installPush .active').length && html != '') {
+              $('.installPush .module-check:eq(0) input').prop('checked',true).prev().addClass('active')
+            }
+          }
+        }
+        // 安装消息通道
+        $('.installPush').on('click', '.form-checkbox-label', function () {
+          var that = $(this).find('i')
+          if (!that.parent().parent().hasClass('check_disabled')){
+            if (that.hasClass('active')) {
+              that.removeClass('active')
+              that.next().prop('checked', false)
+            } else {
+              that.addClass('active')
+              that.next().prop('checked', true)
+            }
+          }
+        });
+
+        $('.installPush').on('click','.installNotice',function(){
+          var type = $(this).data('type')
+          openAlertModuleInstallView(type)
+        })
+      },
+      yes: function (index) {
+        var arry = [];
+        $('.installPush .active').each(function(item){
+          var item = $(this).attr('data-type')
+          arry.push(item)
+        })
+        if(!arry.length) return layer.msg('请选择至少一种告警通知方式',{icon:2})
+        var data = {
+          type: obj.type,
+          cycle: 5,
+          count: parseInt($('input[name="count"]').val()),
+          push_count: parseInt($('input[name="push_count"]').val()),
+          module: arry.join(','),
+          project: obj['project'] ? obj.project : '',
+        }
+        if(obj.type === 'disk'){
+          data['interval'] = 600
+          data.cycle = parseInt($('input[name="cycle"]:checked').val())
+        }
+        if(data.count === '' || data.count <= 0 || (data.count > 100 && obj.type === 'disk' && data.cycle == 2)) return layer.msg(data.cycle == 1 ? '剩余容量范围不正确' : '百分比范围不正确',{icon:2});
+        if(data.push_count === '' || data.push_count <= -1) return layer.msg('发送次数不能小于0',{icon:2});
+        _this.set_push_config({data: data},function (res) {
+          if(res.status) layer.close(index)
+        })
+      },
+      btn2: function (index) {
+        $('#'+ obj.type +'Tips').prop('checked', !$('#'+ obj.type +'Tips').is(':checked'))
+      }
+    })
+  },
+  //获取对应告警信息
+  get_alarm_data:function (type, project){
+    var _this = this
+    var data = {}
+    if($.isEmptyObject(_this.cache_system_push)) return data
+    for (var key in _this.cache_system_push) {
+      var item = _this.cache_system_push[key]
+      if(project ? (item.type === type && item.project === project) : item.type === type){
+        data = item
+        if(!data['id']) data['id'] = key
+      }
+    }
+    return data
+  },
+  //添加和编辑告警信息
+  set_push_config:function (obj, callback) {
+    var _this = this
+    bt_tools.send({
+      url: '/push?action=set_push_config',
+      data: {
+        id: obj['id'] ? obj.id : parseInt(new Date().getTime()/1000),
+        name: 'system_push',
+        data: JSON.stringify(obj.data)
+      }
+    },function (res) {
+      bt_tools.msg(res)
+      _this.get_push_list()
+      if(callback) callback(res)
+    })
+  },
+  //切换告警状态
+  set_push_status:function (id, status) {
+    var _this = this
+    bt_tools.send({
+      url: '/push?action=set_push_status',
+      data: {
+        name: 'system_push',
+        id: id,
+        status: status
+      }
+    },function (res) {
+      bt_tools.msg(res)
+      _this.get_push_list()
+    })
+  },
+  //获取告警列表
+  get_push_list: function () {
+    var _this = this
+    var arr = ['cpu','mem','load','disk']
+    bt_tools.send({
+      url: '/push?action=get_push_list',
+    },function (res) {
+      _this.cache_system_push = res.system_push
+      for (var key in _this.cache_system_push) {
+        var item = _this.cache_system_push[key],
+            title = (item.type == 'load' ? '平均负载' : item.type == 'cpu' ? '平均CPU' : item.type == 'mem' ? '内存使用率' : '磁盘')
+        if(arr.indexOf(item.type) !== -1){
+          var str = ''
+          if(item.type === arr[3]) {
+            str = '该'+ title + (item.cycle == 1 ? '余量不足' + item.count + 'G' : '用量超过'+ item.count +'%触发')
+            $('.disk_scanning_btn[data-path="'+ item.project +'"]').parents('.disk_cont').find('.disk_alarm_tips').html(str)
+          }else{
+            str = item.cycle +'分钟内'+ title +'超过'+ item.count +'%触发'
+            $('.'+ item.type +'_alarm_tips').html(str)
+          }
+        }
+      }
+    })
   },
   get_server_info: function (info) {
     // bt.system.get_total(function (info){
@@ -1103,15 +2062,27 @@ var index = {
       var loadCount = Math.round((res.load.one / res.load.max) * 100) > 100 ? 100 : Math.round((res.load.one / res.load.max) * 100);
       loadCount = loadCount < 0 ? 0 : loadCount;
       var loadInfo = _this.chart_color_active(loadCount);
+      //实时刷新负载弹窗数据
+      $('.load_text').text('运行达到' + loadCount + '%').removeClass('color-red-box color-org-box color-green-box').addClass(loadCount >= 80 ? loadCount >= 90 ? 'color-red-box' : 'color-org-box' : 'color-green-box')
 
       // cpu
       var cpuCount = res.cpu[0];
       var cpuInfo = _this.chart_color_active(cpuCount);
+      //实时刷新cpu弹窗数据
+      $('.cpu_text').text('占用' + cpuCount+'%').removeClass('color-red-box color-org-box color-green-box').addClass(cpuCount >= 80 ? cpuCount >= 90 ? 'color-red-box' : 'color-org-box' : 'color-green-box')
+      for (var i = 0; i < res.cpu[2].length; i++) {
+        $('#cpu_'+ (i+1) +'_num').text(res.cpu[2][i] + '%' + (res.cpu[2].hasOwnProperty(i+1) ? ' / ' + res.cpu[2][i+1] + '%' : ''))
+        i++
+      }
 
       // 内存
       var memCount = Math.round((res.mem.memRealUsed / res.mem.memTotal) * 1000) / 10; // 返回 memRealUsed 占 memTotal 的百分比
       var memInfo = _this.chart_color_active(memCount);
       bt.set_cookie('memSize', res.mem.memTotal)
+      //实时刷新内存弹窗数据
+      $('.mem_text').text('占用' + memCount + '%').removeClass('color-red-box color-org-box color-green-box').addClass(memCount >= 80 ? memCount >= 90 ? 'color-red-box' : 'color-org-box' : 'color-green-box')
+      $('#mem_Free').text(res.mem.memFree+ 'MB')
+      $('#mem_buffer_cache').text((res.mem.memBuffers + res.mem.memCached) + 'MB')
 
       // 磁盘
       var diskList = res.disk;
@@ -1387,22 +2358,26 @@ var index = {
         if(recomConfig){
           var pay_status = product_recommend.get_pay_status();
           for (var i = 0; i < recomConfig['list'].length; i++) {
-            const item = recomConfig['list'][i];
+            var item = recomConfig['list'][i];
             if(setup_length > softboxsum) break;
             if(pay_status.is_pay && item['install']) continue;
+            var day_not_display = bt.get_storage('home_day_not_display_'+ item['name']);
+            if(day_not_display && parseInt(day_not_display) > new Date().getTime()) continue;
             softboxcon += '<div class="col-sm-3 col-md-3 col-lg-3">\
-              <div class="recommend-soft recom-iconfont">\
+              <div class="recommend-soft recom-iconfont" data-name="'+ item['name'] +'">\
+                <div class="day-not-display">近24小时不再显示<span></span></div>\
                 <div class="product-close hide">关闭推荐</div>\
                 <div class="images"><img src="/static/img/soft_ico/ico-'+ item['name'] +'.png"></div>\
                 <div class="product-name">'+ item['title'] +'</div>\
                 <div class="product-pay-btn">\
                 '+ ((item['isBuy'] && !item['install'])?
                 '<button class="btn btn-sm btn-success home_recommend_btn recommend_install" style="margin-left:0;" data-name="'+ item['name'] +'">立即安装</button>':
-                '<a class="btn btn-sm btn-default mr5 '+ (!item.preview?'hide':'') +'" href="'+ item.preview +'" target="_blank">预览</a><button type="submit" class="btn btn-sm btn-success home_recommend_btn" onclick=\"product_recommend.pay_product_sign(\'ltd\','+ item.pay +',\''+item.pluginType+'\')\">购买</button>') +'\
+                '<a class="btn btn-sm btn-default mr5 '+ (!item.preview?'hide':'') +'" href="'+ item.preview +'" target="_blank">预览</a><button type="submit" data-index="'+i+'" data-pay="'+item.pay+'" data-pluginType="'+item.pluginType+'" class="btn btn-sm btn-success home_recommend_btn pay_recommend_plungin">购买</button>') +'\
                 </div>\
               </div>\
             </div>'
             setup_length ++;
+            //  onclick=\"product_recommend.pay_product_sign(\'ltd\','+ item.pay +',\''+item.pluginType+'\')\"
           }
         }
       } catch (error) {
@@ -1415,7 +2390,36 @@ var index = {
         }
       }
       $("#indexsoft").append(softboxcon);
+      //交互优化------非企业版用户 首页软件推荐增加近3天不再显示
+      if(bt.get_cookie('ltd_end') < 0) {
+        $('.recommend-soft.recom-iconfont').hover(function(){
+          var name = $(this).data('name')
+          $(this).find('.day-not-display').fadeIn("1000").find('span').click(function(e){
+            bt.set_storage('home_day_not_display_' + name, (new Date().getTime() + 86400*1000))  //3天不再显示
+            $(this).parent().parent().parent().addClass('no-bg')
+            $(this).parent().parent().remove()
+          })
+        },function() {
+          $(this).find('.day-not-display').hide()
+        })
+      }
+      //交互优化------非企业版用户 首页软件推荐增加近3天不再显示end
+      $('.pay_recommend_plungin').unbind('click').click(function(){
+          var item_pay = $(this).data('pay'),item_pluginType = $(this).data('pluginType'),index = $(this).data('index')
+        //   console.log(product_recommend.get_recommend_type(1)['list'][index])
+          if(bt.get_cookie('ltd_end')<0){
+              // var pro_item = product_recommend.get_recommend_type(1)['list'][index]
+              // pro_item.pluginName = pro_item.title
+              // pro_item.imgSrc = 'https://www.bt.cn/Public/new/plugin/'+pro_item.name+'/1.png'
+              // product_recommend.recommend_product_view(pro_item, {
+              //   imgArea: ['800px', '576px']
+              // },'ltd',item_pay,item_pluginType)
+              product_recommend.pay_product_sign('ltd', item_pay, 'ltd')
+          }
+
+      })
       $("#indexsoft").dragsort({ dragSelector: ".spanmove", dragBetween: true, dragEnd: saveOrder, placeHolderTemplate: "<div class='col-sm-3 col-md-3 col-lg-3 dashed-border'></div>" });
+
       $('.recommend_install').unbind('click').click(function () {
         var name = $(this).data('name');
         bt.soft.install(name)
@@ -1469,6 +2473,7 @@ var index = {
 			var versionData = is_beta ? beta : data
 			var versionType = is_beta ? '测试版' : '正式版'
 			var content = ''
+			var isNpsShow = true
       if(rdata.status){
         content = '<div class="update-title">版本更新-' + bt.os + '面板' + versionType + '</div>\
         <img class="update_bg" src="static/img/update_1.png" alt="" />' +
@@ -1507,6 +2512,16 @@ var index = {
                   <span>有更新时提醒我：<span class="bt_switch" style="display:inline-block"><input class="btswitch btswitch-ios" id="updateTips" type="checkbox"><label class="btswitch-btn" for="updateTips"></label></span><a class="btlink setupdateconfig" style="margin-left: 15px;" href="javascript:;">提醒方式</a></span></span>\
                   </div>\
               </div>\
+							<div id="feedback">\
+								<div class="npsBanner" style="text-align:center;">\
+								<span class="showNps" style="color:#20a53a;vertical-align:4px; font-size:12px;cursor:pointer;">点击此处折叠需求反馈<span class="glyphicon glyphicon-triangle-bottom ml5" style="display:'+ (isNpsShow? 'none':'inline') +';"></span><span class="glyphicon glyphicon-triangle-top ml5" style="display:'+ (isNpsShow? 'inline':'none') +';"></span></span>\
+							</div>\
+							<div class="NPSForm" style=" display:'+ (isNpsShow? 'block':'none') +';">\
+								<div class="flex flex-col items-center">\
+									<div id="feedForm" style="padding-left:31px;"></div>\
+								</div>\
+							</div>\
+							</div>\
           </div>\
           <style>\
             .update_title{display:flex;justify-content:center;align-items:center;position: relative;vertical-align: middle;margin: 12px 0;}\
@@ -1535,13 +2550,147 @@ var index = {
 			bt.open({
         type: 1,
         title: rdata.status ? false : ['宝塔'+ bt.os + '面板','background-color:#37BC51;color:white;height:36px;padding:0 80px 0 13.5px;'],
-        area: '480px',
+        area: '550px',
         shadeClose: false,
         skin: 'layui-layer-dialog'+(!rdata.status ? '' : ' new-layer-update active'),
         closeBtn: 2,
         content: content,
         success:function (layers,indexs) {
-          if(!rdata.status) $(layers).find('.layui-layer-content').css('padding','0')
+
+          if(!rdata.status){
+						$(layers).find('.layui-layer-content').css('padding','0')
+						$('.showNps').off('click').on('click',function(){
+							isNpsShow = !isNpsShow
+							if(isNpsShow){
+								$('.NPSForm').show()
+								$('.glyphicon-triangle-bottom').hide()
+								$('.glyphicon-triangle-top').show()
+							}else{
+								$('.NPSForm').hide()
+								$('.glyphicon-triangle-bottom').show()
+								$('.glyphicon-triangle-top').hide()
+							}
+						})
+						bt_tools.form({
+							el:'#feedForm',
+							form:[
+								{
+									group: {
+										type: 'textarea',
+										name: 'feed',
+										style: {
+											'width': '481px',
+											'min-width': '486px',
+											'min-height': '80px',
+											'line-height': '22px',
+											'padding-top': '10px',
+											'resize': 'none'
+										},
+										tips: { //使用hover的方式显示提示
+											text: '您当前已经是最新版本，如果您使用过程有无法满足的需求，请反馈给我们，我们将尽力为您解决或完善。',
+											style: { top: '336px', left: '39px',width:'486px', padding: '0 8px 0px 3px','font-size':'12px'},
+										},
+									}
+								},
+                {
+                  label:'<span style="color:#666">是否愿意接受回访：</span>',
+                  group:{
+                    type: 'other',
+                    boxcontent:'\
+							<div style="padding-top: 2px;margin-left: -10px;">\
+								<input class="btswitch btswitch-ios" id="feedback-status" type="checkbox">\
+								<label style="margin-left:6px;margin-right:6px;height: 17px;width: 28px;" class="btswitch-btn phpmyadmin-btn" for="feedback-status" ></label>\
+							</div>'
+                  }
+                },
+                {
+                  group: {
+                    type: 'text',
+                    name: 'feedbackPhone',
+                    width: '500px',
+                    placeholder: '请留下手机号码或邮箱，以便我们联系您',
+                    value: '',
+                  }
+                },
+								{
+									group:{
+										name: 'tips',
+										type: 'other',
+										boxcontent:'<div style="color:#20a53a;font-size:12px;position: relative;top: -12px;margin-left:39px;">我们特别重视您的需求反馈，我们会定期每周进行需求评审。希望能更好的帮到您</div>'
+									}
+								},
+								{
+									group: {
+										type: 'button',
+										size: '',
+										name: 'submitForm',
+										class:'feedBtn',
+										style:'margin:-10px auto 20px;padding:6px 40px;position: relative;top: -12px;',
+										title: '提交',
+										event: function (formData, element, that) {
+                      // 触发submit
+                      if(formData.feed == '') {
+                        return bt.msg({status:false,msg:'请填写反馈内容~'})
+                      }
+                      if($('#feedback-status').prop('checked')){
+                        if (!/^1[3456789]\d{9}$/.test(formData.feedbackPhone) && !/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(formData.feedbackPhone)) {
+                          return bt.msg({status: false, msg: '请填写正确的手机号码或邮箱~'})
+                        }
+                      }
+
+                      function checkString(str) {
+                        const phoneRegex = /^1[3456789]\d{9}$/
+                        const emailRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/
+
+                        if (phoneRegex.test(str)) {
+                          return 'phone'
+                        } else if (emailRegex.test(str)) {
+                          return 'email'
+                        } else {
+                          return 'unknown'
+                        }
+                      }
+                      var type = checkString(formData.feedbackPhone)
+											var config = {}
+											config['22'] = formData.feed
+                      bt_tools.send({url:'config?action=write_nps_new',
+                        data:type=='unknown'? {questions:JSON.stringify(config),software_name:1,rate:0,product_type:18}:{questions:JSON.stringify(config),software_name:1,rate:0,product_type:18,feedback: JSON.stringify(
+                            type === 'phone' ? { phone: formData.feedbackPhone } : { email: formData.feedbackPhone }
+                          )}},function(ress){
+												if(ress.status){
+													layer.close(indexs)
+													layer.open({
+														title: false,
+														btn: false,
+														shadeClose: true,
+														shade:0.1,
+														closeBtn: 0,
+														skin:'qa_thank_dialog',
+														area: '230px',
+														content: '<div class="qa_thank_box" style="background-color:#F1F9F3;text-align: center;padding: 20px 0;"><img src="/static/img/feedback/QA_like.png" style="width: 55px;"><p style="margin-top: 15px;">感谢您的参与!</p></div>',
+														success: function (layero,index) {
+															$(layero).find('.layui-layer-content').css({'padding': '0','border-radius': '5px'})
+															$(layero).css({'border-radius': '5px','min-width': '230px'})
+
+															setTimeout(function(){layer.close(index)},3000)
+														}
+													})
+												}
+											},'提交反馈')
+
+										}
+									}
+								}
+							]
+						})
+            $('.tname').css({'width': '130px','padding':'0','text-align':'left'})
+            $('.bt-form').find('input[name="feedbackPhone"]').parent('.inlineBlock ').hide()
+            if($('#feedback-status').length > 0){
+              $('#feedback-status').click(function() {
+                $('.bt-form').find('input[name="feedbackPhone"]').parent('.inlineBlock ').toggle()
+              })
+            }
+					}
           $('.ignore-renew').on('click',function () {
             bt.send('ignore_version', 'ajax/ignore_version', { version: versionData.version }, function (rdata) {
               bt.msg(rdata);
@@ -1741,7 +2890,7 @@ var index = {
     });
   },
   to_not_beta: function () {
-    bt.show_confirm('切换到正式版', '是否从测试版切换到正式版？', function () {
+    bt.simple_confirm({title:'切换正式版',msg: '切换当前版本为正式版，切换后您将无法体验到最新的测试功能，是否继续操作？'}, function () {
 
       bt.send('apple_beta', 'ajax/to_not_beta', {}, function (rdata) {
         if (rdata.status === false) {
@@ -1984,6 +3133,22 @@ var index = {
       }
     });
   },
+  getScanSpeed: function (sele, msg, url) {
+    var that = this;
+    if (!$(sele).length) return;
+    bt_tools.send({url: url}, function (rdata) {
+      body = '<p>正在'+ msg +'，请稍后<img src="/static/img/ing.gif"></p>\
+      <div class="bt-progress"><div class="bt-progress-bar" style="width:'+ rdata + '%">\
+      <span class="bt-progress-text" style="left: '+ (rdata < 21 ? 3 : rdata - 16 ) +'%;">' + rdata + '%</span></div></div>';
+      $(sele).prev().hide();
+      $(sele).css({ "margin-left": "-37px", "width": "380px" });
+      $(sele).parents(".layui-layer").css({ "margin-left": "-100px" });
+      $(sele).html(body);
+      setTimeout(function () {
+        that.getScanSpeed(sele, msg, url);
+      }, 200);
+    })
+  },
   /**
    * @description 获取时间简化缩写
    * @param {Numbre} dateTimeStamp 需要转换的时间戳
@@ -2033,6 +3198,7 @@ var index = {
             (function (index, item) {
               var htmls = '<ul class="module_details_list ' + (item[0] == 'risk' && that.warning_num > 0 ? 'active' : '') + '">';
               bt.each(data_item, function (indexs, items) {
+							if (!items.cve_id) {
                 scan_time = items.check_time;
                 htmls += '<li class="module_details_item">' +
                     '<div class="module_details_head">' +
@@ -2067,10 +3233,87 @@ var index = {
                       });
                       return htmlss;
                     }()) + '</span></div>' +
+                    '<div class="module_details_line"><span class="line_title">温馨提示：</span><span class="line_content">'+ items.remind +'</span></div>'+
                     (items.help != '' ? ('<div class="module_details_line"><span class="line_title">帮助文档：</span><span class="line_content"><a href="' + items.help + '" target="_blank" class="btlink">' + items.help + '</span></div>') : '') +
                     '</div>' +
                     '</li>';
-              });
+							} else {
+								htmls +=
+									'<li class="module_details_item">' +
+									'<div class="module_details_head">' +
+									'<span class="module_details_title"><span title="' +
+									items.vuln_name +
+									'">' +
+									items.vuln_name +
+									'</span><i>（&nbsp;检测时间：' +
+									(that.get_simplify_time(items.check_time) || '刚刚') +
+									'&nbsp;，等级：' +
+									(function (level) {
+										var level_html = '';
+										switch (level) {
+											case 3:
+												level_html += '<span style="color:red">高危</span>';
+												break;
+											case 2:
+												level_html += '<span style="color:#E6A23C">中危</span>';
+												break;
+											case 1:
+												level_html += '<span style="color:#e8d544">低危</span>';
+												break;
+										}
+										return level_html;
+									})(items.level) +
+									'）</i></span>' +
+									'<span class="operate_tools">' +
+									(item[0] != 'security'
+										? '<a href="javascript:;" class="btlink cut_details">详情</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" data-title="' +
+										  items.vuln_name +
+										  '" data-id="' +
+										  items.cve_id +
+										  '" ' +
+										  (item[0] == 'ignore' ? 'class="btlink"' : '') +
+										  ' data-type="' +
+										  'vuln' +
+										  '">' +
+										  (item[0] != 'ignore' ? '忽略' : '移除忽略') +
+										  '</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" class="btlink" data-type="' +
+										  'vuln' +
+										  '" data-id="' +
+										  items.cve_id +
+										  '">检测</a>'
+										: '<a href="javascript:;" class="btlink cut_details">详情</a>') +
+									'</span>' +
+									'</div>' +
+									'<div class="module_details_body">' +
+									'<div class="module_details_line">' +
+									'<div class="module_details_block"><span class="line_title">漏洞编号：</span><span class="line_content">' +
+									items.cve_id +
+									'</span></div>' +
+									'<div class="module_details_block"><span class="line_title">风险等级：</span><span class="line_content" style="color:' +
+									level[items.level - 1][1] +
+									'">' +
+									level[items.level - 1][0] +
+									'</span></div>' +
+									'</div>' +
+									'<div class="module_details_line"><span class="line_title">涉及软件：</span><span class="line_content">' +
+									(function () {
+										var htmlss = '';
+										bt.each(items.soft_name, function (indexss, itemss) {
+											htmlss += '<i>' + indexss + '&nbsp;:&nbsp;' + itemss + '</i></br>';
+                    });
+										return htmlss;
+									})() +
+									'</span></div>' +
+									'<div class="module_details_line"><span class="line_title">' +
+									(item[0] != 'security' ? '解决方案：' : '配置建议') +
+									'</span><span class="line_content">' +
+									items.vuln_solution +
+									'</span></div>' +
+									'</div>' +
+									'</li>';
+							}
+						});
+
               htmls += '</ul>';
               return htmls;
             }(index, item))
@@ -2078,8 +3321,10 @@ var index = {
       });
       $('.warning_scan_body').html(html);
       scan_time = Date.now() / 1000;
-      $('.warning_scan_time').html('检测时间：&nbsp;' + bt.format_data(scan_time));
+      $('.warning_scan_time').html('检测时间：&nbsp;' + bt.format_data(scan_time)+'<a class="btlink" href="/project/security/report/html" target="_Blank" style="margin-left: 6px;text-decoration: underline;">>>获取检测报告 </a>' );
     }
+		var dialog_forbid_data;
+		var danger_check_data = [];
     bt.open({
       type: '1',
       title: '安全风险',
@@ -2095,18 +3340,22 @@ var index = {
           '<ol class="warning_scan_body" style="min-height: 528px;"></ol>' +
           '</div>',
       success: function () {
+				//检测按钮
         $('.warning_again_scan').click(function () {
-          var loadT = layer.msg('正在重新检测安全风险，请稍候...', { icon: 16 });
+          var loadT = bt.load("<div class='myspeed'>正在重新检测安全风险，请稍候...</div>");
+          setTimeout(function () {
+            that.getScanSpeed('.myspeed','重新检测安全风险', '/warning?action=get_scan_bar')
+          },50)
           that.get_warning_list(true, function () {
             layer.msg('扫描成功', { icon: 1 });
             reader_warning_list(that.warning_list);
-            if (that.warning_list.risk.length == 0) {
-              $('.warning_auto_repair').css('display', 'none')
-              $('.warning_again_scan').css('right', '20px')
-            }else{
-              $('.warning_auto_repair').css('display', 'inline')
-              $('.warning_again_scan').css('right', '160px')
-            }
+              if (that.warning_list.risk.length == 0) {
+                  $('.warning_auto_repair').css('display', 'none')
+                  $('.warning_again_scan').css('right', '20px')
+              }else{
+                  $('.warning_auto_repair').css('display', 'inline')
+                  $('.warning_again_scan').css('right', '160px')
+              }
           });
         });
         bt_tools.send({url:'/warning?action=get_list'},function(warInfo) {
@@ -2115,16 +3364,40 @@ var index = {
             $('.warning_auto_repair').css('display', 'none')
             $('.warning_again_scan').css('right', '20px')
           }
+					//一键修复按钮
           $('.warning_auto_repair').click(function () {
+            if(bt.get_cookie('ltd_end') < 0){
+              var item = {
+                ps:'针对扫描服务器系统的漏洞、设置等安全问题提供自动修复方案，并针对扫描出的风险项进行自动一键修复',
+                description:['自动修复方案','修复结果展示','人工辅助修复'],
+                pluginName:'风险一键修复',
+                preview:false,
+                imgSrc:'/static/images/recommend/autoRepair.png'
+              }
+              product_recommend.recommend_product_view(item,undefined,'ltd',68,'ltd')
+              return
+            }
             dialog_forbid_data = [];
             danger_check_data = [];
             $.each(that.warning_list.risk, function (index_c, item_c) {
               //可修复项
-              if ($.inArray(item_c.m_name, warInfo.is_autofix) != -1) {
-                danger_check_data.push(item_c)
-              } else {
-                dialog_forbid_data.push(item_c)
-              }
+							if (!item_c.cve_id) {
+                if ($.inArray(item_c.m_name, warInfo.is_autofix) != -1) {
+                    danger_check_data.push(item_c);
+                } else {
+                    dialog_forbid_data.push(item_c);
+                }
+							} else {
+								if ($.inArray(item_c.cve_id, warInfo.is_autofix) != -1) {
+									item_c['title']='系统漏洞'
+									item_c['ps']=item_c.vuln_name
+									danger_check_data.push(item_c);
+								} else {
+									item_c['ps']=item_c.vuln_name
+									dialog_forbid_data.push(item_c);
+								}
+							}
+
             });
 
             var contentHtml =
@@ -2150,6 +3423,7 @@ var index = {
 							</div>\
 						</div>\
 						<div class="confirm_button">\
+              <span style="font-size:12px;color:#f39c12;margin-right:8px">如果安装了【系统加固】，请先关闭再一键修复</span>\
 							<span id="is_ltd" style="font-size:12px;color:#f39c12;margin-right:8px">此功能为企业版专享功能，您当前还不是企业用户，<span class="btlink openLtd">立即升级</span></span>\
 							<button id="confirm_button" class="button-link">一键修复</button>\
 						</div>\
@@ -2221,11 +3495,11 @@ var index = {
                   if (check_data.checkbox_list.length != 0) {
                     var danger_selected_data = []
                     $.each(check_data.checkbox_list, function (index, item) {
-                      danger_selected_data.push(danger_check_data[item].m_name)
-                    })
-                    that.auto_repair(danger_selected_data, that.warning_list)
+											danger_selected_data.push(danger_check_data[item].m_name||danger_check_data[item].cve_id);
+										});
+										that.auto_repair(danger_selected_data, that.warning_list);
                   } else {
-                    layer.msg('当前无选中风险项!')
+                    layer.msg( '当前无选中风险项!',{ type:1 })
                     e.stopPropagation();
                     e.preventDefault();
                   }
@@ -2253,10 +3527,8 @@ var index = {
                   $(document).click(function (ev) {
                     $('.daily_details_mask').addClass('hide').prev('a').removeAttr('style')
                     ev.stopPropagation();
-                    ev.preventDefault();
                   })
                   e.stopPropagation();
-                  e.preventDefault();
                 })
 
                 // 联系客服
@@ -2270,15 +3542,26 @@ var index = {
                 if (ltd > 0) {
                   $('#is_ltd').css('display', 'none')
                 } else {
+                  $('#is_ltd').prev().hide()
                   $('#confirm_button').attr('disabled', true)
                   $('#confirm_button').css('background-color', 'rgb(203, 203, 203)')
                 }
                 $('.openLtd').click(function () {
-                  product_recommend.pay_product_sign('ltd', 66, 'ltd')
+                  var item = {
+                    ps:'针对扫描服务器系统的漏洞、设置等安全问题提供自动修复方案，并针对扫描出的风险项进行自动一键修复',
+                    description:['自动修复方案','修复结果展示','人工辅助修复'],
+                    pluginName:'风险一键修复',
+                    preview:false,
+                    imgSrc:'https://www.bt.cn/Public/new/plugin/introduce/home/autoRepair.png'
+                  }
+                  bt.soft.product_pay_view({ totalNum: 68, limit: 'ltd', closePro: true,pluginName:item.pluginName,fun:function () {
+                    product_recommend.recommend_product_view(item, undefined, 'ltd', 68, 'ltd',true)
+                  }})
                 })
               },
             });
           });
+					//3个大的下来的点击事件
           $('.warning_scan_body').on('click', '.module_item .module_head', function () {
             var _parent = $(this).parent(), _parent_index = _parent.index(), _list = $(this).next();
             if (parseInt($(this).find('.module_num').text()) > 0) {
@@ -2298,8 +3581,9 @@ var index = {
             }
           });
           $('.warning_repair_scan').click(function () {
-            bt.onlineService()
-          })
+						bt.onlineService();
+					});
+					// 右边的操作
           $('.warning_scan_body').on('click', '.operate_tools a', function () {
             var index = $(this).index(), data = $(this).data();
             switch (index) {
@@ -2318,19 +3602,41 @@ var index = {
                 break;
               case 1:
                 if (data.type != 'ignore') {
-                  bt.confirm({ title: '忽略风险', msg: '是否忽略【' + data.title + '】风险,是否继续?' }, function () {
-                    that.warning_set_ignore(data.model, function (res) {
-                      that.get_warning_list(false, function () {
-                        bt.msg(res)
-                        reader_warning_list(that.warning_list);
-                      });
-                    });
-                  });
+									bt.confirm({ title: '忽略风险', msg: '是否忽略【' + data.title + '】风险,是否继续?' }, function () {
+										if (data.type != 'vuln') {
+                        that.warning_set_ignore(data.model, function (res) {
+                          that.get_warning_list(false, function () {
+                            if (!that.warning_list.risk.length) {
+                              $('.warning_auto_repair').css('display', 'none')
+                              $('.warning_again_scan').css('right', '40px')
+                            }
+                            bt.msg(res)
+                            reader_warning_list(that.warning_list);
+                          });
+                        });
+										} else {
+											// console.log('漏洞的');
+											that.bug_set_ignore(data.id, function (res) {
+												that.get_warning_list(false, function () {
+													if (!that.warning_list.risk.length) {
+														$('.warning_auto_repair').css('display', 'none');
+														$('.warning_again_scan').css('right', '40px');
+													}
+													bt.msg(res);
+													reader_warning_list(that.warning_list);
+                        });
+											});
+										}
+									});
                 } else {
                   that.warning_set_ignore(data.model, function (res) {
                     that.get_warning_list(false, function () {
                       bt.msg(res)
                       reader_warning_list(that.warning_list);
+                      if (that.warning_list.risk.length) {
+                        $('.warning_auto_repair').css('display', 'inline')
+                        $('.warning_again_scan').css('right', '160px')
+                      }
                       setTimeout(function () {
                         $('.module_item.ignore').click();
                       }, 100)
@@ -2339,12 +3645,21 @@ var index = {
                 }
                 break;
               case 2:
-                that.waring_check_find(data.model, function (res) {
-                  that.get_warning_list(false, function () {
-                    bt.msg(res)
-                    reader_warning_list(that.warning_list);
+								if (data.type != 'vuln') {
+                  that.waring_check_find(data.model, function (res) {
+                    that.get_warning_list(false, function () {
+                        bt.msg(res);
+                      reader_warning_list(that.warning_list);
+                    });
                   });
-                });
+								} else {
+									that.bug_check_find(data.id, function (res) {
+										that.get_warning_list(false, function () {
+											bt.msg(res);
+											reader_warning_list(that.warning_list);
+										});
+									});
+								}
                 break;
             }
           });
@@ -2362,126 +3677,152 @@ var index = {
   waring_check_find: function (model_name, callback) {
     var loadT = layer.msg('正在检测指定模块，请稍候...', { icon: 16, time: 0 });
     bt.send('check_find', 'warning/check_find', { m_name: model_name }, function (res) {
-      bt.msg(res);
       if (res.status !== false) {
         if (callback) callback(res);
       }
     });
+	},
+	/**
+	 * @description 安全风险指定模块[漏洞]的检查
+	 * @param {String} cve_id 漏洞编号
+	 * @param {Function} callback 成功后的回调
+	 * @return 无返回值
+	 */
+	bug_check_find: function (cve_id, callback) {
+		var loadT = layer.msg('正在检测指定模块，请稍候...', { icon: 16, time: 0 });
+		bt.send('check_cve', 'warning/check_cve', { cve_id: cve_id }, function (res) {
+			if (res.status !== false) {
+				if (callback) callback(res);
+			}
+		});
+	},
 
-  },
-  // 安全风险一键修复
-  auto_repair: function (params, data) {
-    var that = this
-    var loadT = layer.msg('正在修复安全风险，请稍候...', { icon: 16 });
-    var res_data = [];
-    $.post(
-        '/safe/security/set_security',
-        { data: JSON.stringify({ m_name: params }) },
-        function (rdata) {
-          if(rdata.msg == '当前功能为企业版专享'){
-            layer.msg(rdata.msg)
-            return
-          }
-          var res_item = {};
-          res_data = [];
-          $.each(rdata.success, function (index, item) {
-            res_item.status = item.result.status;
-            res_item.type = item.result.type;
-            res_item.msg = item.result.msg;
-            res_item.m_name = item.m_name;
-            res_data.push(res_item);
-            res_item = {};
-          });
-          $.each(rdata.failed, function (index, item) {
-            res_item.status = item.result.status;
-            res_item.type = item.result.type;
-            res_item.msg = item.result.msg;
-            res_item.m_name = item.m_name;
-            res_data.push(res_item);
-            res_item = {};
-          });
-          if (rdata.cannot_automatically.length) {
-            $.each(rdata.cannot_automatically, function (index, item) {
-              res_item.m_name = item;
-              res_item.status = 'ignore'
-              res_data.push(res_item);
-              res_item = {};
-            });
-          }
-          var result_table ='<div><p style="margin-bottom:20px;font-size:16px">修复结果：修复成功<span style="color:#20a53a">'+ rdata.success.length + '</span>项，修复失败<span style="color:red">' + rdata.failed.length + '</span>项，忽略<span style="color:#b9b9b9">' + rdata.cannot_automatically.length + '</span>项</p><div id="auto_repair_result"></div></div>'+
-              '<div class="forbid_content"><br style="margin-bottom:20px;font-size:12px">关闭后将自动重新检测风险项，如未重新检测请手动点击【重新检测】按钮</br>如有修复失败项，请关闭当前窗口，根据解决方案手动进行修复</div>';
-          layer.open({
-            title: '结果确认',
-            content: result_table,
-            closeBtn: 2,
-            area: '540px',
-            btn: false,
-            success: function (layero, index) {
-              $('#auto_repair_result').empty();
-              bt_tools.table({
-                el: '#auto_repair_result',
-                data: res_data,
-                load: true,
-                height: '240px',
-                column: [
-                  {
-                    type: 'text',
-                    title: '风险项',
-                    template: function (row) {
-                      var rowData;
-                      $.each(data.risk, function (index_d, item_d) {
+ /**
+  * @description:  安全风险一键修复
+  * @param {*} params 选中的修复项的数组
+  * @param {*} data 原先的数组
+  * @return {*}
+  */
+	auto_repair: function (params, data) {
+		var that = this
+		var res_data = [];
+    var loadT = bt.load('<div class="repair_speed">正在修复安全风险，请稍候...</div>')
+    setTimeout(function () {
+      that.getScanSpeed('.repair_speed','修复安全风险', '/safe/security/get_repair_bar')
+    }, 50)
+		$.post(
+			'/safe/security/set_security',
+			{ data: JSON.stringify({ m_name: params }) },
+			function (rdata) {
+				if(rdata.msg == '当前功能为企业版专享'){
+					layer.msg(rdata.msg)
+					return
+				}
+				var res_item = {};
+				res_data = [];
+				$.each(rdata.success, function (index, item) {
+					res_item.status = item.result.status;
+					res_item.type = item.result.type;
+					res_item.msg = item.result.msg;
+					res_item.m_name = item.m_name;
+					res_data.push(res_item);
+					res_item = {};
+				});
+				$.each(rdata.failed, function (index, item) {
+					res_item.status = item.result.status;
+					res_item.type = item.result.type;
+					res_item.msg = item.result.msg;
+					res_item.m_name = item.m_name;
+					res_data.push(res_item);
+					res_item = {};
+				});
+				if (rdata.cannot_automatically.length) {
+					$.each(rdata.cannot_automatically, function (index, item) {
+						res_item.m_name = item;
+						res_item.status = 'ignore'
+						res_data.push(res_item);
+						res_item = {};
+					});
+				}
+				var result_table ='<div><p style="margin-bottom:20px;font-size:16px">修复结果：修复成功<span style="color:#20a53a">'+ rdata.success.length + '</span>项，修复失败<span style="color:red">' + rdata.failed.length + '</span>项，忽略<span style="color:#b9b9b9">' + rdata.cannot_automatically.length + '</span>项</p><div id="auto_repair_result"></div></div>'+
+                    '<div class="forbid_content"><p style="margin-bottom:20px;font-size:12px">关闭后将自动重新检测风险项，如未重新检测请手动点击【重新检测】按钮</br>如有修复失败项，请关闭当前窗口，根据解决方案手动进行修复</div>';
+				layer.open({
+					title: '结果确认',
+					content: result_table,
+					closeBtn: 2,
+					area: '540px',
+					btn: false,
+					success: function (layero, index) {
+						$('#auto_repair_result').empty();
+						bt_tools.table({
+							el: '#auto_repair_result',
+							data: res_data,
+							load: true,
+							height: '240px',
+							column: [
+								{
+									type: 'text',
+									title: '风险项',
+									template: function (row) {
+										var rowData;
+										$.each(data.risk, function (index_d, item_d) {
+										if (!item_d.cve_id) {
                         if (item_d.m_name == row.m_name) {
                           rowData = '<span>' + item_d.title + '</span>';
                         }
-                      });
-                      return rowData;
-                    },
-                  },
-                  {
-                    type: 'text',
-                    title: '相关信息(网站名或其他)',
-                    width:200,
-                    template: function (row) {
-                      if (row.type.length) {
-                        if(Array.isArray(row.type)) {
-                          var data = row.type.join(',')
-                          return '<span  class="result_span">'+data+'</span>';
-                        }
-                        return '<span class="result_span">'+ row.type +'</span>'
-                      } else {
-                        return '<span>--</span>';
-                      }
-                    },
-                  },
-                  {
-                    title: '操作事项',
-                    type: 'text',
-                    align: 'right',
-                    template: function (row) {
-                      if (row.status == false) {
-                        return '<span style="color:red">修复失败</span>';
-                      } else if (row.status == true) {
-                        return '<span style="color:#20a53a">修复成功</span>';
-                      } else if (row.status == 'ignore') {
-                        return '<span style="color:rgb(102, 102, 102)">忽略风险项</span>';
-                      }
-                    },
-                  },
-                ],
-              });
-            },
-            cancel: function (index, layers) {
-              res_data = [];
-              layer.close(index);
-              var loadT = layer.msg('正在重新检测安全风险，请稍候...', {
-                icon: 16,
-              });
-              $('.warning_again_scan').click()
-            },
-          });
-        }
-    );
-  },
+                    }else{
+                        rowData = '<span>' + row.m_name + '</span>';
+                    }
+
+										});
+										return rowData;
+									},
+								},
+								{
+									type: 'text',
+									title: '相关信息(网站名或其他)',
+									width:200,
+									template: function (row) {
+										if (row.type.length) {
+											if(Array.isArray(row.type)) {
+											var data = row.type.join(',')
+												return '<span  class="result_span">'+data+'</span>';
+											}
+											return '<span class="result_span">'+ row.type +'</span>'
+										} else {
+											return '<span>--</span>';
+										}
+									},
+								},
+								{
+									title: '操作事项',
+									type: 'text',
+									align: 'right',
+									template: function (row) {
+										if (row.status == false) {
+											return '<span style="color:red">修复失败</span>';
+										} else if (row.status == true) {
+											return '<span style="color:#20a53a">修复成功</span>';
+										} else if (row.status == 'ignore') {
+											return '<span style="color:rgb(102, 102, 102)">忽略风险项</span>';
+										}
+									},
+								},
+							],
+						});
+					},
+					cancel: function (index, layers) {
+						res_data = [];
+						layer.close(index);
+						var loadT = layer.msg('正在重新检测安全风险，请稍候...', {
+							icon: 16,
+						});
+						$('.warning_again_scan').click()
+					},
+				});
+			}
+		);
+	},
   /**
    * @description 安全风险指定模块是否忽略
    * @param {String} model_name 模块名称
@@ -2497,6 +3838,21 @@ var index = {
       }
     });
   },
+	/**
+	 * @description 安全风险指定漏洞是否忽略
+	 * @param {String} cve_id 漏洞id
+	 * @param {Function} callback 成功后的回调
+	 * @return 无返回值
+	 */
+	bug_set_ignore: function (cve_id, callback) {
+		var loadT = layer.msg('正在设置模块状态，请稍候...', { icon: 16, time: 0 });
+		bt.send('set_vuln_ignore', 'warning/set_vuln_ignore', { cve_list: JSON.stringify([cve_id]) }, function (res) {
+			bt.msg(res);
+			if (res.status !== false) {
+				if (callback) callback(res);
+			}
+		});
+	},
   /**
    * @description 获取当前的产品状态
    */
@@ -2504,6 +3860,16 @@ var index = {
     // var loadT = layer.msg('正在获取产品状态，请稍候...', { icon: 16, time: 0 })
     bt.send('get_pd', 'ajax/get_pd', {}, function (res) {
       $('.btpro-gray').replaceWith($(res[0]));
+      if(res[1] > 1 || res[2] > 1){   //专业版、企业版到期时间大于1  将续费事件赋予最外层span
+        var thatClass = $('.index-pos-box .pull-right span').first().prop('class')
+        var _event = $('.'+thatClass+' a').attr('onclick')
+        var _event = $('.'+thatClass+' a').attr('onclick')
+        $('.'+thatClass).children('a').removeAttr('onclick')
+        $('.'+thatClass).html($('.'+thatClass).html())
+        $('.'+thatClass).click(function() {
+          eval(_event)
+        }) // 删除原有事件，防止二次触发
+      }
       bt.set_cookie('pro_end', res[1]);
       bt.set_cookie('ltd_end', res[2]);
       if(res[1] === 0){
@@ -2536,15 +3902,15 @@ var index = {
       if(!is_pay) advanced = ''; //未购买的时候，使用推荐内容
       if(recomConfig){
         var item = recomConfig;
-        for (let j = 0; j < item['ps'].length; j++) {
-          const element = item['ps'][j];
+        for (var j = 0; j < item['ps'].length; j++) {
+          var element = item['ps'][j];
           list_html += '<div class="item">'+ element +'</div>';
         }
         var pay_html = '',more_html = ''
         if(is_pay){
           pay_html = '<div class="product-buy product-ltd '+ (advanced || item.name) +'-type">到期时间：<span>'+ (end_time === 0?'永久授权':(end_time === -2?'已过期':bt.format_data(end_time,'yyyy-MM-dd')) + '&nbsp;&nbsp;<a class="btlink" href="javascript:;" onclick="product_recommend.pay_product_sign(\''+ advanced +'\','+ item.pay +',\''+ advanced +'\')">续费</a>') +'</span></div>'
-          more_html += '<div class="product-more">查看更多>></div>'
         }else{
+					// more_html += '<div class="product-more">查看更多>></div>'
           pay_html = '<div class="product-buy"><button type="button" onclick="product_recommend.pay_product_sign(\''+ (advanced || item.name) +'\','+ item.pay +',\'ltd\')"><span class="recommend-pay-icon"></span>立即升级</button></div>'
         }
         html = '<div class="conter-box bgw">\
@@ -2553,7 +3919,20 @@ var index = {
             '+ more_html +'\
           </div>\
         </div>'
-        $('#home-recommend').html(html)
+        //交互优化------普通用户才显示横幅
+        var day_not_display = bt.get_storage('home_day_not_display') //获取不再显示最终的时间戳
+        if((day_not_display && parseInt(day_not_display) < new Date().getTime()) || !day_not_display) $('#home-recommend').html(html)
+        $('#home-recommend').hover(function(){
+          if(!$('#home-recommend .day-not-display').length) $(this).css('position','relative').append('<div class="day-not-display">近'+ (is_pay ? '3天' : '24小时') +'不再显示<span></span></div>')
+          $('#home-recommend .day-not-display').fadeIn("1000")
+          $('#home-recommend .day-not-display span').unbind('click').click(function(){
+            bt.set_storage('home_day_not_display', (new Date().getTime() + 86400*1000*(is_pay ? 3 : 1)))  //设置3天不再显示最后的时间戳
+            $('#home-recommend').empty()
+          })
+        },function(){
+          $('#home-recommend .day-not-display').hide()
+        })
+        //交互优化------普通用户才显示横幅end
         $('.product-more').unbind('click').click(function(){
           bt.soft.privilege_contrast()
         })
