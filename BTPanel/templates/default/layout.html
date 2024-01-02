@@ -8,9 +8,11 @@
   <meta name="renderer" content="webkit">
   <title>{{g.title}}</title>
   <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+  <link as="style"
+    href="https://font.sec.miui.com/font/css?family=MiSans:300,400,500,600,700:Chinese_Simplify,Chinese_Traditional,Latin&amp;display=swap">
   <link href="{{g.cdn_url}}/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://font.sec.miui.com/font/css?family=MiSans:400,500,600,700:Chinese_Simplify,Latin,Chinese_Traditional&amp;display=swap" rel="stylesheet">
-  <link href="{{g.cdn_url}}/css/site.css?version={{g['version']}}&repair={{data['js_random']}}" rel="stylesheet" />
+  <link href="{{g.cdn_url}}/css/site.css?version={{g['version']}}&repair={{data['js_random']}}&author=Lazy"
+    rel="stylesheet" />
   <link href="{{g.cdn_url}}/css/extra.css?version={{g['version']}}&author=Lazy" rel="stylesheet" />
   {% for css_f in g['other_css'] %}
   <link href="{{css_f}}" rel="stylesheet" />
@@ -48,19 +50,24 @@
       color: #fff;
     }
 
-    .toolbar-right{
+    .toolbar-right {
       width: 35px;
       height: 150px;
       position: fixed;
       right: 0;
       bottom: 70px;
+      display: flex;
       background-color: #fff;
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
       box-shadow: 0 0 4px 0 #ccc;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
     }
+
     .toolbar-right .service,
-    .toolbar-right .feedback{
+    .toolbar-right .feedback {
       display: inline-block;
       height: 75px;
       width: 35px;
@@ -69,86 +76,238 @@
       background-position: center center;
       background-size: 13.5px;
     }
-    .toolbar-right .service{
+
+    .toolbar-right .service {
       background-image: url('/static/img/service.svg');
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
     }
-    .toolbar-right .service:after{
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      margin-left: -9px;
+
+    /*.toolbar-right .service:after{*/
+    /*  position: absolute;*/
+    /*  bottom: 0;*/
+    /*  left: 50%;*/
+    /*  margin-left: -9px;*/
+    /*  content: '';*/
+    /*  display: inline-block;*/
+    /*  width: 18px;*/
+    /*  border-bottom: 1px solid #ECECEC;*/
+    /*}*/
+    .toolbar-right .feedback {
+      background-image: url('/static/img/feedback.svg');
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+
+    .feedback-iframe .layui-layer-content {
+      overflow: hidden !important;
+    }
+
+    .immediate-experience {
+      background-color: rgba(239, 162, 9, 0.8);
+      color: white;
+      width: 62px;
+      height: 24px;
+      border-radius: 4px;
+      padding: 2px 6px;
+      border: none;
+    }
+
+    .immediately-tip {
+      background-color: #FEF7EB;
+      height: 30px;
+      margin-right: 14px;
+      display: flex;
+      border-radius: 6px;
+      align-items: center;
+      padding: 0 10px;
+      cursor: pointer;
+    }
+
+    .immediately-tip:after {
       content: '';
       display: inline-block;
-      width: 18px;
-      border-bottom: 1px solid #ECECEC;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid #FEF7EB;
+      position: absolute;
+      right: 104px;
+      top: 32px;
     }
-    .toolbar-right .feedback{
-      background-image: url('/static/img/feedback.svg');
+
+    .authState {
+      display: flex;
+      align-items: center;
     }
-    .feedback-iframe .layui-layer-content{
-      overflow: hidden !important;
+
+    /* .authState button:hover{
+      color:white;
+      background-color: #E7AA31;
+    } */
+    /* 右上角自适应 */
+    @media screen and (max-width: 1130px) {
+      .product_version {
+        display: none !important;
+      }
+    }
+
+    @media screen and (min-width: 1130px) {
+      .authState .product_version {
+        display: inline-block !important;
+      }
+    }
+
+    .recommend-immediate-icon {
+      height: 20px;
+      margin-right: 8px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      width: 55px;
+      background-position: center;
+      background-size: 100%;
+      background-repeat: no-repeat;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAuMDAwMDAwIiBoZWlnaHQ9IjE4LjAwMDAwMCIgdmlld0JveD0iMCAwIDYwIDE4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KCTxkZXNjPgoJCQlDcmVhdGVkIHdpdGggUGl4c28uCgk8L2Rlc2M+Cgk8cGF0aCBpZD0icGF0aCIgZD0iTTEwLjUyNzIgMTcuODczNUwwLjA4NDcxNjggNi44NTcxNUMtMC4wMjgxOTgyIDYuNzQ0NzIgLTAuMDI4MTk4MiA2LjU3NjExIDAuMDg0NzE2OCA2LjQ2MzcxTDQuNjU2ODYgMC4xMTI0MjdDNC43MTMyNiAwLjA1NjIxMzQgNC43Njk3OCAwIDQuODgyNTcgMEwxNi41MTA1IDBDMTYuNjIzNCAwIDE2LjY3OTkgMC4wNTYyMTM0IDE2LjczNjMgMC4xMTI0MjdMMjEuMzA4NSA2LjQ2MzcxQzIxLjM2NSA2LjU3NjExIDIxLjM2NSA2Ljc0NDcyIDIxLjMwODUgNi44MDA5M0wxMC45Nzg4IDE3Ljg3MzVDMTAuODY2IDE4LjA0MjEgMTAuNjQwMSAxOC4wNDIxIDEwLjUyNzIgMTcuODczNVpNNy43MDQ5NiA1LjY3NjgyTDEzLjc0NDYgNS42NzY4MkMxMy45NzA1IDUuNjc2ODIgMTQuMDgzNCA1LjQ1MiAxMy45NzA1IDUuMjI3MTdMMTEuNzEyNiAxLjI5Mjc2QzExLjcxMjYgMS4xODAzMyAxMS41OTk3IDEuMTI0MTEgMTEuNDg2OCAxLjEyNDExTDEwLjAxOTMgMS4xMjQxMUM5LjkwNjM3IDEuMTI0MTEgOS43OTM0NiAxLjE4MDMzIDkuNzkzNDYgMS4yOTI3Nkw3LjUzNTY0IDUuMjI3MTdDNy4zNjYyMSA1LjM5NTc4IDcuNDc5MTMgNS42NzY4MiA3LjcwNDk2IDUuNjc2ODJaTTcuNDc5MTMgNy4xOTQzN0wxMC40NzA4IDE0LjcyNkMxMC41ODM3IDE0Ljk1MDggMTAuOTIyNCAxNC45NTA4IDExLjAzNTMgMTQuNzI2TDE0LjAyNyA3LjE5NDM3QzE0LjA4MzQgNy4wMjU3NiAxMy45NzA1IDYuODAwOTMgMTMuNzQ0NiA2LjgwMDkzTDcuNzYxMzUgNi44MDA5M0M3LjUzNTY0IDYuODAwOTMgNy40MjI3MyA3LjAyNTc2IDcuNDc5MTMgNy4xOTQzN1pNMTkuMDUwNyA1LjIyNzE3TDE2LjE3MTkgMS4yOTI3NkMxNi4xMTU1IDEuMTgwMzMgMTYuMDU5IDEuMTI0MTEgMTUuOTQ2IDEuMTI0MTFMMTMuNDA2IDEuMTI0MTFDMTMuMTgwMiAxLjEyNDExIDEzLjA2NzQgMS4zNDg5NCAxMy4xODAyIDEuNTczNzZMMTUuNDM4MSA1LjUwODIxQzE1LjQ5NDUgNS42MjA2MSAxNS42MDc0IDUuNjc2ODIgMTUuNjYzOCA1LjY3NjgyTDE4Ljc2ODQgNS42NzY4MkMxOS4wNTA3IDUuNjc2ODIgMTkuMjIgNS4zOTU3OCAxOS4wNTA3IDUuMjI3MTdaTTE5LjI3NjQgNi44MDA5M0wxNS42MDc0IDYuODAwOTNDMTUuNDk0NSA2LjgwMDkzIDE1LjM4MTYgNi44NTcxNSAxNS4zMjUyIDYuOTY5NTRMMTIuNjcyMiAxMy42NTgxQzEyLjU1OTMgMTMuOTM5MSAxMi45NTQ1IDE0LjIyMDIgMTMuMTgwMiAxMy45MzkxTDE5LjUwMjIgNy4zMDY3OUMxOS42NzE1IDcuMDgxOTcgMTkuNTU4NyA2LjgwMDkzIDE5LjI3NjQgNi44MDA5M1pNMi42ODExNSA1LjY3NjgyTDUuNjcyODUgNS42NzY4MkM1Ljc4NTc3IDUuNjc2ODIgNS44OTg2OCA1LjYyMDYxIDUuODk4NjggNS41MDgyMUw4LjE1NjQ5IDEuNTczNzZDOC4zMjU4MSAxLjM0ODk0IDguMjEyODkgMS4xMjQxMSA3Ljk4NzE4IDEuMTI0MTFMNS41NTk5NCAxLjEyNDExQzUuNDQ3MDIgMS4xMjQxMSA1LjM5MDYyIDEuMTgwMzMgNS4zMzQyMyAxLjIzNjU0TDIuNDU1NDQgNS4xNzA5NkMyLjI4NjEzIDUuMzk1NzggMi40NTU0NCA1LjY3NjgyIDIuNjgxMTUgNS42NzY4MlpNMi4wMDM5MSA3LjMwNjc5TDguMzgyMzIgMTQuMDUxNUM4LjYwODAzIDE0LjI3NjMgOS4wMDMxNyAxNC4wNTE1IDguODkwMjYgMTMuNzcwNUw2LjI5MzgyIDcuMDI1NzZDNi4yMzczIDYuOTEzMzYgNi4xMjQzOSA2Ljg1NzE1IDYuMDExNDcgNi44NTcxNUwyLjIyOTYxIDYuODU3MTVDMS45NDczOSA2LjgwMDkzIDEuODM0NDcgNy4wODE5NyAyLjAwMzkxIDcuMzA2NzlaIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNBNUE1QTUiLz4KCTxwYXRoIGlkPSJwYXRoIiBkPSJNNTkuMTY4IDE3TDE2Ljg1MzggMTdDMTYuMTA5MyAxNyAxNS43MTUxIDE1Ljk0NjcgMTYuMjQwNyAxNS4zNDQ4TDIzLjM3MjEgOC41NzA1M0MyMy42MzQ5IDguMjE5NDIgMjMuNjc4NiA3LjcxNzg2IDIzLjQxNTggNy4zMTY2MkwyMS4wOTQ3IDIuNTU0ODdDMjAuNzAwNiAxLjkwMjgzIDIxLjA5NDcgMSAyMS43OTU0IDFMNTkuMTY4IDFDNTkuNjQ5OCAxIDYwIDEuNDUxNDIgNjAgMi4wMDMxNEw2MCAxNi4wNDdDNjAgMTYuNTQ4NiA1OS42MDYgMTcgNTkuMTY4IDE3WiIgZmlsbC1ydWxlPSJldmVub2RkIiBmaWxsPSIjQTVBNUE1Ii8+Cgk8cGF0aCBpZD0icGF0aCIgZD0iTTMxLjgxMjkgNS40MzU4NUMzMS43MTIgNS4yNzYzMSAzMS41MTAxIDUuMjc2MzEgMzEuNDA5MyA1LjQzNTg1QzMxLjI1NzkgNS42NDg1OSAzMS4wNTYyIDUuODYxMyAzMC44NTQyIDYuMTI3MkMzMC41NTE1IDYuNDQ2MjkgMzAuMTk4NCA2Ljc2NTM1IDI5Ljg0NTIgNy4xMzc2M0MyOS40OTIxIDcuNDU2NyAyOS4wODg0IDcuNzc1NzkgMjguNjg0OCA4LjA5NDg1QzI4LjMzMTUgOC4zNjA3NSAyOC4wMjg4IDguNTczNDkgMjcuNjc1NyA4Ljc4NjE5QzI3LjU3NDggOC44MzkzOSAyNy40MjM1IDguODM5MzkgMjcuMzIyNSA4LjY3OTg0TDI3LjAxOTggOC4wOTQ4NUMyNi45Njk0IDcuOTg4NDkgMjcuMDE5OCA3LjgyODk1IDI3LjEyMDcgNy43MjI2QzI3LjUyNDMgNy41MDk4OSAyNy44Nzc2IDcuMjQzOTkgMjguMjMwNyA2Ljk3ODA5QzI4LjYzNDMgNi42NTkgMjkuMDM4IDYuMzM5OTQgMjkuNDQxNSA2LjAyMDg0QzI5Ljc5NDggNS43MDE3NSAzMC4xNDc5IDUuMzgyNjkgMzAuNDUwNyA1LjAxMDQxQzMwLjcwMjkgNC42OTEzNSAzMC45NTUyIDQuNDI1NDUgMzEuMTU3IDQuMTA2MzVDMzEuMjA3NCA0LjA1MzE5IDMxLjI1NzkgNCAzMS4zNTg4IDRMMzEuOTY0MiA0QzMyLjA2NTIgNCAzMi4xMTU2IDQuMDUzMTkgMzIuMTY2MSA0LjEwNjM1QzMyLjYyMDEgNC43OTc3IDMzLjIyNTYgNS40MzU4NSAzMy44ODE1IDYuMDIwODRDMzQuNTM3NCA2LjYwNTgzIDM1LjI5NDIgNy4xMzc2MyAzNi4xNTIgNy42Njk0M0MzNi4yNTI4IDcuNzIyNiAzNi4zMDMzIDcuODgyMTQgMzYuMjUyOCA4LjA0MTY5TDM1Ljk1MDEgOC42MjY2OEMzNS44OTk3IDguNzMzMDMgMzUuNzQ4MyA4Ljc4NjE5IDM1LjU5NjkgOC43MzMwM0MzNS4yNDM4IDguNTIwMjkgMzQuOTQxIDguMzA3NTkgMzQuNTg3OSA4LjA0MTY5QzM0LjE4NDIgNy43MjI2IDMzLjc4MDYgNy40MDM1MyAzMy40Mjc0IDcuMDg0NDRDMzMuMDc0MiA2Ljc2NTM1IDMyLjcyMTEgNi40NDYyOSAzMi40MTgzIDYuMDc0MDRDMzIuMTY2IDUuODYxMyAzMS45NjQyIDUuNjQ4NTkgMzEuODEyOSA1LjQzNTg1Wk0zMi40Njg4IDEyLjM0OTNMMzUuNTk2OSAxMi4zNDkzQzM1Ljc0ODMgMTIuMzQ5MyAzNS44NDkyIDEyLjQ1NTYgMzUuODQ5MiAxMi42MTUyTDM1Ljg0OTIgMTMuMTQ3QzM1Ljg0OTIgMTMuMzA2NSAzNS43NDgzIDEzLjQxMjkgMzUuNTk2OSAxMy40MTI5TDI3LjQyMzUgMTMuNDEyOUMyNy4yNzIxIDEzLjQxMjkgMjcuMTcxMSAxMy4zMDY1IDI3LjE3MTEgMTMuMTQ3TDI3LjE3MTEgMTIuNjE1MkMyNy4xNzExIDEyLjQ1NTYgMjcuMjcyMSAxMi4zNDkzIDI3LjQyMzUgMTIuMzQ5M0wyOC4yODExIDEyLjM0OTNDMjguNDMyNSAxMi4zNDkzIDI4LjUzMzQgMTIuMjQyOSAyOC41MzM0IDEyLjA4MzRMMjguNTMzNCA4LjgzOTM5QzI4LjUzMzQgOC42Nzk4NCAyOC42MzQzIDguNTczNDkgMjguNzg1NiA4LjU3MzQ5TDI5LjI5MDIgOC41NzM0OUMyOS40NDE1IDguNTczNDkgMjkuNTQyNSA4LjY3OTg0IDI5LjU0MjUgOC44MzkzOUwyOS41NDI1IDEyLjA4MzRDMjkuNTQyNSAxMi4yNDI5IDI5LjY0MzQgMTIuMzQ5MyAyOS43OTQ4IDEyLjM0OTNMMzEuMDA1NiAxMi4zNDkzQzMxLjE1NyAxMi4zNDkzIDMxLjI1NzkgMTIuMjQyOSAzMS4yNTc5IDEyLjA4MzRMMzEuMjU3OSA3LjI0Mzk5QzMxLjI1NzkgNy4wODQ0NCAzMS4zNTg4IDYuOTc4MDkgMzEuNTEwMSA2Ljk3ODA5TDMyLjAxNDggNi45NzgwOUMzMi4xNjYgNi45NzgwOSAzMi4yNjcgNy4wODQ0NCAzMi4yNjcgNy4yNDM5OUwzMi4yNjcgOC44MzkzOUMzMi4yNjcgOC45OTg5MyAzMi4zNjc5IDkuMTA1MjkgMzIuNTE5MyA5LjEwNTI5TDM0LjY4ODcgOS4xMDUyOUMzNC44NDAxIDkuMTA1MjkgMzQuOTQxIDkuMjExNjQgMzQuOTQxIDkuMzcxMTlMMzQuOTQxIDkuOTAyOThDMzQuOTQxIDEwLjA2MjUgMzQuODQwMSAxMC4xNjg5IDM0LjY4ODcgMTAuMTY4OUwzMi40Njg4IDEwLjE2ODlDMzIuMzE3NCAxMC4xNjg5IDMyLjIxNjYgMTAuMjc1MiAzMi4yMTY2IDEwLjQzNDhMMzIuMjE2NiAxMi4xMzY1QzMyLjIxNjYgMTIuMjQyOSAzMi4zNjc5IDEyLjM0OTMgMzIuNDY4OCAxMi4zNDkzWiIgZmlsbC1ydWxlPSJldmVub2RkIiBmaWxsPSIjRkVGN0VCIi8+Cgk8cGF0aCBpZD0icGF0aCIgZD0iTTQ1LjkzOTkgMTIuNTA4OEw0NS45Mzk5IDEzLjA0MDZDNDUuOTM5OSAxMy4yMDAxIDQ1LjgzOSAxMy4zMDY1IDQ1LjY4NzYgMTMuMzA2NUwzNy4zNjI4IDEzLjMwNjVDMzcuMjExNCAxMy4zMDY1IDM3LjExMDUgMTMuMjAwMSAzNy4xMTA1IDEzLjA0MDZMMzcuMTEwNSAxMi41MDg4QzM3LjExMDUgMTIuMzQ5MiAzNy4yMTE0IDEyLjI0MjkgMzcuMzYyOCAxMi4yNDI5TDM5LjY4MzYgMTIuMjQyOUMzOS44MzUgMTIuMjQyOSAzOS45MzU5IDEyLjEzNjUgMzkuOTM1OSAxMS45NzdMMzkuOTM1OSAxMC41OTQzQzM5LjkzNTkgMTAuMzgxNiAzOS43MzQgMTAuMjc1MiAzOS41ODI4IDEwLjM4MTZMMzkuMzMwNCAxMC41NDExQzM5LjE3OTEgMTAuNjQ3NSAzOS4wMjc3IDEwLjU0MTEgMzguOTc3MyAxMC40MzQ4QzM4Ljg3NjMgMTAuMTY4OSAzOC44MjU5IDkuOTU2MTUgMzguNzI1IDkuNjkwMjVDMzguNTczNiA5LjMxNzk5IDM4LjQyMjIgOC44OTI1NSAzOC4yNzA5IDguNTIwMjlDMzguMTE5NSA4LjE0ODA0IDM3Ljk2ODEgNy43NzU3NiAzNy44MTY4IDcuNDAzNUMzNy43MTU5IDcuMTM3NiAzNy42MTUgNi45MjQ5IDM3LjUxNDIgNi43MTIxNkMzNy40NjM2IDYuNjA1OCAzNy41MTQyIDYuNDQ2MjYgMzcuNjE1IDYuMzkzMUwzOC4xMTk1IDYuMTI3MkMzOC4yMjA1IDYuMDc0MDEgMzguMzcxOCA2LjEyNzIgMzguNDIyMiA2LjIzMzU1QzM4LjUyMzIgNi4zOTMxIDM4LjU3MzYgNi42MDU4IDM4LjY3NDYgNi44MTg1NEMzOC44MjU5IDcuMTM3NiAzOC45NzczIDcuNTA5ODYgMzkuMTI4NyA3Ljg4MjE0QzM5LjI4IDguMjU0MzkgMzkuNDMxNCA4LjYyNjY1IDM5LjU4MjggOC45OTg5QzM5LjczNCA5LjM3MTE5IDM5LjgzNSA5LjY5MDI1IDM5LjkzNTkgOS45NTYxNUwzOS45MzU5IDQuNDc4NjFDMzkuOTM1OSA0LjMxOTA2IDQwLjAzNjcgNC4yMTI3MSA0MC4xODgxIDQuMjEyNzFMNDAuNzQzMiA0LjIxMjcxQzQwLjg5NDUgNC4yMTI3MSA0MC45OTU0IDQuMzE5MDYgNDAuOTk1NCA0LjQ3ODYxTDQwLjk5NTQgMTEuOTc3QzQwLjk5NTQgMTIuMTM2NSA0MS4wOTYzIDEyLjI0MjkgNDEuMjQ3NyAxMi4yNDI5TDQxLjgwMjYgMTIuMjQyOUM0MS45NTQgMTIuMjQyOSA0Mi4wNTQ5IDEyLjEzNjUgNDIuMDU0OSAxMS45NzdMNDIuMDU0OSA0LjQ3ODYxQzQyLjA1NDkgNC4zMTkwNiA0Mi4xNTU5IDQuMjEyNzEgNDIuMzA3MyA0LjIxMjcxTDQyLjg2MjIgNC4yMTI3MUM0My4wMTM1IDQuMjEyNzEgNDMuMTE0NSA0LjMxOTA2IDQzLjExNDUgNC40Nzg2MUw0My4xMTQ1IDkuOTU2MTVDNDMuMjY1OSA5LjYzNzA4IDQzLjQxNzIgOS4zMTc5OSA0My41Njg2IDguOTQ1NzRDNDMuNzIgOC41NzM0OSA0My44NzEyIDguMjU0MzkgNDQuMDIyNiA3Ljg4MjE0QzQ0LjE3NCA3LjUwOTg2IDQ0LjMyNTMgNy4xOTA4IDQ0LjQyNjMgNi44MTg1NEM0NC41MjcyIDYuNjA1OCA0NC41Nzc2IDYuMzM5OSA0NC42Nzg2IDYuMTI3MkM0NC43MjkgNS45Njc2NSA0NC44ODA0IDUuOTE0NDYgNDUuMDMxNyA1Ljk2NzY1TDQ1LjUzNjMgNi4yMzM1NUM0NS42MzcyIDYuMjg2NzQgNDUuNjg3NiA2LjQ0NjI2IDQ1LjY4NzYgNi41NTI2NEM0NS41ODY3IDYuNzY1MzUgNDUuNTM2MyA3LjAzMTI1IDQ1LjM4NDkgNy4zNTAzNEM0NS4yMzM1IDcuNzIyNiA0NS4wODIyIDguMDk0ODUgNDQuOTMwOCA4LjUyMDI5QzQ0Ljc3OTQgOC44OTI1NSA0NC41Nzc2IDkuMzE3OTkgNDQuNDI2MyA5LjY5MDI1QzQ0LjI3NDkgOS45NTYxNSA0NC4xNzQgMTAuMjIyIDQ0LjA3MzEgMTAuNDM0OEM0NC4wMjI2IDEwLjU0MTEgNDMuODcxMyAxMC41OTQzIDQzLjcyIDEwLjU0MTFMNDMuMTE0NSAxMC4yMjJMNDMuMTE0NSAxMS45MjM4QzQzLjExNDUgMTIuMDgzMyA0My4yMTUzIDEyLjE4OTcgNDMuMzY2NyAxMi4xODk3TDQ1LjY4NzYgMTIuMTg5N0M0NS44MzkgMTIuMjQyOSA0NS45Mzk5IDEyLjM0OTIgNDUuOTM5OSAxMi41MDg4WiIgZmlsbC1ydWxlPSJldmVub2RkIiBmaWxsPSIjRkVGN0VCIi8+Cgk8cGF0aCBpZD0icGF0aCIgZD0iTTU0LjM2NTYgMTEuMTI2MUM1NC4zMTUyIDExLjIzMjUgNTQuMzE1MiAxMS4zMzg5IDU0LjM2NTYgMTEuNDQ1MkM1NC41Njc1IDExLjcxMTEgNTQuODE5NyAxMS45MjM4IDU1LjA3MiAxMi4xODk3QzU1LjMyNDIgMTIuNDAyNSA1NS41NzY1IDEyLjYxNTIgNTUuODc5MyAxMi44Mjc5QzU1Ljk4MDIgMTIuODgxMSA1Ni4wMzA2IDEzLjA0MDYgNTUuOTgwMiAxMy4xNDdMNTUuNzI3OSAxMy42MjU2QzU1LjY3NzUgMTMuNzg1MSA1NS40NzU2IDEzLjc4NTEgNTUuMzc0OCAxMy43MzJDNTUuMDcyIDEzLjUxOTIgNTQuODE5NyAxMy4yNTMzIDU0LjU2NzUgMTMuMDQwNkM1NC4zMTUyIDEyLjgyNzkgNTQuMTEzNCAxMi41NjIgNTMuODYxMSAxMi4yOTYxQzUzLjc2MDMgMTIuMTg5NyA1My42MDg5IDEyLjE4OTcgNTMuNTA3OSAxMi4yOTYxQzUzLjI1NTYgMTIuNTYyIDUzLjAwMzQgMTIuODI3OSA1Mi43NTExIDEzLjA0MDZDNTIuNDQ4NCAxMy4zMDY1IDUyLjA5NTIgMTMuNTcyNCA1MS43NDIxIDEzLjgzODNDNTEuNjQxMSAxMy44OTE1IDUxLjQ4OTcgMTMuODkxNSA1MS4zODg5IDEzLjc4NTFMNTAuOTM0OCAxMy4yMDAyQzUwLjg4NDQgMTMuMjUzMyA1MC44ODQ0IDEzLjMwNjUgNTAuODMzOSAxMy40MTI5QzUwLjc4MzQgMTMuNDY2MSA1MC43ODM0IDEzLjUxOTIgNTAuNzMzIDEzLjYyNTZMNTAuMjI4NCAxMy4yNTMzTDUwLjIyODQgMTMuNzMyTDQ5LjU3MjUgMTMuNzMyQzQ5LjQyMTEgMTMuNzMyIDQ5LjMyMDMgMTMuNjI1NiA0OS4zMjAzIDEzLjQ2NjFMNDkuMzIwMyAxMC40MzQ4QzQ5LjMyMDMgMTAuMjc1MiA0OS4yMTk0IDEwLjE2ODkgNDkuMDY4IDEwLjE2ODlMNDguODE1NyAxMC4xNjg5QzQ4LjY2NDQgMTAuMTY4OSA0OC41NjM1IDEwLjI3NTIgNDguNTYzNSAxMC40MzQ4QzQ4LjU2MzUgMTAuNzUzOSA0OC41MTMxIDExLjA3MyA0OC40NjI1IDExLjMzODlDNDguNDEyMSAxMS43MTExIDQ4LjM2MTcgMTIuMDMwMiA0OC4yNjA3IDEyLjM0OTNDNDguMTU5OCAxMi42Njg0IDQ4LjEwOTQgMTIuOTg3NCA0OC4wMDg0IDEzLjI1MzNDNDcuOTA3NiAxMy40NjYxIDQ3Ljg1NzEgMTMuNjc4OCA0Ny43NTYyIDEzLjgzODNDNDcuNzA1OCAxMy45OTc5IDQ3LjUwMzkgMTQuMDUxIDQ3LjQwMzEgMTMuOTQ0N0w0Ni45NDkgMTMuNjI1NkM0Ni44NDggMTMuNTcyNCA0Ni43OTc2IDEzLjQxMjkgNDYuODQ4IDEzLjMwNjVDNDYuOTk5NCAxMy4wNDA2IDQ3LjEwMDMgMTIuODI3OSA0Ny4yMDEyIDEyLjU2MkM0Ny4zMDIxIDEyLjI0MjkgNDcuNDAzMSAxMS45MjM4IDQ3LjUwMzkgMTEuNTUxNkM0Ny41NTQ0IDExLjE3OTMgNDcuNjA0OSAxMC43NTM5IDQ3LjY1NTMgMTAuMjc1M0M0Ny43MDU4IDkuNzk2NjMgNDcuNzA1OCA5LjIxMTY0IDQ3LjcwNTggOC41NzM0OUw0Ny43MDU4IDQuNjM4MTVDNDcuNzA1OCA0LjQ3ODY0IDQ3LjgwNjYgNC4zNzIyNSA0Ny45NTggNC4zNzIyNUw0OC40MTIxIDQuMzcyMjVDNDguNTYzNSA0LjM3MjI1IDQ4LjY2NDQgNC40Nzg2NCA0OC42NjQ0IDQuNjM4MTVMNDguNjY0NCA2Ljc2NTM4QzQ4LjY2NDQgNi45MjQ5IDQ4Ljc2NTMgNy4wMzEyOCA0OC45MTY2IDcuMDMxMjhMNDkuMjE5NCA3LjAzMTI4QzQ5LjM3MDcgNy4wMzEyOCA0OS40NzE3IDYuOTI0OSA0OS40NzE3IDYuNzY1MzhMNDkuNDcxNyA0LjQyNTQ1QzQ5LjQ3MTcgNC4yNjU5IDQ5LjU3MjUgNC4xNTk1NSA0OS43MjM5IDQuMTU5NTVMNTAuMTI3NiA0LjE1OTU1QzUwLjI3ODkgNC4xNTk1NSA1MC4zNzk4IDQuMjY1OSA1MC4zNzk4IDQuNDI1NDVMNTAuMzc5OCA2Ljk3ODA5TDUwLjk4NTIgNi45NzgwOUw1MC45ODUyIDcuNzIyNkM1MC45ODUyIDcuODgyMTQgNTAuODg0NCA3Ljk4ODQ5IDUwLjczMyA3Ljk4ODQ5TDQ4LjY2NDQgNy45ODg0OUw0OC42NjQ0IDguNzMzMDNMNDguNjY0NCA5LjA1MjEyTDUwLjA3NyA5LjA1MjEyQzUwLjIyODQgOS4wNTIxMiA1MC4zMjkzIDkuMTU4NDggNTAuMzI5MyA5LjMxODAyTDUwLjMyOTMgMTIuMzQ5M0M1MC40ODA3IDEyLjAzMDIgNTAuNTgxNyAxMS43MTExIDUwLjY4MjUgMTEuMzkyQzUwLjc4MzQgMTEuMDcyOSA1MC44ODQ0IDEwLjc1MzkgNTAuOTM0OCAxMC4zODE2QzUwLjk4NTIgMTAuMDA5MyA1MS4wMzU2IDkuNjM3MDggNTEuMDg2MiA5LjIxMTY0QzUxLjEzNjYgOC43ODYyMiA1MS4xMzY2IDguMzYwNzggNTEuMTM2NiA3LjgyODk4TDUxLjEzNjYgNS4yMjMxNEM1MS4xMzY2IDUuMDYzNiA1MS4yMzc1IDQuOTU3MjQgNTEuMzg4OSA0Ljk1NzI0QzUxLjk5NDQgNC45MDQwNSA1Mi42NTAzIDQuODUwODkgNTMuMzU2NiA0Ljc0NDU0QzU0LjAxMjUgNC42MzgxNSA1NC42NjgzIDQuNTMxOCA1NS4yNzM4IDQuMzcyMjVDNTUuNDI1MiA0LjMxOTA5IDU1LjUyNjEgNC40MjU0NSA1NS41NzY1IDQuNTg0OTlMNTUuNjc3NSA1LjExNjc5QzU1LjY3NzUgNS4yNzYzNCA1NS42MjcgNS4zODI2OSA1NS40NzU2IDUuNDM1ODhDNTUuMjczOCA1LjQ4OTA0IDU1LjA3MiA1LjU0MjI0IDU0LjgxOTcgNS41OTU0QzU0LjUxNyA1LjY0ODU5IDU0LjIxNDIgNS43MDE3OCA1My44NjExIDUuNzU0OTRDNTMuNTU4MyA1LjgwODE0IDUzLjI1NTYgNS44NjEzIDUyLjkwMjUgNS45MTQ0OUM1Mi42NTAzIDUuOTY3NjggNTIuNDQ4NCA1Ljk2NzY4IDUyLjI0NjYgNi4wMjA4NEM1Mi4xNDU2IDYuMDIwODQgNTIuMDQ0OCA2LjEyNzIgNTIuMDQ0OCA2LjI4Njc0TDUyLjA0NDggNi44NzE3M0M1Mi4wNDQ4IDcuMDMxMjggNTIuMTQ1NiA3LjEzNzYzIDUyLjI5NyA3LjEzNzYzTDU1LjMyNDIgNy4xMzc2M0M1NS40NzU2IDcuMTM3NjMgNTUuNTc2NSA3LjI0Mzk5IDU1LjU3NjUgNy40MDM1M0w1NS41NzY1IDguMTQ4MDRMNTUuNTc2NSA4LjIwMTIzQzU1LjQyNTIgOC44MzkzOSA1NS4yNzM4IDkuNDI0MzggNTUuMDcyIDkuOTU2MThDNTQuODE5NyAxMC4yNzUyIDU0LjYxNzkgMTAuNzUzOSA1NC4zNjU2IDExLjEyNjFaTTUxLjA4NjIgMTIuOTg3NEM1MS44OTM0IDEyLjQ1NTYgNTIuNTQ5MyAxMS45MjM4IDUzLjAwMzQgMTEuMzM4OUM1My4wNTM4IDExLjIzMjUgNTMuMTA0MiAxMS4xMjYxIDUzLjA1MzggMTEuMDE5OEM1Mi44NTIxIDEwLjY0NzUgNTIuNjUwMyAxMC4yNzUyIDUyLjQ5ODkgOS44NDk4MkM1Mi4zNDc1IDkuNDc3NTQgNTIuMjQ2NiA5LjA1MjEyIDUyLjE0NTYgOC41NzM0OUM1Mi4xNDU2IDguNDY3MTMgNTIuMTk2MiA4LjMwNzU5IDUyLjI5NyA4LjI1NDM5TDUyLjY1MDMgOC4xNDgwNEM1Mi44MDE2IDguMDk0ODggNTIuOTUzIDguMjAxMjMgNTIuOTUzIDguMzYwNzhDNTMuMDUzOCA4Ljk0NTc0IDUzLjIwNTIgOS40MjQzOCA1My40MDcgOS45MDI5OEM1My41MDc5IDEwLjExNTcgNTMuNzYwMyAxMC4xMTU3IDUzLjg2MTEgOS45MDI5OEM1NC4wNjMgOS40MjQzOCA1NC4yNjQ4IDguODkyNTggNTQuNDE2MSA4LjMwNzU5QzU0LjQ2NjYgOC4xNDgwNCA1NC4zMTUyIDcuOTg4NDkgNTQuMTYzOCA3Ljk4ODQ5TDUyLjE0NTYgNy45ODg0OUM1MS45OTQ0IDcuOTg4NDkgNTEuODkzNCA4LjA5NDg4IDUxLjg5MzQgOC4yNTQzOUM1MS44OTM0IDguNzMzMDMgNTEuODkzNCA5LjEwNTI5IDUxLjg0MyA5LjUzMDczQzUxLjc5MjUgOS45NTYxOCA1MS43NDIxIDEwLjM4MTYgNTEuNjkxNyAxMC44MDdDNTEuNjQxMSAxMS4xNzkzIDUxLjU0MDMgMTEuNTUxNiA1MS40MzkzIDExLjkyMzhDNTEuMzg4OSAxMi4yNDI5IDUxLjIzNzUgMTIuNjE1MiA1MS4wODYyIDEyLjk4NzRaIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNGRUY3RUIiLz4KCTxkZWZzLz4KPC9zdmc+Cg==');
+    }
+
+    .icon-r1 {
+      background: url("/static/img/arrow.svg") no-repeat center;
+    }
+
+    #feedback_id .layui-layer-TipsG {
+      width: 15px !important;
+      height: 15px !important;
+      transform: rotate(45deg);
+      border-top-color: rgb(54, 58, 80) !important;
+      border-right-color: rgb(54, 58, 80) !important;
+      z-index: -1;
+    }
+
+    #feedback_id i.layui-layer-TipsL {
+      right: -3px !important;
+    }
+
+    #feedback_id .layui-layer-TipsR:after {
+      position: absolute;
+      bottom: -2px;
+      left: -15px;
+      content: '';
+      width: 31px;
+      height: 50px;
+      background: #fff;
+      transform: rotate(45deg);
+    }
+
+    #feedback_id i.layui-layer-TipsL,
+    #feedback_id i.layui-layer-TipsR {
+      top: 8px !important;
+    }
+
+    #memu_custom {
+      /* display: none; */
+      /* margin-top: 30px;
+      text-align: center; */
+      /* position: absolute;
+			bottom: 0;
+			right: 50%;
+			margin-right: -55px; */
+      position: relative;
+      bottom: 0;
+      margin: 0 auto;
+      height: 44px;
+    }
+
+    .memu_custom {
+      padding-left: 52px;
+      background: url('/static/img/ico/icon-custom1.svg');
+      line-height: 44px;
+      text-align: center;
+      cursor: pointer;
+      background-repeat: no-repeat;
+      background-size: 16px auto;
+      background-position: 14px 6px;
+      padding: 6px 14px 6px 36px;
+      border-radius: 2px;
+      color: #ccc;
+    }
+
+    #memu_custom .memu_custom:hover {
+      background-color: #2c3138b8;
+      color: #ccc;
+      box-shadow: 0 0 10px #2c3138e0;
+    }
+
+    #memu_custom:hover .memu_custom {
+      /* background: url('/static/img/ico/icon-custom2.svg'); */
+      background-repeat: no-repeat;
+      background-size: 16px auto;
+      background-position: 14px 6px;
     }
   </style>
   <script type="text/javascript">
     // 处理浏览器兼容性问题
-    function browserCompatibility(){
+    function browserCompatibility() {
       var ie = (function () {
         //ie版本
         var agent = navigator.userAgent.toLowerCase();
         return !!window.ActiveXObject || 'ActiveXObject' in window
-                ? (agent.match(/msie\s(\d+)/) || [])[1] || (agent.indexOf('edge') > -1?'edge':false)  || (agent.indexOf('trident') > -1 && agent.indexOf('rv:11.0') > -1?'11':false) //由于ie11并没有msie的标识
-                : false;
+          ? (agent.match(/msie\s(\d+)/) || [])[1] || (agent.indexOf('edge') > -1 ? 'edge' : false) || (agent.indexOf('trident') > -1 && agent.indexOf('rv:11.0') > -1 ? '11' : false) //由于ie11并没有msie的标识
+          : false;
       })()
-      if(typeof ie !== "boolean" && ie !== 'edge') ie = parseInt(ie);
-      if(ie < 11 && typeof ie !== "boolean"){
+      if (typeof ie !== "boolean" && ie !== 'edge') ie = parseInt(ie);
+      if (ie < 11 && typeof ie !== "boolean") {
         window.location.href = '/tips';
-      }else if(ie){
+      } else if (ie) {
         var title = document.createElement('div');
         title.setAttribute('class', 'content');
-        title.setAttribute('style','height: 50px;position: absolute;top: 0;left: 0;right: 0;line-height: 50px;z-index: 9999999;background: rgba(0,0,0,.5);text-align: center;color: #ff922e;font-size: 19px;font-weight: 600;');
+        title.setAttribute('style', 'height: 50px;position: absolute;top: 0;left: 0;right: 0;line-height: 50px;z-index: 9999999;background: rgba(0,0,0,.5);text-align: center;color: #ff922e;font-size: 19px;font-weight: 600;');
         title.innerHTML = '<span>当前浏览器可能存在视图不兼容的情况，推荐使用Chrome/FireFox/国产浏览器急速模式访问</span><span class="compatibility_tips" style="position: absolute;right: 15px;top: 10px;font-size: 14px;display: inline-block; height: 30px;line-height: 28px;padding: 0 12px;font-weight: 500;color: #ffffff; border-radius: 4px;cursor: pointer;border: 2px solid #ffffff;font-weight: 500;">关闭提示</span>';
-        title.querySelector('.compatibility_tips').addEventListener('click',function(res){
+        title.querySelector('.compatibility_tips').addEventListener('click', function (res) {
           var parentNode = this.parentElement;
           parentNode.parentElement.removeChild(parentNode)
         })
         var style = document.createElement('style');
-        style.setAttribute('type','text/css');
-        style.innerHTML = '.sidebar-scroll .mypcip span{background-position: -20px;background-size: 65px;}.bind-user{background-position: -35px;}.bt-dashi{background-position: -30px;}.bt-dashi{background-position: -30px;}.ico-system{background-position: -15px;}.btltd{background-position: -80px;}';
+        style.setAttribute('type', 'text/css');
+        style.innerHTML = '.sidebar-scroll .mypcip span{background-position: -20px;background-size: 65px;}.bind-user{background-position: -35px;}.bt-dashi{background-position: -30px;}.bt-dashi{background-position: -30px;}.ico-system{background-position: -15px;}.btltd,.index-pos-box .btpro{background-position: -80px;}.libPay-content-box .glyphicon{display: none;}';
         var html = document.querySelector('html')
         html.appendChild(title)
+        if (!(window.location.pathname === 'index' || window.location.pathname === '/')) {
+          style.innerHTML += '@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {.btltd,.index-pos-box .btpro{background-position: -0px;}}'
+        }
         html.appendChild(style)
       }
       if (!window.location.origin) {
-        window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+        window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
       }
       return ie;
     }
 
     // 修复浏览器当前分辨率（包括当前浏览和系统提供的显示缩放），小于1920则进行修复，大于1920则不修复
-    function repairResolution(){
-      var ratio = (function getRatio(){
-        var ratio=0;
-        var screen=window.screen;
-        var ua=navigator.userAgent.toLowerCase();
-        if(window.devicePixelRatio !== undefined){
-          ratio=window.devicePixelRatio;
-        } else if(~ua.indexOf('msie')) {
-          if(screen.deviceXDPI && screen.logicalXDPI) {
-            ratio=screen.deviceXDPI/screen.logicalXDPI;
+    function repairResolution() {
+      var ratio = (function getRatio() {
+        var ratio = 0;
+        var screen = window.screen;
+        var ua = navigator.userAgent.toLowerCase();
+        if (window.devicePixelRatio !== undefined) {
+          ratio = window.devicePixelRatio;
+        } else if (~ua.indexOf('msie')) {
+          if (screen.deviceXDPI && screen.logicalXDPI) {
+            ratio = screen.deviceXDPI / screen.logicalXDPI;
           }
-        }else if(window.outerWidth !== undefined && window.innerWidth !== undefined) {
-          ratio=window.outerWidth/window.innerWidth;
+        } else if (window.outerWidth !== undefined && window.innerWidth !== undefined) {
+          ratio = window.outerWidth / window.innerWidth;
         }
-        if(ratio) {
-          ratio=Math.round(ratio*100);
+        if (ratio) {
+          ratio = Math.round(ratio * 100);
         }
         return ratio;
       })();
       var availWidth = window.screen.availWidth, actualWidth = availWidth * ratio;
       var __zoom = 1;  //需要缩放的比例
-      if(availWidth < 1920){
+      if (availWidth < 1920) {
         __zoom = (availWidth / 1920).toFixed(1)
-        if(__zoom <= .7) __zoom = .7
+        if (__zoom <= .7) __zoom = .7
         document.querySelector('html').style.zoom = __zoom;
       }
       return __zoom;
@@ -161,13 +320,13 @@
 
 <body>
   <div style="z-index: -3;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  min-height: 475px;
-  background-image: url('{{g.cdn_url}}/images/bg.jpg');
-  background-repeat: no-repeat;
-  background-size: cover;"></div>
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    min-height: 475px;
+    background-image: url('{{g.cdn_url}}/images/bg.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;"></div>
   <div class="bt-warp bge6">
     <a style="display:none;" id="panel_debug" data="{{g['debug']}}" data-pyversion="{{g['pyversion']}}"></a>
     <a style="display:none;" id="request_token_head" token="{{session[g.get_csrf_html_token_key]}}"></a>
@@ -175,10 +334,10 @@
     <div class="public_key" style="display: block;" data="{{session['rsa_public_key']}}"></div>
     <div id="container" class="container-fluid">
       <div class="sidebar-scroll">
-        <div class="sidebar-auto">
+        <div class="sidebar-auto flex" style="flex-direction: column;">
           <div id="task" class="task cw" onclick="messagebox()">0</div>
           <h3 class="mypcip"><span class="f14 cw" title="单击可显示/隐藏IP，双击可复制IP">{{session['address']}}</span></h3>
-          <ul class="menu">
+          <ul class="menu flex-1" style="overflow-y: auto;overflow-x: hidden;">
             {% for menu in g['menus'] %}
             {% if menu['href'] == g.uri %}
             <li id="{{menu['id']}}" class="current"> <a class="{{menu['class']}}"
@@ -188,47 +347,77 @@
             {% endif %}
             {% endfor %}
           </ul>
+          <div id="memu_custom"><a class="memu_custom">自定义菜单</a></div>
         </div>
       </div>
       <button style="display: none;" id="bt_copys" class="bt_copy" data-clipboard-text=""></button>
       <a style="display: none;" id="defaultPath">{{session['config']['sites_path']}}</a>
       {% block content %}{% endblock %}
+
       <!-- <div id="wechat-customer" class="wechat-customer hide" >
-        <div class="describe-title">在线客服</div>
-        <div class="qrcode-wechat">
-          <div id="wechatCustomerQrcode"><img src="/static/images/customer-qrcode.png" /></div>
+      <div class="describe-title">在线客服</div>
+      <div class="qrcode-wechat">
+        <div id="wechatCustomerQrcode"><img src="/static/images/customer-qrcode.png" /></div>
+      </div>
+      <div class="wechat-title">
+        <img class="icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAATlJREFUSEvtVrFOw0AMfed8AxJsZWGAgQHBXP4DCQa+Ioou7g18BRIg9T/KDGJggIGFbiDxDXGQowSBuGvrFISEmtF+7/nis312RVEMiWgIoMT375aIjpj5KeJrTMy8JSJjAPsRzEhErl1Zlhd1XZ8kRKZEdMjM0xlBBiIyATCIYZxzl857X6uTiHaY+TElZrUz87aIPCjvI0gIwVmF5uG7H1gFmZepxv85XTdqCCEcLMQ0gLz3jbbTOm/rPdkLBt0v0E77xysq2it9T2nhuTzPN4ho10KyYEXkXvvkBcC6hWjEvmqQMwCnANZa8p1RJAbfa41vAM7/0cUzczOiZ43zvunrtPVOntuO3+wrluJ12qspvFBm/+bR+u03nhPrkKZk2ZVINUZO964sy44Ta9FSK5GuQ1VVXb0DLf+sHQ9tLL0AAAAASUVORK5CYII=" />
+        <span class="scan-title">微信扫码</span>
+      </div>
+      <span class="layui-layer-setwin wechat-close"><a href="javascript:;" class="layui-layer-ico layui-layer-close layui-layer-close2"></a></span>
+    </div> -->
+      <div id="wechat-customer" style="
+        right: 55px;
+        bottom: 50px;
+        width: 170px;
+        display: flex;
+        height: 228px;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center;
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);" class="wechat-customer hide">
+        <div style="
+        background: rgba(32, 165, 58, 0.1);
+        width: 100%;
+        height: 46px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;">
+          <a href="https://www.bt.cn/new/wechat_customer" target="_blank" class="btlink"
+            style="font-size: 16px;display: flex;flex-direction: row;flex-wrap: nowrap;align-items: center;"><span
+              style="border-bottom: 1px solid;">点击咨询客服</span>
+            <div class="icon-r1" style="width: 15px;height: 18px;margin-top: 1px;margin-left: 5px;"></div>
+          </a>
         </div>
-        <div class="wechat-title">
-          <img class="icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAATlJREFUSEvtVrFOw0AMfed8AxJsZWGAgQHBXP4DCQa+Ioou7g18BRIg9T/KDGJggIGFbiDxDXGQowSBuGvrFISEmtF+7/nis312RVEMiWgIoMT375aIjpj5KeJrTMy8JSJjAPsRzEhErl1Zlhd1XZ8kRKZEdMjM0xlBBiIyATCIYZxzl857X6uTiHaY+TElZrUz87aIPCjvI0gIwVmF5uG7H1gFmZepxv85XTdqCCEcLMQ0gLz3jbbTOm/rPdkLBt0v0E77xysq2it9T2nhuTzPN4ho10KyYEXkXvvkBcC6hWjEvmqQMwCnANZa8p1RJAbfa41vAM7/0cUzczOiZ43zvunrtPVOntuO3+wrluJ12qspvFBm/+bR+u03nhPrkKZk2ZVINUZO964sy44Ta9FSK5GuQ1VVXb0DLf+sHQ9tLL0AAAAASUVORK5CYII=" />
-          <span class="scan-title">微信扫码</span>
-        </div>
-        <span class="layui-layer-setwin wechat-close"><a href="javascript:;" class="layui-layer-ico layui-layer-close layui-layer-close2"></a></span>
-      </div> -->
-      <div id="wechat-customer" class="wechat-customer hide">
-        <div class="describe-title">在线客服</div>
-        <div class="qrcode-wechat">
+        <div class="qrcode-wechat" style="width: 128px;height: 128px;margin: 8px 0 4px 0">
           <div id="wechatCustomerQrcode">
-            <img src="/static/images/customer-qrcode.png"  style="width: 80px;height: 80px;" alt="" />
+            <img src="/static/images/customer-qrcode.png" style="width: 128px;height: 128px;" alt="" />
           </div>
         </div>
-        <div class="wechat-title">
-        <img class="icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAATlJREFUSEvtVrFOw0AMfed8AxJsZWGAgQHBXP4DCQa+Ioou7g18BRIg9T/KDGJggIGFbiDxDXGQowSBuGvrFISEmtF+7/nis312RVEMiWgIoMT375aIjpj5KeJrTMy8JSJjAPsRzEhErl1Zlhd1XZ8kRKZEdMjM0xlBBiIyATCIYZxzl857X6uTiHaY+TElZrUz87aIPCjvI0gIwVmF5uG7H1gFmZepxv85XTdqCCEcLMQ0gLz3jbbTOm/rPdkLBt0v0E77xysq2it9T2nhuTzPN4ho10KyYEXkXvvkBcC6hWjEvmqQMwCnANZa8p1RJAbfa41vAM7/0cUzczOiZ43zvunrtPVOntuO3+wrluJ12qspvFBm/+bR+u03nhPrkKZk2ZVINUZO964sy44Ta9FSK5GuQ1VVXb0DLf+sHQ9tLL0AAAAASUVORK5CYII=">
-        <span class="scan-title">微信扫码</span></div>
-        <hr style="width: 88px;height: 1px;background: #E6E6E6;margin: 10px auto;">
-        <div><a href="https://www.bt.cn/new/wechat_customer" target="_blank" class="btlink">点击咨询客服<div class="icon-r"></div></a></div>
-        <span class="layui-layer-setwin wechat-close"><a href="javascript:;" class="layui-layer-ico layui-layer-close layui-layer-close2"></a></span>
+        <div class="wechat-title" style="width: 103px;height: 26px;">
+          <img class="icon" style="width: 17px;height: 17px;"
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAATlJREFUSEvtVrFOw0AMfed8AxJsZWGAgQHBXP4DCQa+Ioou7g18BRIg9T/KDGJggIGFbiDxDXGQowSBuGvrFISEmtF+7/nis312RVEMiWgIoMT375aIjpj5KeJrTMy8JSJjAPsRzEhErl1Zlhd1XZ8kRKZEdMjM0xlBBiIyATCIYZxzl857X6uTiHaY+TElZrUz87aIPCjvI0gIwVmF5uG7H1gFmZepxv85XTdqCCEcLMQ0gLz3jbbTOm/rPdkLBt0v0E77xysq2it9T2nhuTzPN4ho10KyYEXkXvvkBcC6hWjEvmqQMwCnANZa8p1RJAbfa41vAM7/0cUzczOiZ43zvunrtPVOntuO3+wrluJ12qspvFBm/+bR+u03nhPrkKZk2ZVINUZO964sy44Ta9FSK5GuQ1VVXb0DLf+sHQ9tLL0AAAAASUVORK5CYII=">
+          <span class="scan-title" style="font-size: 16px">扫一扫</span>
+        </div>
+        <span class="layui-layer-setwin wechat-close"><a href="javascript:;"
+            class="layui-layer-ico layui-layer-close layui-layer-close2"></a></span>
       </div>
       <div class="toolbar-right hide">
-        <a href="javascript:;" class="service" title="在线客服"></a>
-        <a href="javascript:;" class="feedback" title="反馈调研"></a>
+        <a href="javascript:;" class="service"></a>
+        <a href="javascript:;" class="feedback"></a>
       </div>
       <div class="footer bgw">
-        <span style="margin-right: 8px;">{{session['brand']}}{{session['product']}} &copy;2014-{{g['yaer']}} 广东堡塔安全技术有限公司 (bt.cn)</span>
+        <span style="margin-right: 8px;">{{session['brand']}}{{session['product']}} &copy;2014-{{g['yaer']}}
+          广东堡塔安全技术有限公司 (bt.cn)</span>
         <a class="btlink" style="margin-right: 8px;" href="http://www.bt.cn/bbs" target="_blank">论坛求助</a>|
-        <a class="btlink" style="margin: 0 8px;" href="https://www.kancloud.cn/chudong/bt2017/424204" target="_blank">使用手册</a>|
-        <a class="btlink bt_wx_qrcode" style="margin: 0 8px;" href="javascript:;">微信公众号<div class="bt_wx_img"></div></a>|
-        <a class="btlink" style="margin: 0 8px;" href="https://www.bt.cn/auth" target="_blank">正版查询</a>|<a class="btlink" style="margin: 0 8px;" href="https://www.lazy.ink" target="_blank">主题作者：Lazy</a>|
-        <span class="bt_qq_qun">|<a class="btlink" style="margin: 0 8px;" href="https://jq.qq.com/?_wv=1027&k=12Y6BkLq" target="_blank">售后QQ群：907340327</a></span>
+        <a class="btlink" style="margin: 0 8px;" href="https://www.kancloud.cn/chudong/bt2017/424204"
+          target="_blank">使用手册</a>|
+        <a class="btlink bt_wx_qrcode" style="margin: 0 8px;" href="javascript:;">微信公众号<div class="bt_wx_img"></div>
+        </a>|
+        <a class="btlink" style="margin: 0 8px;" href="https://www.bt.cn/auth" target="_blank">正版查询</a>|<a
+          class="btlink" style="margin: 0 8px;" href="https://www.lazy.ink" target="_blank">主题作者：Lazy</a>
+        <span class="bt_qq_qun">|<a class="btlink" style="margin: 0 8px;" href="https://jq.qq.com/?_wv=1027&k=12Y6BkLq"
+            target="_blank">售后QQ群：907340327</a></span>
       </div>
     </div>
     {% if g.cdn_url != '/static' %}
@@ -255,54 +444,69 @@
     {% endif %}
     <script type="text/javascript">
       var recycle_bin_db_open = "{{g['recycle_bin_db_open']}}" === "1",
-              recycle_bin_open = "{{g['recycle_bin_open']}}" === "1",
-              update_code = "{{data['js_random']}}",
-              panel_version = "{{g['version']}}",
-              cdn_url = "{{g.cdn_url}}";
+        recycle_bin_open = "{{g['recycle_bin_open']}}" === "1",
+        update_code = "{{data['js_random']}}",
+        panel_version = "{{g['version']}}",
+        cdn_url = "{{g.cdn_url}}";
     </script>
     {% if request.path == '/btwaf/index' %}
     <script type="text/javascript" src="{{g.cdn_url}}/js/jquery-2.2.4.min.js"></script>
     <script type="text/javascript" src="{{g.cdn_url}}/layer/layer.js?version={{g['version']}}"></script>
-    <script type="text/javascript" src="{{g.cdn_url}}/language/{{session['lan']}}/lan.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script type="text/javascript"
+      src="{{g.cdn_url}}/language/{{session['lan']}}/lan.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
     <script type="text/javascript" src="{{g.cdn_url}}/js/clipboard.min.js" defer></script>
     <script type="text/javascript" src="{{g.cdn_url}}/laydate/laydate.js" defer></script>
     <script type="text/javascript" src="{{g.cdn_url}}/js/jquery.qrcode.min.js"></script>
-    <script type="text/javascript" src="{{g.cdn_url}}/js/public.js?version={{g['version']}}&repair={{data['js_random']}}&patch=1"></script>
-    <script type="text/javascript" src="{{g.cdn_url}}/js/public_backup.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
-    <script type="text/javascript" src="{{g.cdn_url}}/js/tools.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script type="text/javascript"
+      src="{{g.cdn_url}}/js/public.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script type="text/javascript"
+      src="{{g.cdn_url}}/js/public_backup.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script type="text/javascript"
+      src="{{g.cdn_url}}/js/tools.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script src="{{g.cdn_url}}/js/jsencrypt.min.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
     {% endif %}
 
     {% block scripts %}
     <script src="{{g.cdn_url}}/js/jquery-2.2.4.min.js"></script>
     <script src="{{g.cdn_url}}/layer/layer.js?version={{g['version']}}"></script>
-    <script src="{{g.cdn_url}}/language/{{session['lan']}}/lan.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script
+      src="{{g.cdn_url}}/language/{{session['lan']}}/lan.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
     <script src="{{g.cdn_url}}/js/clipboard.min.js" defer></script>
     <script src="{{g.cdn_url}}/laydate/laydate.js" defer></script>
-    <script type="text/javascript"  src="{{g.cdn_url}}/js/jquery.qrcode.min.js"></script>
-		<script src="{{g.cdn_url}}/js/jsencrypt.min.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
-
+    <script type="text/javascript" src="{{g.cdn_url}}/js/jquery.qrcode.min.js"></script>
+    <script src="{{g.cdn_url}}/js/jsencrypt.min.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
 
     <!-- 以下文件未来将被剔除 -->
     <script src="{{g.cdn_url}}/js/bootstrap.min.js"></script>
-    <script src="{{g.cdn_url}}/js/public.js?version={{g['version']}}&repair={{data['js_random']}}&patch=1"></script>
+    <script src="{{g.cdn_url}}/js/public.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
     <script src="{{g.cdn_url}}/js/public_backup.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
     <!-- End -->
-    <script type="text/javascript" src="{{g.cdn_url}}/js/tools.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+    <script type="text/javascript"
+      src="{{g.cdn_url}}/js/tools.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
     <script type="text/javascript">
-      window.localStorage.setItem('mypcip',"{{session['address']}}");
+      // 解决按钮链接点击后按enter键再次触发的问题
+      document.onclick = function (e) {
+        if (e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'a') {
+          e.target.blur(); //去掉按钮的焦点
+        } else if ($(e.target).parent()[0] && $(e.target).parent()[0].tagName.toLowerCase() === 'button') {
+          $(e.target).parent()[0].blur(); //去掉按钮的焦点
+        }
+      }
+
+      window.localStorage.setItem('mypcip', "{{session['address']}}");
       var mypcip = window.localStorage.getItem('mypcip')
-      var ipArr = mypcip.split('.'),numberIp = window.localStorage.getItem('mypcipShow')
+      var ipArr = mypcip.split('.'), numberIp = window.localStorage.getItem('mypcipShow')
       $('.mypcip .cw').text(numberIp !== null && parseInt(numberIp) ? ipArr[0] + '.***.***.' + ipArr[ipArr.length - 1] : mypcip);
       numberIp !== null && parseInt(numberIp) ? $('.mypcip').removeClass('active') : $('.mypcip').addClass('active')
 
       $('.mypcip').mousedown(function () {
         var stime = new Date().getTime();//当前时间
         $(this).mouseup(function (e) {
-          if(new Date().getTime() - stime < 200) {//鼠标按下和松开的时间间隔小于200为点击事件
+          if (new Date().getTime() - stime < 200) {//鼠标按下和松开的时间间隔小于200为点击事件
             var is_show = $(this).hasClass('active')
             $('.mypcip .cw').text(is_show ? ipArr[0] + '.***.***.' + ipArr[ipArr.length - 1] : mypcip);
-            window.localStorage.setItem('mypcipShow',is_show ? 1 : 0);
-            if(is_show) $(this).removeClass('active');
+            window.localStorage.setItem('mypcipShow', is_show ? 1 : 0);
+            if (is_show) $(this).removeClass('active');
             else $(this).addClass('active');
             e.stopPropagation()
             e.preventDefault()
@@ -311,205 +515,353 @@
       })
       $('.mypcip').on('dblclick', function () {
         bt.pub.copy_pass(mypcip);
-        bt_tools.msg({msg:'复制成功',status: true});
+        bt_tools.msg({ msg: '复制成功', status: true });
       })
 
       bt.set_cookie('order', 'id desc');
       bt.set_cookie('serverType', "{{session['webserver']}}");
+      var panelVersion = '{{session["version"]}}'
       if (bt.get_cookie('pro_end') >= 0 || bt.get_cookie('ltd_end') > 0) $(".bt_qq_qun").show()
-
-      $('#onlineCustomer').click(function (){
-        var customer = $("#wechat-customer");
-        var ltd_end = bt.get_cookie('ltd_end');
-        if (!(ltd_end > 0)){
-          if(!$('#pay_product_view').length > 0){
-            product_recommend.pay_product_sign('ltd',45,'ltd');
-            layer.msg('在线客服仅支持企业版用户使用', {icon: 5});
-          }
-          return false;
-        }else{
-          if(customer.hasClass('hide')){
-            customer.removeClass('hide');
-          }else{
-            customer.addClass('hide');
+      var num = 0, too = false, time = 0
+      $('.toolbar-right .service').hover(function () {
+        if (too) return false
+        $(this).css({ 'background-image': 'url(/static/img/service_2.svg)', 'background-color': 'rgb(32, 165, 58)' })
+        $('.toolbar-right').css({ 'border-top-left-radius': '4px', 'border-top-right-radius': '4px' })
+        $('#wechat-customer').removeClass('hide')
+        $('.wechat-close').hide()
+        num = 0
+      }, function () {
+        if (too) return false
+        $(this).attr('style', '')
+        $('.toolbar-right').attr('style', '')
+        clearTimeout(time)
+        time = setTimeout(function () {
+          $('#wechat-customer').addClass('hide')
+        }, 50)
+        num = 1
+      })
+      $('.wechat-close').on('click', function () {
+        $('.toolbar-right .service').attr('style', '')
+        $('.toolbar-right').attr('style', '')
+        $(this).parent().addClass('hide');
+        too = false
+      })
+      $('#wechat-customer').hover(function () {
+        clearTimeout(time)
+      }, function () {
+        if (too) return false
+        $('.toolbar-right .service').attr('style', '')
+        $('.toolbar-right').attr('style', '')
+        clearTimeout(time)
+        $('#wechat-customer').addClass('hide')
+        num = 1
+      })
+      $('.toolbar-right .service').click(function () {
+        $('.wechat-close').show()
+        if (num == 0) {
+          too = true
+          num = 1
+        } else if (num == 1) {
+          $(this).attr('style', '')
+          $('.toolbar-right').attr('style', '')
+          $('#wechat-customer').addClass('hide')
+          too = false
+          num = 2
+        } else {
+          if ($('#wechat-customer').hasClass('hide')) {
+            too = true
+            $('.toolbar-right .service').css({ 'background-image': 'url(/static/img/service_2.svg)', 'background-color': 'rgb(32, 165, 58)' })
+            $('.toolbar-right').css({ 'border-top-left-radius': '4px', 'border-top-right-radius': '4px' })
+            $('#wechat-customer').removeClass('hide')
+          } else {
+            $('.toolbar-right .service').attr('style', '')
+            $('.toolbar-right').attr('style', '')
+            $('#wechat-customer').addClass('hide')
+            too = false
           }
         }
       })
-
-      $('#wechat-customer .wechat-close').on('click',function(){
-        $(this).parent().addClass('hide');
+      var id = 0;
+      $('.feedback').hover(function () {
+        $('.toolbar-right .service').attr('style', '')
+        $('.toolbar-right').attr('style', '')
+        too = false
+        num = 0
+        $('#wechat-customer').addClass('hide')
+        id = layer.tips('点击打开调查问卷', '.feedback', {
+          tips: [4, 'rgb(54, 58, 80)'],
+          id: 'feedback_id',
+          time: 0,
+          success: function (layero, index) {
+            var top = layero.css("top");
+            console.log(top)
+            layero.css("top", parseInt(top) + 20 + "px");
+          }
+        })
+        $('.toolbar-right').css({ 'border-bottom-left-radius': '4px', 'border-bottom-right-radius': '4px' })
+        $(this).css({ 'background-image': 'url(/static/img/feedback_2.svg)', 'background-color': 'rgb(32, 165, 58)' })
+      }, function () {
+        layer.close(id)
+        $(this).attr('style', '')
+        $('.toolbar-right').attr('style', '')
       })
-      $('.toolbar-right .service').on('click',function(){
-        $('#wechat-customer').removeClass('hide')
-      })
-
-      $('.toolbar-right .feedback').on('click',function(){
-        if($('.nps_survey').length >= 1) return false;  //防止多层
+      $('.toolbar-right .feedback').on('click', function () {
+        if ($('.nps_survey').length >= 1) return false;  //防止多层
+        if (window.localStorage.getItem('panelNPS') == null) window.localStorage.setItem('panelNPS', true)
         layer.open({
-          type:1,
-          title:false,
-          btn:false,
-          area:'520px',
-          skin:'nps_survey',
+          type: 1,
+          title: false,
+          offset: 'auto',
+          btn: false,
+          area: '580px',
+          skin: 'nps_survey',
           closeBtn: 2,
-          content:'<div class="nps_survey_box"">\
+          content: '<div class="nps_survey_box"">\
 	           <div class="nps_survey_banner">\
 	                <span>\
 	                    <i></i>\
-	                    <span style="vertical-align: 4px;">宝塔面板NPS问卷</span>\
+	                    <span style="vertical-align: 4px;">宝塔面板产品体验调查</span>\
 	                </span>\
 	           </div>\
-	           <div style="padding:12px 40px 40px;">\
-    	           <div class="nps_survey_score">\
-    	                <div class="survey_title">基于本次使用，您是否愿意把宝塔面板推荐给朋友？</div>\
-    	                <div class="score_title"><span style="font-weight: normal;">请从0-10打个分</span></div>\
-    	                <ul class="survey_score_num initbg">\
-    	                    <li>0</li>\
-    	                    <li>1</li>\
-    	                    <li>2</li>\
-    	                    <li>3</li>\
-    	                    <li>4</li>\
-    	                    <li>5</li>\
-    	                    <li>6</li>\
-    	                    <li>7</li>\
-    	                    <li>8</li>\
-    	                    <li>9</li>\
-    	                    <li>10</li>\
-    	                </ul>\
-    	                <div style="color: #999;display: flex;justify-content: space-between;margin-top: 5px;margin-left: -15px;width: 460px;"><span>非常不愿意</span><span>非常愿意</span></div>\
+	           <div style="padding:30px 40px;">\
+    	           <div class="nps_survey_score" style="height: 130px;">\
+                   <div class="survey_title">您向朋友或同事推荐宝塔面板的可能性有多大?</div>\
+                   <ul class="survey_score_num small">\
+                        <li data-content="0">0</li>\
+                        <li data-content="1">1</li>\
+                        <li data-content="2">2</li>\
+                        <li data-content="3">3</li>\
+                        <li data-content="4">4</li>\
+                        <li data-content="5">5</li>\
+                        <li data-content="6">6</li>\
+                    </ul>\
+                    <ul class="survey_score_num medium">\
+                        <li data-content="7">7</li>\
+                        <li data-content="8">8</li>\
+                    </ul>\
+                    <ul class="survey_score_num large">\
+                        <li data-content="9">9</li>\
+                        <li data-content="10">10</li>\
+                    </ul>\
     	           </div>\
     	           <div class="nps_survey_content hide">\
-    	                <div class="nps_survey_line">\
-    	                    <span class="nps_survey_title"><i>*</i>1.您给出该分数的<b>主要原因</b>是什么?</span>\
-    	                    <input type="text" name="problem_one">\
-    	                </div>\
-    	                <div class="nps_survey_line">\
-    	                    <span class="nps_survey_title"><i>*</i>2.您想通过我们的产品解决<b>哪些问题</b>?</span>\
+                      <div class="nps_survey_line">\
+												<span class="nps_survey_title"><i>* </i>1.您的哪些需求在宝塔面板上还没有被满足的?</span>\
+												<textarea type="text" name="problem_one" placeholder=""></textarea>\
+												<div class="placeholder c9 problem_tips" style="top: 36px; left: 10px; display: block;font-size: 12px;">您在使用产品过程中有什么需求没有被满足，或遇到什么BUG没被解决，请将您的问题或需<br>求详细描述给我们，我们尽力为您解决及开发对应的功能</div>\
+											</div>\
+    	                <div class="nps_survey_line hide">\
+    	                    <span class="nps_survey_title">2.您给出该分数的主要原因是什么?</span>\
+    	                    <span class="nps_surver_tips">例如影响您评分的因素：功能、操作这些等等</span>\
     	                    <input type="text" name="problem_two">\
     	                </div>\
-    	                <div class="nps_survey_line">\
-    	                    <span class="nps_survey_title"><i>*</i>3.您在产品体验中有哪些感到<b>不足或失望</b>的地方?</span>\
+    	                <div class="nps_survey_line hide">\
+    	                    <span class="nps_survey_title">3.您的哪些需求在宝塔面板上没有得到满足?</span>\
+    	                    <span class="nps_surver_tips">您的建议很可能在下个版本更新发布</span>\
     	                    <input type="text" name="problem_three">\
     	                </div>\
-    	                <button class="btn btn-success set_survey_info pull-right" style="margin: 25px 0 30px;padding: 6px 40px;">提交</button>\
+    	                <div class="score_title"><span>我们特别重视您的需求反馈，我们会定期每周进行需求评审。希望能更好的帮到您</span></div>\
     	           </div>\
+    	           <button class="btn btn-success set_survey_info" style="margin-top:30px">提交</button>\
     	       </div>\
 	        </div>\
 	        <style>\
-	        .nps_survey_banner{position: relative;background: url(/static/img/feedback/QA_banner.png);width:100%;background-size: 100%;height: 123px;}\
+	        .nps_survey_banner{position: relative;background: url(/static/img/feedback/QA_banner.png);width:100%;background-size: 100%;height: 92px;margin-top: -1px;}\
 	        .nps_survey_banner>span{position: absolute;left: 32px;top: 16px;font-size: 17px;color: #fff;}\
 	        .nps_survey_banner i{background-image: url(/static/images/svg/logo-white.svg);background-repeat: no-repeat;background-size: 18px;display: inline-block;width: 20px;height: 20px;}\
-	        .survey_title {font-size: 16px;font-weight: bold;text-align: center;}\
-	        .score_title{font-size:16px;font-weight:bold;color:#20a53a;text-align:center;height: 50px;line-height: 60px;}\
-	        .nps_survey_score ul{margin-top:10px}\
-	        .nps_survey_score li {position:relative;display: inline-block;font-size: 14px;color: #20a53a;width: 32px;height: 32px;margin-right: 5px;border: 1px solid #D0D0D0;border-radius: 20px;text-align: center;line-height: 32px;cursor: pointer;background-color:#CFF3D7;font-weight: bold;}\
-	        .nps_survey_score li:last-child{margin-right:0;}\
-	        .survey_score_num.initbg li{background-color:#fff;font-weight: inherit}\
-	        .survey_score_num li.wafA{border:none}\
-	        .survey_score_num li.wafA:before{content: "";background: url(/static/img/feedback/QA_emoj.png);background-size: 99%;width: 32px;height: 32px;display: inline-block;position: absolute;left: -1px;top: -1px;}\
-	        .nps_survey_content{margin-top: 25px;}\
-	        .nps_survey_line{ font-size:14px;}\
-	        .nps_survey_line .nps_survey_title{margin:20px 0 7px 0;display:block;font-weight: bold;}\
-	        .nps_survey_line p{color:#999;font-size:12px;margin-bottom:5px;}\
-	        .nps_survey_line i,.nps_survey_line b{color:#FC6D26;font-style: inherit;}\
-	        .nps_survey_line input{width:440px;height:28px;border:1px solid #cccccc;font-size:12px;}\
-	        .survey_score_num li:nth-child(2).wafA:before{background-position: 0 328px;}\
-	        .survey_score_num li:nth-child(3).wafA:before{background-position: 0 295px;}\
-	        .survey_score_num li:nth-child(4).wafA:before{background-position: 0 262px;}\
-	        .survey_score_num li:nth-child(5).wafA:before{background-position: 0 229px;}\
-	        .survey_score_num li:nth-child(6).wafA:before{background-position: 0 196px;}\
-	        .survey_score_num li:nth-child(7).wafA:before{background-position: 0 163px;}\
-	        .survey_score_num li:nth-child(8).wafA:before{background-position: 0 130px;}\
-	        .survey_score_num li:nth-child(9).wafA:before{background-position: 0 97px;}\
-	        .survey_score_num li:nth-child(10).wafA:before{background-position: 0 64px;}\
-	        .survey_score_num li:nth-child(11).wafA:before{background-position: 0 32px;}\
+	        .survey_title {font-size: 19px;font-weight: bold;text-align: center;color: #000;}\
+	        .score_title{font-size:13px;color:#20a53a;text-align:center;line-height: 35px;}\
+	        .nps_survey_score ul{position: relative;margin-top:25px;display: inline-block;border: 1px solid #ccc;border-radius: 2px;font-size:0;cursor: pointer;}\
+            .survey_score_num::before {content: "";height: 35px;width: 100%;display: inline-block;position: absolute;bottom: -37px;cursor: auto;}\
+            .nps_survey_score ul.small::before{background:linear-gradient(to bottom,#ffdfdd,#fff)}\
+            .nps_survey_score ul.medium::before{background:linear-gradient(to bottom,#fff2db,#fff);}\
+            .nps_survey_score ul.large::before{background:linear-gradient(to bottom,#ebf9e0,#fff)}\
+            .survey_score_num.small::after {content: "不可能推荐";position: absolute;top: 48px;left: 117px;font-size: 12px;cursor: auto;}\
+            .survey_score_num.medium::after {content: "可能推荐";position: absolute;top: 48px;left: 18px;font-size: 12px;cursor: auto;}\
+            .survey_score_num.large::after {content: "一定推荐";position: absolute;top: 48px;left: 18px;font-size: 12px;cursor: auto;}\
+            .survey_score_num li {position: relative;display: inline-block;width: 42px;height: 42px;line-height: 42px;text-align: center;font-size:15px;font-weight: bold;}\
+            .survey_score_num .act::before {content: attr(data-content);color: #fff;height: 52px;line-height: 52px;width: 100%;position: absolute;top: -5px;font-size: 19px;background: inherit;border-radius: 4px;font-weight: initial;text-align: left;padding-left: 10px;}\
+            .survey_score_num .ten::before {content: attr(data-content);color: #fff;height: 52px;line-height: 52px;width: 100%;position: absolute;top: -5px;font-size: 19px;background: inherit;border-radius: 4px;font-weight: initial;text-align: left;padding-left: 2px;}\
+            .survey_score_num .act::after {content: "分";font-size:12px;color: #fff;position: absolute;left:21px;margin-left: 2px;}\
+            .survey_score_num .ten::after {content: "分";font-size:12px;color: #fff;position: absolute;left:25px;}\
+            .survey_score_num li::before{content:"";position: absolute;right: 0;top:10px;border-right-style: solid;border-right-width: 1px;border-color: rgb(255 255 255 / 30%);height: 25px;}\
+            .survey_score_num li:last-child::before{border:none}\
+            .survey_score_num.small{border-color: #f3a8a5;background: #f7cfce;color: #ed6d68;}\
+            .survey_score_num.medium{border-color: #f4cf8f;background: #fbe6c0;color: #f7be56;margin: 0 5px;}\
+            .survey_score_num.large{border-color: #a7db88;background: #d8f0ca;color: #69be3d;}\
+            .nps_survey_content{margin-top: 35px;}\
+            .nps_survey_line{ font-size:15px;position: relative;}\
+            .nps_survey_line.problem_rule::before{content:"请输入您的需求再提交~";position:absolute;top:72px;font-size:12px;color:#f56c6c}\
+						.nps_survey_line.problem_rule1::before{content:"请输入您的需求再提交~";position:absolute;top:190px;font-size:12px;color:#f56c6c}\
+            .nps_survey_line.problem_rule input,.nps_survey_line.problem_rule textarea{border-color:#f56c6c}\
+            .nps_survey_line .nps_survey_title{margin:20px 0 7px 0;font-weight: bold;}\
+            .nps_survey_line .nps_survey_title i{color:red;}\
+            .nps_survey_line .nps_surver_tips{font-size:12px;color:#999;}\
+            .nps_survey_line p{color:#999;font-size:12px;margin-bottom:5px;}\
+            .nps_survey_line input{width:490px;height:45px;border:1px solid #cccccc;font-size:12px;margin-top: 5px;margin-bottom: 20px;padding-left: 5px;}\
+            .nps_survey_line textarea{width:500px;height:160px;border:1px solid #cccccc;font-size:12px;margin-top: 5px;margin-bottom: 20px;padding: 5px 10px;line-height: 22px;}\
+            .set_survey_info{margin: 5px auto 0;display: block;padding: 6px 40px;}\
 	        </style>',
-          success:function(layers,indexs){
-            //客服电话咨询
-            $('.nps-kf-box').click(function (ev) {
-              if ($(this).find('i').hasClass('active')) {
-                $(this).find('i').removeClass('active');
-                $(this).find('input').prop('checked', false)
-              } else {
-                $(this).find('i').addClass('active');
-                $(this).find('input').prop('checked', true)
-              }
-              ev.preventDefault();
-            })
+          success: function (layers, indexs) {
             var goNum = 0;
+            var chooseScore = null;
             //评分栏目鼠标经过事件
-            $('.survey_score_num').on('mouseenter','li',function(){
-              $('.nps_survey_content').removeClass('hide')
-              $('.survey_score_num').removeClass('initbg')
-              if(goNum < 1) {
+            $('.survey_score_num').on('mouseenter', 'li', function () {
+              if (goNum < 1) {
                 $(window).resize()
                 goNum++
               }
-              var _mouseScore = $(this).index(),
-                      _scoreText = ''
-              if(!$(this).hasClass('wafA')){
-                $(this).addClass('wafA').siblings().removeAttr('class')
-                if(_mouseScore <= 6){
-                  _scoreText = '<span style="color:#E43434">'+_mouseScore+'分，不愿意</span>'
-                  if(_mouseScore == 0) _scoreText = '<span style="color:#E43434">'+_mouseScore+'分，非常不愿意</span>'
-                }else if(_mouseScore == 7 || _mouseScore == 8){
-                  _scoreText = _mouseScore+'分，一般'
-                }else{
-                  _scoreText = _mouseScore+'分，愿意'
-                  if(_mouseScore == 10) _scoreText = _mouseScore+'分，非常愿意'
+              var _mouseScore = $(this).text()
+              if (!$(this).hasClass('act') && !$(this).hasClass('ten')) {
+                $.each($('.survey_score_num li'), function (i, v) {
+                  if (i != chooseScore) {
+                    $(v).removeAttr('class')
+                    $(v).removeAttr('style')
+                  }
+                })
+                $(this).addClass('act')
+                if (_mouseScore <= 6) {
+                  $(this).css({ 'background-color': 'red', 'opacity': '0.8' })
+
+                } else if (_mouseScore == 7 || _mouseScore == 8) {
+                  $(this).css({ 'background-color': '#ff7f00', 'opacity': '0.8' })
+                } else if (_mouseScore == 10) {
+                  $(this).css({ 'background-color': '#20a53a', 'opacity': '0.8' })
+                  $(this).addClass('ten')
+                } else {
+                  $(this).css({ 'background-color': '#20a53a', 'opacity': '0.8' })
                 }
-
-                //设置评分颜色
-                $(this).prevAll().removeAttr('style')
-                $(this).nextAll().attr('style','background-color:#fff;font-weight: inherit;')
-                $(this).css('background-color','#fff')
-
-                $('.score_title').html(_scoreText)
               }
             })
-            // 设置调查信息
-            $('.set_survey_info').click(function(){
-              var _score = $('.wafA').index(),
-                      _one = $('input[name=problem_one]').val(),
-                      _two = $('input[name=problem_two]').val(),
-                      _three = $('input[name=problem_three]').val()
-
-              _one = _one == '' ? ' ' : _one
-              _two = _two == '' ? ' ' : _two
-              _three = _three == '' ? ' ' : _three
-              $.post('/config?action=write_nps',{software_name:'panel',product_type:0,rate:_score,questions:JSON.stringify({
-                          "LMdrUlYWLMjhjYjczNTUyMDIwcoCSWTt": _one,
-                          "PCpsJvGUmMjRjYjczNTUyMDExLGAMKPd": _two,
-                          "IYlVujIciMmM4YjczNTUyMDMzfselTpB":_three})},
-                      function (rdata) {
-                        if(rdata.status){
-                          layer.close(indexs)
-                          layer.open({
-                            title: false,
-                            btn: false,
-                            shadeClose: true,
-                            shade:0.1,
-                            closeBtn: 0,
-                            skin:'qa_thank_dialog',
-                            area: '230px',
-                            content: '<div class="qa_thank_box" style="background-color:#F1F9F3;text-align: center;padding: 20px 0;"><img src="/static/img/feedback/QA_like.png" style="width: 55px;"><p style="margin-top: 15px;">感谢您的参与!</p></div>',
-                            success: function (layero,index) {
-                              $(layero).find('.layui-layer-content').css({'padding': '0','border-radius': '5px'})
-                              $(layero).css({'border-radius': '5px','min-width': '230px'})
-
-                              setTimeout(function(){layer.close(index)},3000)
-                            }
-                          })
-                        }
-                      });
+            $('.survey_score_num').on('mouseout', 'li', function () {
+              $.each($('.survey_score_num li'), function (i, v) {
+                if (i != chooseScore) {
+                  $(v).removeAttr('class')
+                  $(v).removeAttr('style')
+                }
+              })
             })
+            $('.survey_score_num').on('click', 'li', function (e) {
+              chooseScore = $(this).text()
+              $.each($('.survey_score_num li'), function (i, v) {
+                if (i != chooseScore) {
+                  $(v).removeAttr('class')
+                  $(v).removeAttr('style')
+                }
+              })
+              $(this).css('opacity', '1')
+              $('.nps_survey_content').removeClass('hide')
+              $('.nps_survey').css('top', ($(window).height() - 663) / 2 + 'px')
+              // 取消按钮样式
+              $('.set_survey_info').removeAttr('style')
+            })
+            // 聚焦问题1取消验证类名
+            $('[name=problem_one]').focus(function () {
+              $('.nps_survey_line').removeClass('problem_rule')
+            })
+
+            // 文本域触发隐藏显示
+            $('.nps_survey_line .problem_tips').click(function () {
+              $(this).prev().focus()
+            })
+            $('.nps_survey_line textarea').on('focus', function () {
+              $('.nps_survey_line').removeClass('problem_rule1')
+              $(this).next().hide();
+              layer.tips($(this).next().html(), $(this), {
+                tips: [1, '#20a53a'],
+                time: 0,
+                area: $(this).width()
+              });
+            })
+            $('.nps_survey_line textarea').on('blur', function () {
+              if ($(this).val() === '') $(this).next().show();
+              layer.closeAll('tips')
+            })
+
+            // 设置调查信息
+            $('.set_survey_info').click(function () {
+              var _score = $('.act').text()
+              //     _one = $('input[name=problem_one]').val(),
+              //     _two = $('input[name=problem_two]').val(),
+              //     _three = $('input[name=problem_three]').val()
+
+              // _two = _two == '' ? ' ' : _two
+              // _three = _three == '' ? ' ' : _three
+              if (_score == '') layer.msg('打个分数再提交吧，麻烦您了~', { icon: 0 })
+              // if(_one == ''){
+              //   $('input[name=problem_one]').parent('.nps_survey_line').addClass('problem_rule')
+              //   return false;
+              // }
+
+              // 文本域问题 清除所有校验
+              $('textarea').parent('.nps_survey_line').removeClass('problem_rule1')
+              // 排查未填写的必填项
+              _one = $('textarea[name=problem_one]').val()
+              if (_one == '') {
+                $('textarea[name=problem_one]').parent('.nps_survey_line').addClass('problem_rule1')
+                return false
+              }
+              $('textarea[name=problem_one]').parent('.nps_survey_line').removeClass('problem_rule1')
+              // 文本域问题 end
+
+              $.post('/config?action=write_nps', {
+                software_name: 'panel', product_type: 0, rate: _score, questions: JSON.stringify({
+                  "LMdrUlYWLMjhjYjczNTUyMDIwcoCSWTt": _one,
+                  // "PCpsJvGUmMjRjYjczNTUyMDExLGAMKPd": _two,
+                  // "IYlVujIciMmM4YjczNTUyMDMzfselTpB":_three,
+                  "RS4shJeBIMmIwYjczNTUyMDJim9MuCVq": 'v1-' + window.localStorage.getItem('panelVersion')
+                })
+              },
+                function (rdata) {
+                  if (rdata.status) {
+                    layer.close(indexs)
+                    layer.open({
+                      title: false,
+                      btn: false,
+                      shadeClose: true,
+                      shade: 0.1,
+                      closeBtn: 0,
+                      skin: 'qa_thank_dialog',
+                      area: '230px',
+                      content: '<div class="qa_thank_box" style="background-color:#F1F9F3;text-align: center;padding: 20px 0;"><img src="/static/img/feedback/QA_like.png" style="width: 55px;"><p style="margin-top: 15px;">感谢您的参与!</p></div>',
+                      success: function (layero, index) {
+                        $(layero).find('.layui-layer-content').css({ 'padding': '0', 'border-radius': '5px' })
+                        $(layero).css({ 'border-radius': '5px', 'min-width': '230px' })
+
+                        setTimeout(function () { layer.close(index) }, 3000)
+                      }
+                    })
+                  }
+                });
+            })
+          }, cancel: function (index) {
+            var _width = $(window).width(), revers = Math.abs(_width) * -1, _height = $(window).height()
+            $('.nps_survey_box').append('<style>\
+                .nps_survey {-webkit-animation: slide-out-elliptic-right-bck 0.7s ease-in both;animation: slide-out-elliptic-right-bck 0.7s ease-in both;}\
+                @-webkit-keyframes slide-out-elliptic-right-bck {\
+                  0% {\
+                    -webkit-transform: translateX(0) rotateY(0) scale(1);\
+                            transform: translateX(0) rotateY(0) scale(1);\
+                    -webkit-transform-origin: '+ revers + 'px 200%;\
+                            transform-origin: '+ revers + 'px 200%;\
+                    opacity: 1;\
+                  }\
+                  100% {\
+                    -webkit-transform: translateX('+ (Number(_width) + 200) + 'px) rotateY(-30deg) scale(0);\
+                            transform: translateX('+ (Number(_width) + 200) + 'px) rotateY(-30deg) scale(0);\
+                    -webkit-transform-origin: -60% 100%;\
+                            transform-origin: -60% '+ (_height - (_height - 600)) + 'px;\
+                    opacity: 1;\
+                  }\
+                }\
+              </style>')
+            setTimeout(function () { layer.close(index) }, 700)
+            // 关闭nps
+            $.post('/config?action=stop_nps', { software_name: 'panel' })
+            return false;
           }
         })
       })
-
-      {% if data['show_workorder'] %}
-      $('.debugs').removeClass('hide');
-      {% endif %}
 
       $("#setBox").click(function () {
         if ($(this).prop("checked")) {
@@ -552,30 +904,30 @@
 
               if (task_list[i]['type'] == '1') {
                 msg_body +=
-                        '<div class="mw-con">\
-                                              <ul class="waiting-down-list">\
-                                                  <li>\
-                                                      <div class="down-filse-name"><span class="fname" style="width:80%;" title="正在下载: ' +
-                        task_list[i].shell + '">正在下载: ' + task_list[i].shell +
-                        '</span><span style="position: absolute;left: 84%;top: 25px;color: #999;">' + task_list[i].log
-                                .pre + '%</span><span class="btlink" onclick="remove_task(' + task_list[i].id + ')" style="position: absolute;top: 25px;right: 20px;">取消</span></div>\
-                                          <div class="down-progress"><div class="done-progress" style="width:' + task_list[i]
-                                .log.pre + '%"></div></div>\
-                                          <div class="down-info"><span class="total-size"> ' + task_list[i].log.used + '/' +
-                        ToSize(task_list[i].log.total) + '</span><span class="speed-size">' + (task_list[i].log.speed ==
-                        0 ? '正在连接..' : task_list[i].log.speed) + '/s</span><span style="margin-left: 20px;">预计还要: ' +
-                        task_list[i].log.time + '</span></div>\
-                                        </li>\
-                                            </ul>\
-                                        </div>'
+                  '<div class="mw-con">\
+                                            <ul class="waiting-down-list">\
+                                                <li>\
+                                                    <div class="down-filse-name"><span class="fname" style="width:80%;" title="正在下载: ' +
+                  task_list[i].shell + '">正在下载: ' + task_list[i].shell +
+                  '</span><span style="position: absolute;left: 84%;top: 25px;color: #999;">' + task_list[i].log
+                    .pre + '%</span><span class="btlink" onclick="remove_task(' + task_list[i].id + ')" style="position: absolute;top: 25px;right: 20px;">取消</span></div>\
+				                                <div class="down-progress"><div class="done-progress" style="width:' + task_list[i]
+                    .log.pre + '%"></div></div>\
+				                                <div class="down-info"><span class="total-size"> ' + task_list[i].log.used + '/' +
+                  ToSize(task_list[i].log.total) + '</span><span class="speed-size">' + (task_list[i].log.speed ==
+                    0 ? '正在连接..' : task_list[i].log.speed) + '/s</span><span style="margin-left: 20px;">预计还要: ' +
+                  task_list[i].log.time + '</span></div>\
+			                                </li>\
+	                                        </ul>\
+	                                    </div>'
               } else {
                 msg_body +=
-                        '<div class="mw-title"><span style="max-width: 88%;display: block;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">' +
-                        task_list[i].name + ': ' + task_list[i].shell +
-                        '</span><span class="btlink" onclick="remove_task(' + task_list[i].id + ')"  style="position: absolute;top: 10px;right: 15px;">取消</span></div>\
-                                        <div class="mw-con codebg">\
-                                          <code>' + task_list[i].log + '</code>\
-                                        </div>'
+                  '<div class="mw-title"><span style="max-width: 88%;display: block;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">' +
+                  task_list[i].name + ': ' + task_list[i].shell +
+                  '</span><span class="btlink" onclick="remove_task(' + task_list[i].id + ')"  style="position: absolute;top: 10px;right: 15px;">取消</span></div>\
+	                                    <div class="mw-con codebg">\
+		                                    <code>' + task_list[i].log + '</code>\
+	                                    </div>'
 
               }
 
@@ -585,8 +937,8 @@
                 is_add = true;
               }
               msg_body += '<li><span class="wt-list-name" style="width: 90%;">' + task_list[i].name + ': ' +
-                      task_list[i].shell + '</span><span class="mw-cancel" onclick="remove_task(' + task_list[i].id +
-                      ')">X</span></li>';
+                task_list[i].shell + '</span><span class="mw-cancel" onclick="remove_task(' + task_list[i].id +
+                ')">X</span></li>';
             }
           }
           if (task_open) {
@@ -625,7 +977,7 @@
       }
 
       function remove_task(id) {
-        layer.confirm('是否取消当前执行的任务队列？', { title: '取消任务队列', icon: 0 }, function(indexs) {
+        layer.confirm('是否取消当前执行的任务队列？', { title: '取消任务队列', icon: 0 }, function (indexs) {
           layer.close(indexs);
           var loadT = bt.load('正在取消任务...');
           $.post('/task?action=remove_task', {
@@ -639,34 +991,51 @@
       task_stat();
 
       // 获取支付状态
-      function getPaymentStatus(){
+      function getPaymentStatus() {
         bt.send('get_pd', 'ajax/get_pd', {}, function (res) {
           var tab = $('.pos-box .tab-list'),
-                  proHTML = '',
-                  _index = res[1] > 0 ? 1 : 2,
-                  is_pay = res[1] >= 0 || res[2] > 0, //是否购买
-                  advanced = res[1] == 0 || res[1] > 0 ? 'pro':'ltd';
-          if(is_pay){
-            proHTML = '<div class="product-buy" style="margin-right:0;font-size: 12px;">到期时间：<span style="vertical-align: initial">'+(res[1] === 0?'永久授权':((res[1] === -2 || res[2] === -2)?'已过期':bt.format_data(res[_index],'yyyy-MM-dd'))+ '&nbsp;&nbsp;<a class="btlink" href="javascript:;" onclick="product_recommend.pay_product_sign(\''+ advanced +'\',81,\''+ advanced +'\')">续费</a>')+'</span></div>'
-          }else {
+            proHTML = '',
+            _index = res[1] > 0 ? 1 : 2,
+            is_pay = res[1] >= 0 || res[2] > 0, //是否购买
+            advanced = res[1] == 0 || res[1] > 0 ? 'pro' : 'ltd';
+          bt.set_cookie('pro_end', res[1]);
+          bt.set_cookie('ltd_end', res[2]);
+          if (is_pay) {
+            // 已购买
+            proHTML = '<div class="product-buy" style="margin-right:0;font-size: 12px;">到期时间：<span style="vertical-align: initial">' + (res[1] === 0 ? '永久授权' : ((res[1] === -2 && res[2] === -2) ? '已过期' : bt.format_data(res[_index], 'yyyy-MM-dd')) + '&nbsp;&nbsp;<a class="btlink" href="javascript:;" onclick="product_recommend.pay_product_sign(\'' + advanced + '\',81,\'' + advanced + '\')">续费</a>') + '</span></div>'
+          } else {
             proHTML = '<div class="product-buy" style="margin-right:0;"><button type="button" class="btn btn-success btn-xs" style="vertical-align: 1px;" onclick="product_recommend.pay_product_sign(\'ltd\',80,\'ltd\')">立即升级</button></div>'
+            // proHTML = '<div class="product-buy" style="margin-right:0;display:flex;align-items:center"><div onclick="product_recommend.pay_product_sign(\'ltd\',80,\'ltd\')" class="immediately-tip"><span class="recommend-immediate-icon"></span><span style="color:rgb(239, 159, 0);line-height:18.2px">安全、高效，让您更安心！</span></div><button type="button" class="btn btn-xs immediate-experience" style="vertical-align: 1px;" onclick="product_recommend.pay_product_sign(\'ltd\',80,\'ltd\')">立即体验</button></div>'
           }
-          if((tab.children().length*105 + 306.28) < tab.parent().width()){
-            tab.parent().css({display:'flex','justify-content':'space-between'});
-            var _html = '<div class="authState" style="line-height: 45px;padding-right: 20px;"><span class="'+(!is_pay?'btltd-gray':'bt'+advanced)+'" style="vertical-align: bottom;"></span><div style="display: inline-block;font-size: 12px" class="mr10">'+(!is_pay?'免费版&nbsp;&nbsp;':'')+' {{session["version"]}}</div> ' + proHTML +'</div>'
-            if(tab.next().hasClass('authState')) tab.next().remove()
+          $(window).resize(function () {
+            if ($(window).innerWidth() < 1080) {
+              $('.recommend-immediate-icon').next().addClass('hide')
+            } else {
+              $('.recommend-immediate-icon').next().removeClass('hide')
+            }
+          })
+          if ((tab.children().length * 105 + 306.28) < tab.parent().width()) {
+            tab.parent().css({ display: 'flex', 'justify-content': 'space-between' });
+            // var _html = '<div class="authState" style="line-height: 45px;padding-right: 20px;"><span class="'+(!is_pay?'btltd-gray':'bt'+advanced)+'" style="vertical-align: bottom;"></span><div style="display: inline-block;font-size: 12px" class="mr10">'+(!is_pay?'免费版&nbsp;&nbsp;':'')+' {{session["version"]}}</div> ' + proHTML +'</div>'
+            var _html = '<div class="authState" style="line-height: 45px;padding-right: 20px;"><span class="' + (!is_pay ? 'btltd-gray' : 'bt' + advanced) + '" ' + (is_pay ? 'onclick="product_recommend.pay_product_sign(\'' + advanced + '\',90,\'' + advanced + '\')"' : 'onclick="product_recommend.pay_product_sign(\'ltd\',80,\'ltd\')"') + ' style="vertical-align: bottom;"></span><div style="display: inline-block;font-size: 12px;color:#666" class=" product_version mr10">' + (!is_pay ? '免费版&nbsp;&nbsp;' : '') + ' {{session["version"]}}</div> ' + proHTML + '</div>'
+            if (tab.next().hasClass('authState')) tab.next().remove()
             tab.after(_html);
           }
+          // window.LayerTitle = ('<div class="layer-title-free">' +
+          //         '<span class="'+ (is_pay?'':'') +'">面版版本：' + (!is_pay?'免费版': advanced == 'pro' ? '专业版' : '企业版') + '&nbsp;' + panelVersion + '&nbsp;</span>' +
+          //         '<span class="btlink ' + (!is_pay?'hide':'') + '" onclick="product_recommend.pay_product_sign(\''+ advanced +'\',90,\''+ advanced +'\')">续费</span>' +
+          //         '<span class="btlink '+ (is_pay?'hide':'') +'" onclick="product_recommend.pay_product_sign(\'ltd\',90,\'ltd\')">立即升级</span>' +
+          //         '</div>')
         })
       }
-      if(bt.get_cookie('bt_user_info') == null || bt.get_cookie('bt_user_info') == ''){
-        bt.pub.get_user_info(function(userInfo){
+      if (bt.get_cookie('bt_user_info') == null || bt.get_cookie('bt_user_info') == '') {
+        bt.pub.get_user_info(function (userInfo) {
           if (userInfo.status) {
             bt.set_cookie('bt_user_info', JSON.stringify(userInfo));
             getPaymentStatus();
           }
         })
-      }else{
+      } else {
         getPaymentStatus();
       }
 
@@ -676,6 +1045,21 @@
       {% if data['show_workorder'] %}
       $('.toolbar-right').removeClass('hide');
       {% endif %}
+      if (window.localStorage.getItem('panelNPS') == null) {
+        $.post('/config?action=get_nps', { software_name: 'panel' }, function (npsStatus) {
+          if (npsStatus.nps && npsStatus.safe_day >= 10) $('.toolbar-right .feedback').click()
+        })
+      }
+      // 面板当前版本
+      if (window.localStorage.getItem('panelVersion') == null) {
+        if (typeof panelVersion != 'undefined') {
+          window.localStorage.setItem('panelVersion', panelVersion)
+        } else {
+          bt.system.get_net(function (res) {
+            window.localStorage.setItem('panelVersion', res.version)
+          })
+        }
+      }
     </script>
     {% for js_f in g['other_js'] %}
     <script type="text/javascript" src="{{js_f}}"></script>
