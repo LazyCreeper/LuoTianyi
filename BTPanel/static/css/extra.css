@@ -93,3 +93,61 @@
 .info_box_item .item_value {
   color: #deffff !important;
 }
+
+/* 隐藏除了首页外的登陆状态 */
+.authState {
+	display: none !important
+}
+
+/* Docker 页面 */
+.dk_fast_project_block {
+  box-shadow: none !important;
+  border: 1px solid #ffffff33 !important;
+  backdrop-filter: blur(4px);
+  transition: all 0.5s;
+}
+
+.dk_fast_project_block:hover {
+  box-shadow: 0px 2px 20px rgb(153 153 153 / 48%);
+  transform: translateY(-10px);
+  backdrop-filter: blur(4px) brightness(0.8);
+}
+
+.dk_fast_project_block .dk_fp_header .dk_template_name {
+  color: #ffe3e3 !important;
+}
+
+.dk_fast_project_block .dk_fp_header .dk_template_title {
+  color: #efefef !important;
+}
+
+.dk_fp_template-introduce {
+  color: #cfcfcf !important;
+}
+
+/* 日志界面 */
+/* 网站日志 */
+#siteMenu {
+  background-color: rgba(0,0,0,0.5) !important;
+}
+
+.mt_select .mt_select_content {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+/* 网站列表表格 */
+#bt_site_table thead th:nth-child(6), #bt_site_table tbody tr td:nth-child(6) {
+	width: 140px !important;
+}
+
+.site_traffic--typeBox {
+  background: #1b1b1bab !important;
+}
+
+/* 软件商店搜索推荐 */
+.records_search {
+  background: rgb(0 0 0 / 40%) !important;
+	backdrop-filter: blur(4px);
+  border: 1px solid #bbba;
+}
