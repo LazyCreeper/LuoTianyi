@@ -1,7 +1,7 @@
 /*!
  
  @Name: 宝塔面板文件管理主题样式
- @Last Date: 2023.5.16
+ @Last Date: 2024.1.1
  @Create Date: 2022.8.5			
  @Author: Lazy
  @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
@@ -111,7 +111,6 @@ z-index: 1;
 }
 
 .file_table_view .file_name .file_title i:hover {
-  color: #000;
   cursor: pointer;
 }
 
@@ -140,6 +139,7 @@ z-index: 1;
   width: 80px !important;
   min-height: 90px;
   padding: 5px;
+	position:relative;
   vertical-align: top;
   margin: 0 10px 10px 0;
 }
@@ -179,20 +179,24 @@ z-index: 1;
   text-align: center;
   word-break: break-all;
   display: -webkit-box;
+  display: -ms-inline-flexbox;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
 .file_table_view.icon_view .file_list_content .file_tr:hover {
-  background: #f0f9f7 !important;
+  background: #9affe930 !important;
+  backdrop-filter: blur(3px);
+  box-shadow: 0 0 10px #9affe930;
 }
 
 .file_table_view.icon_view .file_list_content .file_tr.active {
-  background: #f0f9f7 !important;
-  border: 1px solid #ddefeb;
+  background: #9affe930 !important;
+  border: unset;
   box-sizing: border-box;
   padding: 4px;
+  backdrop-filter: blur(3px);
 }
 .file_table_view.icon_view .file_operation{
   display: none;
@@ -215,6 +219,10 @@ margin-left: -5px;
   max-width: 300px;
 }
 
+/* .file_list_header .file_th {
+  color: #333;
+} */
+
 .file_list_header .file_th.active {
   background: #475b8263;
   color: #ffe0e0;
@@ -226,7 +234,7 @@ margin-left: -5px;
 }
 
 .file_list_header .file_checkbox:hover {
-background: #f1f1f1;
+  background: #f1f1f1;
 }
 
 
@@ -551,7 +559,7 @@ display: block;
 .file_table_view.list_view .file_list_content .file_tr:hover .set_file_ps,
 .file_table_view.list_view .file_list_content .file_tr.active .set_file_ps{
   border: 1px solid transparent;
-}
+  }
 .file_table_view.list_view .file_list_content .file_td {
   height: 40px;
   line-height: 40px;
@@ -1421,6 +1429,7 @@ height: 22px;
 }
 .terminal_view .iconfont{
   vertical-align: middle;
+  line-height: 17px;
 }
 
 .nav_group .nav_btn,
@@ -1433,7 +1442,7 @@ height: 22px;
   border-radius: 2px;
   transition: all 100ms;
   position: relative;
-  padding: 7px 10px;
+  padding: 6px 8px;
 }
 
 .nav_group {
@@ -1540,14 +1549,14 @@ height: 22px;
 
 .nav_group.recycle_bin .nav_btn,
 .nav_group.mount_disk_list .nav_btn {
-  padding: 7px 10px 7px 5px;
+  padding: 6px 8px 6px 5px;
 }
 
 .nav_group.recycle_bin .nav_btn span,
 .nav_group.mount_disk_list .nav_btn span {
   font-size: 12px;
   margin-left: 5px;
-}
+  }
 .nav_group.mount_disk_list .nav_btn .glyphicon {
   top: -2px;
 }
@@ -1597,12 +1606,9 @@ height: 22px;
 
 .nav_group.mount_disk_list.thezoom .disk_title_group_btn {
   border-radius: 2px;
-  height: 32px;
-  line-height: 32px;
   border: 1px solid #cfcfcf;
-  padding: 7px 10px;
+  padding: 6px 8px;
   display: inline-block;
-  width: 85px;
   box-sizing: border-box;
   cursor: pointer;
   position: relative;
@@ -1620,8 +1626,7 @@ height: 22px;
 .nav_group.mount_disk_list.thezoom .disk_title_group_btn .disk_title_group {
   font-size: 12px;
   color: #fff;
-  position: absolute;
-  top: 0px;
+  line-height: 15px;
 }
 
 .nav_group.multi.thezoom .batch_multi_title::before,
@@ -1656,9 +1661,6 @@ height: 22px;
 .nav_group.mount_disk_list.thezoom .disk_title_group_btn>i {
   font-size: 12px;
   margin-left: 2px;
-  position: absolute;
-  right: 9px;
-  top: 0px;
 }
 
 .nav_group.mount_disk_list.thezoom .disk_title_group_btn .nav_down_list {
@@ -2455,7 +2457,7 @@ height: 22px;
 }
 
 .file_bodys {
-  background-color:rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.5);
   margin: 10px 15px;
   padding: 15px 20px;
   font-size: 12px;
@@ -2699,7 +2701,8 @@ height: 22px;
 }
 
 .filePage>.page_num a:hover {
-  color: #ff7988;
+  color: #ff7988;;
+  text-shadow: 0 1px 0 #fff;
   cursor: pointer;
 }
 
@@ -3026,11 +3029,11 @@ height: 25px;
 line-height: 25px;
 }
 .bt-property-setting .property-box .attr-box .attr-content span{
-width: 450px;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-display: inline-block;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 .details_box_view,.history_box_view{
 border:1px solid #ececec;
@@ -3078,4 +3081,11 @@ overflow: hidden;
 text-overflow: ellipsis;
 white-space: nowrap;
 display: inline-block;
+}
+
+.file_list_content .file_bt_split {
+  background-image: url(../img/file_icon/split.png);
+}
+.file_list_content .file_bt_split_json {
+  background-image: url(../img/file_icon/join.png);
 }
