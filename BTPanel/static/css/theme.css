@@ -1,8 +1,19 @@
+/*!
+
+ @Name: 宝塔面板框架主题样式
+ @Last Date: 2025.4.7
+ @Create Date: 2021.3.21				
+ @Author: Lazy
+ @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
+
+*/
+
 :root {
   --main-color: #ff709e;
+  --main-border-color: #ffebef;
   --a-color: #ffd1d1;
   --a-hover-color: #ffafaf;
-  --card-bg-color: rgb(0 0 0 / 45%);
+  --card-bg-color: rgb(0 0 0 / 50%);
   /* --card-bg-filter: blur(5px); */
   --card-bg-filter: unset;
   --card-box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
@@ -46,6 +57,10 @@
   transition: all 0.3s;
 }
 
+.hover\:text-primary:hover {
+  color: var(--main-color) !important;
+}
+
 .user-phone:hover,
 .bt-link:hover,
 .hover\:text-\[\#20a53a\]:hover {
@@ -75,7 +90,8 @@
 
 .layout-message,
 .bt-menu,
-.menu-toolbar {
+.menu-toolbar,
+.box {
   background-color: unset !important;
 }
 
@@ -151,8 +167,8 @@ path.el-progress-circle__path {
   box-shadow: 0 0 0 1px var(--select-main-color) inset !important;
 }
 
-.el-select__popper.el-popper[role="tooltip"],
-.el-dropdown__popper.el-popper[role="tooltip"] {
+.el-select__popper.el-popper,
+.el-dropdown__popper.el-popper {
   background: rgba(0, 0, 0, 0.5) !important;
   backdrop-filter: blur(5px) !important;
   border: 1px solid var(--select-main-color) !important;
@@ -163,22 +179,40 @@ path.el-progress-circle__path {
   color: var(--select-main-color) !important;
 }
 
-.el-select-dropdown__item {
+.el-select-dropdown__item,
+.el-dropdown-menu__item,
+.el-select-dropdown__footer {
   color: #ececec !important;
 }
 
-.el-select-dropdown__item.is-hovering {
+.el-select-dropdown__item.is-hovering,
+.el-dropdown-menu__item:not(.is-disabled):hover,
+.el-dropdown-menu__item:not(.is-disabled):focus,
+.select-type-line:hover {
   background-color: #f3b0f359 !important;
+  color: var(--select-main-color) !important;
 }
 
+.select-custom-hover.el-select-dropdown__item,
+.el-dropdown-menu {
+  background-color: unset !important;
+}
+
+
 /* loading mask */
-.custom-loading .custom-loading__mask {
+.custom-loading .custom-loading__mask,
+.software-mask {
   background-color: rgb(0 0 0 / 40%) !important;
   backdrop-filter: blur(4px);
 }
 
 .custom-loading .custom-loading__icon {
   filter: invert(1);
+}
+
+.software-view {
+  background-color: var(--card-bg-color) !important;
+  color: var(--card-text-color) !important;
 }
 
 /* 首页软件列表 */
@@ -192,10 +226,7 @@ path.el-progress-circle__path {
   backdrop-filter: brightness(0.8);
 }
 
-.wrapper-item
-  .box-wrapper:has(
-    .absolute.-left-1\.5.-top-1.py-\.5.px-2.transform.scale-75.bg-\[\#efefef\].text-\[\#999\].opacity-80
-  ) {
+.wrapper-item .box-wrapper:has(.absolute.-left-1\.5.-top-1.py-\.5.px-2.transform.scale-75.bg-\[\#efefef\].text-\[\#999\].opacity-80) {
   display: none !important;
 }
 
@@ -207,12 +238,11 @@ path.el-progress-circle__path {
   color: #ffe3e3 !important;
 }
 
-#layout-footer a[href='http://www.bt.cn/bbs']
-{
+#layout-footer a[href='http://www.bt.cn/bbs'] {
   display: none;
 }
 
-#layout-footer > span:last-child::after {
+#layout-footer>span:last-child::after {
   margin-left: 12px;
   content: "主题作者：Lazy";
 }
@@ -265,7 +295,7 @@ path.el-progress-circle__path {
   border: 0 !important;
 }
 
-.el-popover.el-popper > .el-card {
+.el-popover.el-popper>.el-card {
   background: transparent !important;
   box-shadow: unset !important;
   backdrop-filter: none;
@@ -284,18 +314,30 @@ path.el-progress-circle__path {
   background-color: var(--main-color) !important;
 }
 
+.el-button {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: #d8d8d8 !important;
+}
+
+.el-button:hover {
+  border-color: var(--main-color) !important;
+  color: var(--main-color) !important;
+}
+
 .el-button--primary {
   background-color: var(--main-color) !important;
   border-color: var(--main-color) !important;
   transition: all 0.3s;
+  color: #fff !important;
 }
 
 .el-button--primary:hover {
   filter: opacity(0.8);
+  color: #fff !important;
 }
 
 /* 表格 */
-.el-table--enable-row-hover .el-table__body tr:hover > td {
+.el-table--enable-row-hover .el-table__body tr:hover>td {
   background-color: rgba(58, 118, 121, 0.5) !important;
 }
 
@@ -323,12 +365,10 @@ path.el-progress-circle__path {
   border-bottom: 1px solid #68879e !important;
 }
 
-.el-table__body tr.hover-row > td.el-table__cell,
-.el-table__body tr.hover-row.current-row > td.el-table__cell,
-.el-table__body tr.hover-row.el-table__row--striped > td.el-table__cell,
-.el-table__body
-  tr.hover-row.el-table__row--striped.current-row
-  > td.el-table__cell {
+.el-table__body tr.hover-row>td.el-table__cell,
+.el-table__body tr.hover-row.current-row>td.el-table__cell,
+.el-table__body tr.hover-row.el-table__row--striped>td.el-table__cell,
+.el-table__body tr.hover-row.el-table__row--striped.current-row>td.el-table__cell {
   background-color: #2a778959 !important;
 }
 
@@ -343,6 +383,9 @@ path.el-progress-circle__path {
 .menu-item {
   transition: all 0.5s;
 }
+
+.body-item:hover,
+.recommend-item:hover,
 .menu-item:hover {
   background-color: rgb(124 124 124 / 45%) !important;
   color: var(--card-text-color) !important;
@@ -355,9 +398,107 @@ path.el-progress-circle__path {
 
 .el-input-group__append,
 .el-input-group__prepend {
-  background-color: rgb(104 104 104 / 50%);
+  background-color: rgb(104 104 104 / 50%) !important;
 }
 
 .el-input__wrapper.is-focus {
-  box-shadow: 0 0 0 1px var(--main-color) inset;
+  box-shadow: 0 0 0 1px var(--main-color) inset !important;
+}
+
+.el-input__inner {
+  color: #DADADB !important
+}
+
+.header-tabs {
+  background-color: var(--card-bg-color) !important;
+  backdrop-filter: var(--card-bg-filter);
+  box-shadow: var(--card-box-shadow) !important;
+  color: var(--card-text-color)
+}
+
+.header-child-tab {
+  color: #d8d8d8 !important;
+}
+
+.header-child-tab:hover {
+  background-color: #5828603b !important;
+}
+
+.active-tab {
+  color: #dfc4ff !important;
+  background: #5828603b;
+}
+
+.active-tab::after {
+  background-color: #dfc4ff !important;
+}
+
+.router-tabs-content {
+  background-color: var(--card-bg-color) !important;
+  backdrop-filter: var(--card-bg-filter);
+  box-shadow: var(--card-box-shadow) !important;
+}
+
+[class^=svgtofont-],
+[class*=" svgtofont-"] {
+  color: var(--main-border-color) !important;
+  transition: color 0.3s;
+}
+
+[class^=svgtofont-]:hover,
+[class*=" svgtofont-"]:hover {
+  color: var(--a-hover-color) !important;
+}
+
+.el-checkbox {
+  color: #ececec !important;
+}
+
+.el-checkbox__inner:hover {
+  border-color: var(--main-color) !important;
+}
+
+.el-checkbox__input.is-indeterminate .el-checkbox__inner,
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--main-color) !important;
+  border-color: var(--main-color) !important;
+}
+
+.el-checkbox__input.is-disabled {
+  filter: contrast(0.5)
+}
+
+/* pagination */
+.el-pagination.is-background .btn-prev.is-active,
+.el-pagination.is-background .btn-next.is-active,
+.el-pagination.is-background .el-pager li.is-active {
+  background-color: var(--main-color) !important;
+  color: var(--el-color-white) !important;
+}
+
+.el-pagination.is-background li.is-active:hover {
+  filter: hue-rotate(222deg);
+}
+
+.el-pagination.is-background .btn-prev:disabled,
+.el-pagination.is-background .btn-prev.is-disabled,
+.el-pagination.is-background .btn-next:disabled,
+.el-pagination.is-background .btn-next.is-disabled,
+.el-pagination.is-background .el-pager li:disabled,
+.el-pagination.is-background .el-pager li.is-disabled {
+  background-color: #f5f7fa30 !important;
+  color: var(--el-text-color-placeholder) !important;
+}
+
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .el-pager li {
+  background-color: #f4f4f570 !important;
+  color: #000000 !important;
+}
+
+.el-pagination__sizes,
+.el-pagination__total,
+.el-pagination__jump {
+  color: var(--card-text-color) !important;
 }
