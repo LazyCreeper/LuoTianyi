@@ -88,6 +88,13 @@
   border-left: #ffae1a 2px solid !important;
 }
 
+.top_all .monitor,
+.bg-\[\#fff\],
+.bg-white,
+[bg-white=""],
+[bg-white~="_createElementVNode("],
+[bg-white~="})"],
+.docker-route-con:has(.el-card),
 .layout-message,
 .bt-menu,
 .menu-toolbar,
@@ -95,6 +102,7 @@
   background-color: unset !important;
 }
 
+.content_box,
 .el-card {
   background-color: var(--card-bg-color) !important;
   backdrop-filter: var(--card-bg-filter);
@@ -116,6 +124,7 @@ path.el-progress-circle__path {
   stroke: var(--main-color);
 }
 
+.bg-\[\#fff\]:has(.top_all),
 .overview-box {
   background-color: var(--card-bg-color) !important;
   backdrop-filter: var(--card-bg-filter);
@@ -253,6 +262,10 @@ path.el-progress-circle__path {
   color: #dedede !important;
 }
 
+.text-\[\#555\] {
+  color: #a9a9a9 !important;
+}
+
 .color-\#666,
 .text-\[\#666\],
 .text-\[\#666666\],
@@ -307,6 +320,10 @@ path.el-progress-circle__path {
 
 .el-collapse-item__wrap {
   background-color: rgb(249 249 249 / 5%) !important;
+}
+
+.el-switch__core {
+  background: #dcdfe660 !important;
 }
 
 .el-switch.is-checked .el-switch__core {
@@ -431,7 +448,7 @@ path.el-progress-circle__path {
 }
 
 .header-child-tab:hover {
-  background-color: #5828603b !important;
+  background-color: #6e2b4e3b !important;
 }
 
 .active-tab {
@@ -443,10 +460,18 @@ path.el-progress-circle__path {
   background-color: var(--main-color) !important;
 }
 
+.bg-\[\#f3f3f3\],
+.bg-white {
+  background: unset !important;
+}
+
+.docker-route-con .left-list,
+.docker-route-con,
 .router-tabs-content {
   background-color: var(--card-bg-color) !important;
   backdrop-filter: var(--card-bg-filter);
   box-shadow: var(--card-box-shadow) !important;
+  color: var(--card-text-color);
 }
 
 [class^=svgtofont-],
@@ -515,4 +540,72 @@ path.el-progress-circle__path {
 
 .web_name_title {
   color: #fff
+}
+
+.el-alert {
+  background-color: var(--card-bg-color) !important;
+  color: var(--card-text-color)
+}
+
+.el-alert--info {
+  background-color: #5e5e5e80 !important;
+  border: 0 !important;
+}
+
+.class-item {
+  background-color: rgb(128 128 128 / 35%) !important;
+  border-radius: 5.25px !important;
+  transition: all 0.3s;
+}
+
+.class-item:hover,
+.class-item.on {
+  background-color: var(--main-color) !important;
+  box-shadow: 0 0 5px var(--main-color);
+  color: rgb(255 255 255 / var(--un-text-opacity));
+}
+
+.AppItem {
+  border-color: #a3a3a3 !important;
+}
+
+.AppItem:hover {
+  border-color: var(--main-color) !important;
+  backdrop-filter: blur(4px);
+}
+
+.AppContent {
+  color: var(--card-text-color) !important;
+}
+
+.AppImg {
+  width: 60px !important;
+  height: 60px !important;
+  border-width: 0 !important;
+  box-shadow: unset !important;
+  filter: drop-shadow(2px 4px 6px black);
+}
+
+.el-tag {
+  background-color: #0909098f !important;
+  border-color: #565254 !important;
+}
+
+.left-list {
+  border: 0 !important
+}
+
+.el-form .el-form-item__label {
+  color: var(--card-text-color) !important
+}
+
+.body_top {
+  color: inherit !important
+}
+
+.bottom_item[data-v-26923ce2]:nth-child(1),
+.bottom_item[data-v-26923ce2]:nth-child(5),
+.bottom_item[data-v-26923ce2]:nth-child(14),
+.bottom_item[data-v-26923ce2]:nth-child(17) {
+  background-color: rgb(255 255 255 / 17%) !important;
 }
