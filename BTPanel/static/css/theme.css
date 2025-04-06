@@ -1,0 +1,363 @@
+:root {
+  --main-color: #ff709e;
+  --a-color: #ffd1d1;
+  --a-hover-color: #ffafaf;
+  --card-bg-color: rgb(0 0 0 / 45%);
+  /* --card-bg-filter: blur(5px); */
+  --card-bg-filter: unset;
+  --card-box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  --card-text-color: #cdcdcd;
+  --card-title-color: #f9ebff;
+
+  --select-main-color: #f3b0f3;
+}
+
+#app-container {
+  background-color: rgb(0 0 0 / 30%) !important;
+}
+
+.home-header-box {
+  color: #f9ebff;
+}
+
+.text-\[\#20a53a\],
+.text-\[\#20A53A\],
+.text-primary,
+[color~="#20a53a"],
+[text-color~="#20a53a"],
+[text-primary=""],
+[text-primary~="_createElementBlock("],
+[text-primary~="_ctx.compData.sql)"],
+[text-primary~=","],
+[text-primary~="?"],
+[text-primary~="(_ctx.compData.ftp"],
+[text-primary~="(_openBlock(),"],
+[text-primary~=")"],
+[text-primary~="}"],
+[text-primary~="},"],
+[text-primary~="+"],
+[text-primary~="||"],
+[text-primary~="${!_ctx.compData.title"],
+[text-primary~="2),"],
+[text-primary~="null,"],
+.user-phone,
+.bt-link {
+  color: var(--a-color) !important;
+  transition: all 0.3s;
+}
+
+.user-phone:hover,
+.bt-link:hover,
+.hover\:text-\[\#20a53a\]:hover {
+  color: var(--a-hover-color) !important;
+}
+
+.playTips {
+  background-color: rgb(234 40 40 / 22%) !important;
+}
+
+.layout-left-menu {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  height: 100% !important;
+}
+
+.sidebar {
+  background-color: var(--card-bg-color) !important;
+}
+
+.bt-menu .menu-item a:hover,
+.bt-menu .menu-item a.is-active {
+  background-image: linear-gradient(to right, #ff1e1e70, rgb(227 0 103 / 57%));
+  border-left: #ffae1a 2px solid !important;
+}
+
+.layout-message,
+.bt-menu,
+.menu-toolbar {
+  background-color: unset !important;
+}
+
+.el-card {
+  background-color: var(--card-bg-color) !important;
+  backdrop-filter: var(--card-bg-filter);
+  box-shadow: var(--card-box-shadow) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--card-text-color) !important;
+}
+
+.el-card .el-card__header {
+  color: var(--card-title-color) !important;
+}
+
+path.el-progress-circle__track {
+  stroke: #9b9b9b6b;
+}
+
+path.el-progress-circle__path {
+  stroke: var(--main-color);
+}
+
+.overview-box {
+  background-color: var(--card-bg-color) !important;
+  backdrop-filter: var(--card-bg-filter);
+  box-shadow: var(--card-box-shadow) !important;
+  color: var(--card-text-color) !important;
+}
+
+.overview-box .title {
+  color: var(--card-text-color) !important;
+}
+
+.percentage-value {
+  color: #ffaef8;
+}
+
+.box-icon {
+  filter: hue-rotate(180deg);
+}
+
+.overview-box.relative.ghost,
+.el-col.el-col-6.wrapper-item.ghost {
+  border: 2px dashed #ffaef8 !important;
+}
+
+/* tab */
+.el-tabs__nav {
+  background-color: rgb(31 31 31 / 60%) !important;
+  box-shadow: 0 0 2px #000000a6;
+}
+
+.el-tabs__active-bar {
+  background-color: #ff73939c !important;
+}
+
+.el-tabs__header .el-tabs__item {
+  color: #ccc !important;
+}
+
+/* selector */
+.el-select__wrapper {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.el-select__placeholder {
+  color: #c2c2c2 !important;
+}
+
+.el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--select-main-color) inset !important;
+}
+
+.el-select__popper.el-popper[role="tooltip"],
+.el-dropdown__popper.el-popper[role="tooltip"] {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(5px) !important;
+  border: 1px solid var(--select-main-color) !important;
+  box-shadow: 0 0 5px var(--select-main-color) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+  color: var(--select-main-color) !important;
+}
+
+.el-select-dropdown__item {
+  color: #ececec !important;
+}
+
+.el-select-dropdown__item.is-hovering {
+  background-color: #f3b0f359 !important;
+}
+
+/* loading mask */
+.custom-loading .custom-loading__mask {
+  background-color: rgb(0 0 0 / 40%) !important;
+  backdrop-filter: blur(4px);
+}
+
+.custom-loading .custom-loading__icon {
+  filter: invert(1);
+}
+
+/* 首页软件列表 */
+.wrapper-item {
+  border-style: none !important;
+  filter: drop-shadow(2px 4px 6px black);
+  transition: all 0.3s;
+}
+
+.el-col.el-col-6.wrapper-item:hover {
+  backdrop-filter: brightness(0.8);
+}
+
+.wrapper-item
+  .box-wrapper:has(
+    .absolute.-left-1\.5.-top-1.py-\.5.px-2.transform.scale-75.bg-\[\#efefef\].text-\[\#999\].opacity-80
+  ) {
+  display: none !important;
+}
+
+.h-auto:has(.advantage-view) {
+  display: none !important;
+}
+
+.label {
+  color: #ffe3e3 !important;
+}
+
+#layout-footer a[href='http://www.bt.cn/bbs']
+{
+  display: none;
+}
+
+#layout-footer > span:last-child::after {
+  margin-left: 12px;
+  content: "主题作者：Lazy";
+}
+
+/* tools */
+.text-\[\#333\],
+.text-\[\#333333\] {
+  color: #dedede !important;
+}
+
+.color-\#666,
+.text-\[\#666\],
+.text-\[\#666666\],
+.text-\#666 {
+  color: #f6f6f6 !important;
+}
+
+.text-\[\#777\],
+.text-\#777 {
+  color: var(--card-title-color) !important;
+}
+
+.text-\[\#888\],
+.text-\#888 {
+  color: #decfd8 !important;
+}
+
+.state-header,
+.state-bottom {
+  color: #ffb7b7 !important;
+}
+
+.el-link.el-link--primary {
+  color: var(--a-color) !important;
+  transition: all 0.3s;
+}
+
+.el-link.el-link--primary:hover {
+  color: var(--a-hover-color) !important;
+}
+
+.el-tag.el-tag--success {
+  filter: invert(1) hue-rotate(180deg) opacity(0.9) contrast(0.8);
+}
+
+.el-popover.el-popper {
+  background: rgb(0 0 0 / 50%) !important;
+  backdrop-filter: blur(4px);
+  color: #e4e4e4 !important;
+  border: 0 !important;
+}
+
+.el-popover.el-popper > .el-card {
+  background: transparent !important;
+  box-shadow: unset !important;
+  backdrop-filter: none;
+}
+
+.card-popover .el-collapse-item__header {
+  background-color: rgb(249 249 249 / 10%) !important;
+}
+
+.el-collapse-item__wrap {
+  background-color: rgb(249 249 249 / 5%) !important;
+}
+
+.el-switch.is-checked .el-switch__core {
+  border-color: var(--main-color) !important;
+  background-color: var(--main-color) !important;
+}
+
+.el-button--primary {
+  background-color: var(--main-color) !important;
+  border-color: var(--main-color) !important;
+  transition: all 0.3s;
+}
+
+.el-button--primary:hover {
+  filter: opacity(0.8);
+}
+
+/* 表格 */
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: rgba(58, 118, 121, 0.5) !important;
+}
+
+.el-table {
+  color: #a3fff9 !important;
+  background-color: transparent !important;
+  border: 1px solid #535353 !important;
+}
+
+.el-table thead tr th .cell {
+  color: #a3fff9 !important;
+}
+
+.el-table th {
+  color: #a3fff9 !important;
+  background-color: rgba(50, 78, 88, 0.5) !important;
+}
+
+.el-table tr {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.el-table td,
+.el-table th.is-leaf {
+  border-bottom: 1px solid #68879e !important;
+}
+
+.el-table__body tr.hover-row > td.el-table__cell,
+.el-table__body tr.hover-row.current-row > td.el-table__cell,
+.el-table__body tr.hover-row.el-table__row--striped > td.el-table__cell,
+.el-table__body
+  tr.hover-row.el-table__row--striped.current-row
+  > td.el-table__cell {
+  background-color: #2a778959 !important;
+}
+
+.el-table__cell .cell {
+  color: #d2dfeb !important;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+  background: rgba(38, 60, 79, 0.5) !important;
+}
+
+.menu-item {
+  transition: all 0.5s;
+}
+.menu-item:hover {
+  background-color: rgb(124 124 124 / 45%) !important;
+  color: var(--card-text-color) !important;
+}
+
+/* input */
+.el-input__wrapper {
+  background-color: rgb(0 0 0 / 20%) !important;
+}
+
+.el-input-group__append,
+.el-input-group__prepend {
+  background-color: rgb(104 104 104 / 50%);
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--main-color) inset;
+}
