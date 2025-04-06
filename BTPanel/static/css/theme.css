@@ -338,22 +338,21 @@ path.el-progress-circle__path {
 
 /* 表格 */
 .el-table--enable-row-hover .el-table__body tr:hover>td {
-  background-color: rgba(58, 118, 121, 0.5) !important;
+  background-color: rgba(91, 68, 127, 0.5) !important;
 }
 
 .el-table {
-  color: #a3fff9 !important;
+  color: #f6dfff !important;
   background-color: transparent !important;
   border: 1px solid #535353 !important;
 }
 
 .el-table thead tr th .cell {
-  color: #a3fff9 !important;
+  color: #ffaaaa !important;
 }
 
 .el-table th {
-  color: #a3fff9 !important;
-  background-color: rgba(50, 78, 88, 0.5) !important;
+  background-color: rgb(146 80 100 / 50%) !important;
 }
 
 .el-table tr {
@@ -362,14 +361,14 @@ path.el-progress-circle__path {
 
 .el-table td,
 .el-table th.is-leaf {
-  border-bottom: 1px solid #68879e !important;
+  border-bottom: 1px solid #68565f !important;
 }
 
 .el-table__body tr.hover-row>td.el-table__cell,
 .el-table__body tr.hover-row.current-row>td.el-table__cell,
 .el-table__body tr.hover-row.el-table__row--striped>td.el-table__cell,
 .el-table__body tr.hover-row.el-table__row--striped.current-row>td.el-table__cell {
-  background-color: #2a778959 !important;
+  background-color: #826b7559 !important;
 }
 
 .el-table__cell .cell {
@@ -409,6 +408,17 @@ path.el-progress-circle__path {
   color: #DADADB !important
 }
 
+.bt-table-input:hover,
+.bt-table-input:focus {
+  border-color: var(--main-color) !important;
+  background-color: var(--card-bg-color) !important
+}
+
+.bt-input {
+  border-color: var(--main-color) !important;
+  background-color: var(--card-bg-color) !important
+}
+
 .header-tabs {
   background-color: var(--card-bg-color) !important;
   backdrop-filter: var(--card-bg-filter);
@@ -425,12 +435,12 @@ path.el-progress-circle__path {
 }
 
 .active-tab {
-  color: #dfc4ff !important;
-  background: #5828603b;
+  color: var(--main-color) !important;
+  background: #a52f5c3b;
 }
 
 .active-tab::after {
-  background-color: #dfc4ff !important;
+  background-color: var(--main-color) !important;
 }
 
 .router-tabs-content {
@@ -501,4 +511,8 @@ path.el-progress-circle__path {
 .el-pagination__total,
 .el-pagination__jump {
   color: var(--card-text-color) !important;
+}
+
+.web_name_title {
+  color: #fff
 }
