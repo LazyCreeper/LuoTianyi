@@ -21,6 +21,16 @@
   --card-title-color: #f9ebff;
 
   --select-main-color: #f3b0f3;
+
+  --el-tab-border-color: #ffffff7a;
+  --el-tab-border: 1px solid var(--el-tab-border-color);
+
+  --color-333: #dedede;
+  --color-555: #a9a9a9;
+  --color-666: #f6f6f6;
+  --color-777: var(--card-title-color);
+  --color-888: #decfd8;
+  --color-999: #e6c7dd;
 }
 
 #app-container {
@@ -259,28 +269,33 @@ path.el-progress-circle__path {
 /* tools */
 .text-\[\#333\],
 .text-\[\#333333\] {
-  color: #dedede !important;
+  color: var(--color-333) !important;
 }
 
 .text-\[\#555\] {
-  color: #a9a9a9 !important;
+  color: var(--color-555) !important;
 }
 
 .color-\#666,
 .text-\[\#666\],
 .text-\[\#666666\],
 .text-\#666 {
-  color: #f6f6f6 !important;
+  color: var(--color-666) !important;
 }
 
 .text-\[\#777\],
 .text-\#777 {
-  color: var(--card-title-color) !important;
+  color: var(--color-777) !important;
 }
 
 .text-\[\#888\],
 .text-\#888 {
-  color: #decfd8 !important;
+  color: var(--color-888) !important;
+}
+
+.text-\[\#999\],
+.text-\#999 {
+  color: var(--color-999) !important
 }
 
 .state-header,
@@ -355,7 +370,7 @@ path.el-progress-circle__path {
 
 /* 表格 */
 .el-table--enable-row-hover .el-table__body tr:hover>td {
-  background-color: rgba(91, 68, 127, 0.5) !important;
+  background-color: #826b7559 !important;
 }
 
 .el-table {
@@ -566,12 +581,13 @@ path.el-progress-circle__path {
 }
 
 .AppItem {
-  border-color: #a3a3a3 !important;
+  border-color: #a3a3a370 !important;
+  backdrop-filter: blur(5px);
 }
 
 .AppItem:hover {
   border-color: var(--main-color) !important;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(5px) brightness(0.7);
 }
 
 .AppContent {
@@ -608,4 +624,160 @@ path.el-progress-circle__path {
 .bottom_item[data-v-26923ce2]:nth-child(14),
 .bottom_item[data-v-26923ce2]:nth-child(17) {
   background-color: rgb(255 255 255 / 17%) !important;
+}
+
+.el-progress-bar__outer {
+  background-color: #ebeef524 !important;
+}
+
+.el-progress__text {
+  color: #d2d2d2 !important;
+}
+
+.tab-header-operate {
+  border-bottom: 1px solid #ffffff33 !important;
+}
+
+.el-tabs--card>.el-tabs__header {
+  border-bottom: var(--el-tab-border) !important;
+}
+
+.el-tabs--card>.el-tabs__header .el-tabs__nav {
+  border: var(--el-tab-border) !important;
+}
+
+.el-divider--horizontal {
+  border-top: var(--el-tab-border) !important;
+}
+
+.el-tabs--card>.el-tabs__header .el-tabs__item.is-active {
+  border-bottom-color: var(--main-color) !important;
+  background: #a52f5c3b;
+  color: var(--main-color) !important;
+}
+
+.el-tabs.tabs-card .el-tabs__item.is-active:after {
+  background: var(--main-color) !important;
+  height: 2px !important;
+}
+
+.el-tabs--left .el-tabs__item.is-left.is-active:after {
+  height: 0 !important;
+}
+
+.el-tabs__nav-wrap:after {
+  background: var(--el-tab-border-color) !important;
+}
+
+.el-radio-button__inner {
+  background: rgb(31 31 31 / 60%) !important;
+  border: var(--el-tab-border) !important;
+  color: #ffffff7a !important;
+}
+
+.el-radio-button__inner:hover {
+  color: var(--a-hover-color) !important
+}
+
+.el-radio-button.is-active .el-radio-button__original-radio:not(:disabled)+.el-radio-button__inner {
+  background-color: var(--main-color) !important;
+  border-color: var(--main-color) !important;
+  color: #fff !important;
+}
+
+.progress_item {
+  background-color: #f7f7f725 !important;
+}
+
+.progress_item_header {
+  color: #ecf4ff !important;
+}
+
+.progress_item_header .progress_type .title-icon {
+  filter: contrast(4);
+}
+
+.progress_item_header .progress_fold {
+  filter: invert(1)
+}
+
+.progress_item_info.active {
+  background-color: rgb(255 144 89 / 26%) !important;
+  transition: all 0.4s;
+}
+
+.progress_item_info.active:hover {
+  background-color: rgba(252, 109, 38, .2) !important;
+}
+
+.progress_item_info .info_cont {
+  color: #eeeeee !important;
+}
+
+.progress_item_info.active .info_cont_desc {
+  color: #f3dcc5 !important;
+}
+
+.progress_item_info {
+  transition: all 0.3s;
+}
+
+.progress_item_info:hover {
+  background-color: #0000004a !important;
+}
+
+.product-introduce-tab,
+.sn-home-overview,
+.sn-home-list,
+.border-\[\#e9e9e9\] {
+  border-color: var(--el-tab-border-color) !important
+}
+
+.card_title:before {
+  background-color: var(--main-color) !important;
+}
+
+.el-empty__image svg {
+  filter: opacity(0.5);
+}
+
+.sn-home-overview-green {
+  background: linear-gradient(to bottom, rgb(54 222 97 / 23%), #387f9824) !important;
+}
+
+.sn-home-overview-item-title {
+  color: rgb(221 255 237 / 85%) !important
+}
+
+.sn-home-overview-item-num {
+  color: #d6d6d6 !important
+}
+
+.sn-home-note {
+  background-color: rgb(255 201 124 / 30%) !important;
+}
+
+.product-introduce-title {
+  color: var(--color-999) !important
+}
+
+.product-introduce-ps {
+  color: var(--color-888) !important
+}
+
+.product-introduce-ul {
+  color: var(--color-666) !important
+}
+
+.product-introduce-ul-icon {
+  filter: hue-rotate(188deg);
+}
+
+.product-introduce-tab {
+  color: var(--color-666) !important
+}
+
+.product-introduce-tab>li.on {
+  border-color: var(--main-color) !important;
+  color: var(--main-color) !important;
 }
