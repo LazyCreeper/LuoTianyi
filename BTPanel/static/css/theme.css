@@ -62,6 +62,7 @@
 [text-primary~="2),"],
 [text-primary~="null,"],
 .user-phone,
+.btlink,
 .bt-link {
   color: var(--a-color) !important;
   transition: all 0.3s;
@@ -72,13 +73,23 @@
 }
 
 .user-phone:hover,
+.btlink:hover,
 .bt-link:hover,
 .hover\:text-\[\#20a53a\]:hover {
   color: var(--a-hover-color) !important;
 }
 
+.el-alert.el-alert--error,
 .playTips {
   background-color: rgb(234 40 40 / 22%) !important;
+}
+
+.el-alert.el-alert--error .text-\[\#a94442\] {
+  color: rgb(239 8 8 / var(--un-text-opacity)) !important;
+}
+
+.el-alert.el-alert--info .text-\[\#31708f\] {
+  color: #4bc4ff !important;
 }
 
 .layout-left-menu {
@@ -86,6 +97,7 @@
   margin-bottom: 0 !important;
   margin-left: 0 !important;
   height: 100% !important;
+  border-radius: 0 !important;
 }
 
 .sidebar {
@@ -96,6 +108,10 @@
 .bt-menu .menu-item a.is-active {
   background-image: linear-gradient(to right, #ff1e1e70, rgb(227 0 103 / 57%));
   border-left: #ffae1a 2px solid !important;
+}
+
+.setting-hover:hover {
+  background-color: rgb(226 49 98 / 36%) !important;
 }
 
 .top_all .monitor,
@@ -249,6 +265,7 @@ path.el-progress-circle__path {
   display: none !important;
 }
 
+.recom-view,
 .h-auto:has(.advantage-view) {
   display: none !important;
 }
@@ -267,6 +284,7 @@ path.el-progress-circle__path {
 }
 
 /* tools */
+.text-medium,
 .text-\[\#333\],
 .text-\[\#333333\] {
   color: var(--color-333) !important;
@@ -337,10 +355,13 @@ path.el-progress-circle__path {
   background-color: rgb(249 249 249 / 5%) !important;
 }
 
+.custom-checkbox i,
+.el-checkbox__inner,
 .el-switch__core {
   background: #dcdfe660 !important;
 }
 
+.custom-tbody .custom-tr.row-checked .custom-checkbox i,
 .el-switch.is-checked .el-switch__core {
   border-color: var(--main-color) !important;
   background-color: var(--main-color) !important;
@@ -369,6 +390,7 @@ path.el-progress-circle__path {
 }
 
 /* 表格 */
+.vue-recycle-scroller__item-view:hover,
 .el-table--enable-row-hover .el-table__body tr:hover>td {
   background-color: #826b7559 !important;
 }
@@ -379,10 +401,12 @@ path.el-progress-circle__path {
   border: 1px solid #535353 !important;
 }
 
+.table-head,
 .el-table thead tr th .cell {
   color: #ffaaaa !important;
 }
 
+.table-head,
 .el-table th {
   background-color: rgb(146 80 100 / 50%) !important;
 }
@@ -415,6 +439,16 @@ path.el-progress-circle__path {
   transition: all 0.5s;
 }
 
+.history-item,
+.search-item,
+.recommend-item {
+  color: var(--color-333) !important;
+}
+
+.soft-item:hover,
+.recommend-item:hover,
+.search-item:hover,
+.history-item:hover,
 .body-item:hover,
 .recommend-item:hover,
 .menu-item:hover {
@@ -423,6 +457,7 @@ path.el-progress-circle__path {
 }
 
 /* input */
+.path-input input,
 .el-input__wrapper {
   background-color: rgb(0 0 0 / 20%) !important;
 }
@@ -475,11 +510,23 @@ path.el-progress-circle__path {
   background-color: var(--main-color) !important;
 }
 
+.history-box,
+.terminal-nav,
+.el-tabs.tabs-bg-card .el-tabs__header,
+.el-tabs--border-card,
+pre.bg-\[\#333\],
+.custom-tbody,
+.files-head-item,
+.files-head-item.custom-operate-head,
+.custom-tbody .custom-tr,
+.tab-add-item,
+.path-list-group,
 .bg-\[\#f3f3f3\],
 .bg-white {
   background: unset !important;
 }
 
+.file-manager,
 .docker-route-con .left-list,
 .docker-route-con,
 .router-tabs-content {
@@ -544,7 +591,7 @@ path.el-progress-circle__path {
 .el-pagination.is-background .btn-next,
 .el-pagination.is-background .el-pager li {
   background-color: #f4f4f570 !important;
-  color: #000000 !important;
+  color: #262626 !important;
 }
 
 .el-pagination__sizes,
@@ -638,6 +685,7 @@ path.el-progress-circle__path {
   border-bottom: 1px solid #ffffff33 !important;
 }
 
+.right-menu-divider,
 .el-tabs--card>.el-tabs__header {
   border-bottom: var(--el-tab-border) !important;
 }
@@ -669,6 +717,7 @@ path.el-progress-circle__path {
   background: var(--el-tab-border-color) !important;
 }
 
+.el-tabs.tabs-bg-card .el-tabs__item,
 .el-radio-button__inner {
   background: rgb(31 31 31 / 60%) !important;
   border: var(--el-tab-border) !important;
@@ -780,4 +829,102 @@ path.el-progress-circle__path {
 .product-introduce-tab>li.on {
   border-color: var(--main-color) !important;
   color: var(--main-color) !important;
+}
+
+.path-name {
+  color: var(--color-666) !important
+}
+
+.el-tabs.tabs-bg-card .el-tabs__item.is-active,
+.tab-item,
+.path-name-icon:hover,
+.path-group-item:hover {
+  background: #f5f7fa3d !important;
+}
+
+.custom-checkbox i:hover {
+  border: 1px solid var(--main-color) !important
+}
+
+.menu-type.active {
+  border-color: var(--main-color) !important;
+  background-color: #ff709e1b !important;
+  border-left: 1px solid var(--main-color) !important;
+  border-right: 1px solid var(--main-color) !important;
+}
+
+.menu-type.active .grid-icon,
+.menu-type.active .list-icon {
+  filter: hue-rotate(188deg);
+}
+
+.menu-type:hover {
+  background-color: rgb(245 245 245 / 20%) !important;
+}
+
+.icon-file-item:hover {
+  background-color: rgba(236, 236, 236, .15) !important;
+}
+
+.files-icon-wrapper .fileName:hover {
+  color: var(--main-color) !important
+}
+
+.icon-file-active {
+  filter: hue-rotate(180deg);
+}
+
+.icon-file-active .fileName:hover {
+  color: rgb(32 165 58 / var(--un-text-opacity)) !important
+}
+
+.v-contextmenu,
+.fold-dir-list {
+  background-color: var(--card-bg-color) !important;
+  border: var(--el-tab-border) !important;
+  backdrop-filter: blur(4px);
+}
+
+.v-contextmenu-item,
+.fold-dir-item span {
+  color: var(--color-333) !important
+}
+
+.v-contextmenu-item.v-contextmenu-item--hover {
+  filter: invert(0.8)
+}
+
+.fold-dir-item:hover {
+  background-color: #ffffff21 !important;
+  color: var(--color-666) !important;
+}
+
+.refresh:hover,
+.back:hover {
+  border-color: var(--main-color) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--main-color) !important;
+}
+
+pre.bg-\[\#333\] {
+  backdrop-filter: blur(5px);
+}
+
+.activeClass {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--main-color) !important;
+}
+
+.menu-hover:hover {
+  background-color: rgb(225 162 195 / 30%) !important;
+}
+
+.el-tabs.tabs-bg-card.el-tabs--border-card {
+  background-color: var(--card-bg-color) !important;
+  color: var(--card-text-color) !important;
+}
+
+.terminal-nav-full:hover,
+.terminal-nav-add:hover {
+  background-color: rgb(194 152 255 / 25%) !important;
 }
