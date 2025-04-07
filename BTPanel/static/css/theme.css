@@ -1201,6 +1201,7 @@ pre.bg-\[\#333\] {
   color: var(--color-666) !important;
 }
 
+.tab-item.on,
 .tab-nav .on {
   background: rgba(140, 186, 255, 0.5) !important;
   border-bottom: #fff 1px solid !important;
