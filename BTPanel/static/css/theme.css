@@ -559,6 +559,7 @@ path.el-progress-circle__path {
 }
 
 /* input */
+.el-textarea__inner,
 .tootls_group .bt_search .search_input,
 #auto-push-table.bt_table .table-input,
 .site-setting-item textarea,
@@ -579,6 +580,7 @@ path.el-progress-circle__path {
   box-shadow: 0 0 0 1px var(--main-color) inset !important;
 }
 
+.el-textarea__inner,
 .el-input__inner {
   color: #DADADB !important
 }
@@ -618,6 +620,7 @@ path.el-progress-circle__path {
   background-color: var(--main-color) !important;
 }
 
+.bt-dialog-v2 header,
 .layui-layer-content,
 .history-box,
 .terminal-nav,
@@ -1049,6 +1052,7 @@ pre.bg-\[\#333\] {
   background-color: rgb(194 152 255 / 25%) !important;
 }
 
+.bt-dialog-v2,
 .el-dialog {
   background-color: rgba(28, 102, 109, 0.3) !important;
   backdrop-filter: blur(5px);
@@ -1261,7 +1265,15 @@ pre.bg-\[\#333\] {
 }
 
 .ace_editor {
-  background-color: #fff !important;
+  background-color: #fff;
+}
+
+.dialog-editor .ace_editor {
+  background-color: inherit;
+}
+
+.dialog-btn-group .icon:hover {
+  background-color: #f1f1f12e !important;
 }
 
 /* NGINX 免费防火墙 */
