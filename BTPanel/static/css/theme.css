@@ -1,6 +1,6 @@
 /*!
 
- @Name: 宝塔面板框架主题样式
+ @Name: 宝塔面板洛天依主题
  @Last Date: 2025.4.7
  @Create Date: 2021.3.21				
  @Author: Lazy
@@ -12,6 +12,7 @@
 
   /* 登陆界面背景图 */
   --login-pc-bg: url('https://api.imlazy.ink/img/');
+  /* --login-phone-bg: url('https://api.imlazy.ink/img-phone/'); */
 
   /* 背景图片 */
   --index-bg: url('../images/bg.jpg');
@@ -158,6 +159,14 @@
 
 .hover\:text-primary:hover {
   color: var(--main-color) !important;
+}
+
+.user-phone {
+  filter: blur(4px);
+}
+
+.user-phone:hover {
+  filter: blur(0);
 }
 
 .user-phone:hover,
