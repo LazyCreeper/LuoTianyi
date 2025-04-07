@@ -161,10 +161,12 @@
   color: var(--main-color) !important;
 }
 
+div[title="双击可复制IP"],
 .user-phone {
   filter: blur(4px);
 }
 
+div[title="双击可复制IP"]:hover,
 .user-phone:hover {
   filter: blur(0);
 }
