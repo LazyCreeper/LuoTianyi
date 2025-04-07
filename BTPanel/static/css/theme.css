@@ -1,7 +1,7 @@
 /*!
 
  @Name: 宝塔面板洛天依主题
- @Last Date: 2025.4.7
+ @Last Date: 2025.4.8
  @Create Date: 2021.3.21				
  @Author: Lazy
  @WebSite: https://blog.imlazy.ink:233/index.php/archives/38/
@@ -435,7 +435,7 @@ path.el-progress-circle__path {
 }
 
 .el-tag.el-tag--success {
-  filter: invert(1) hue-rotate(180deg) opacity(0.9) contrast(0.8);
+  /* filter: invert(1) hue-rotate(180deg) opacity(0.9) contrast(0.8); */
 }
 
 .el-popover.el-popper {
@@ -663,7 +663,7 @@ pre.bg-\[\#333\],
 }
 
 .el-checkbox {
-  color: #ececec !important;
+  color: #1b1a1a !important;
 }
 
 .el-checkbox__inner:hover {
@@ -744,11 +744,14 @@ pre.bg-\[\#333\],
   color: rgb(255 255 255 / var(--un-text-opacity));
 }
 
+.con-grid .w-full.h-\[19rem\].border.border-\[\#ccc\].rounded-\[\.2rem\].text-\[1\.2rem\].text-\[\#999\],
 .AppItem {
   border-color: #a3a3a370 !important;
   backdrop-filter: blur(5px);
+  transition: all 0.3s;
 }
 
+.con-grid .w-full.h-\[19rem\].border.border-\[\#ccc\].rounded-\[\.2rem\].text-\[1\.2rem\].text-\[\#999\]:hover,
 .AppItem:hover {
   border-color: var(--main-color) !important;
   backdrop-filter: blur(5px) brightness(0.7);
@@ -764,6 +767,10 @@ pre.bg-\[\#333\],
   border-width: 0 !important;
   box-shadow: unset !important;
   filter: drop-shadow(2px 4px 6px black);
+}
+
+.chart.bg-\[\#f5f5f5\] {
+  background-color: rgb(245 245 245 / 10%) !important;
 }
 
 .el-tag {
